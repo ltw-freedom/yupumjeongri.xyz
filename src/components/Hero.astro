@@ -4,38 +4,57 @@ import { site } from '../data/site';
 interface Props {
   title: string;
   lead: string;
-  /** 세 가지 약속(정찰제·추가금 0원·최저가 보상) 노출 여부 */
-  promises?: boolean;
-  /** hero 이미지는 첫 화면이라 lazy 를 붙이지 않는다 */
-  image?: string;
-  imageAlt?: string;
+  /** 견적서 카드(정찰제 시각화) 노출 여부 — 홈에서만 켠다 */
+  quoteDoc?: boolean;
 }
 
-const { title, lead, promises = false, image, imageAlt } = Astro.props;
+const { title, lead, quoteDoc = false } = Astro.props;
+
+/** 견적서 카드 항목 — 브랜드 약속을 문서 형식으로 보여준다 */
+const quoteRows = [
+  { label: '유품 분류 · 포장 · 반출', value: '공개 범위 내' },
+  { label: '폐기물 처리', value: '항목별 표기' },
+  { label: '작업 후 청소', value: '포함' },
+  { label: '견적서 외 추가 항목', value: '0원', gold: true },
+];
 ---
 
-<section class="hero container">
-  <h1>{title}</h1>
-  <p class="lead">{lead}</p>
-  {
-    promises && (
-      <ul class="promises">
-        {site.promises.map((promise) => (
-          <li>
-            <b>{promise.label}</b>
-            <span>{promise.detail}</span>
-          </li>
-        ))}
-      </ul>
-    )
-  }
-  <div class="hero__actions">
-    <a class="button button--primary" href={site.consultPath}>상담 신청하기</a>
-    <a class="button button--ghost" href="/cost/">비용 먼저 보기</a>
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__copy">
+      <h1 set:html={title} />
+      <p class="lead">{lead}</p>
+      <div class="hero__actions">
+        <a class="button button--primary" href={site.consultPath}>무료 상담 신청하기</a>
+        <a class="button button--ghost" href="/cost/">비용 먼저 보기</a>
+      </div>
+      <p class="hero__reassure">상담·방문 견적 무료 · 상담 후 계약 의무 없음</p>
+    </div>
+
+    {
+      quoteDoc && (
+        <div class="hero__doc" aria-hidden="true">
+          <div class="quote-doc">
+            <div class="quote-doc__head">
+              <p class="quote-doc__title">견적서</p>
+              <p class="quote-doc__sub">Estimate</p>
+            </div>
+            <ul class="quote-doc__rows">
+              {quoteRows.map((row) => (
+                <li>
+                  <span>{row.label}</span>
+                  <span class="dots" />
+                  <span class:list={['val', { 'val--gold': row.gold }]}>{row.value}</span>
+                </li>
+              ))}
+            </ul>
+            <div class="quote-doc__foot">
+              <p>합계는 견적서에 적힌 그대로. 현장에서 늘어나지 않습니다.</p>
+              <span class="seal">정찰</span>
+            </div>
+          </div>
+        </div>
+      )
+    }
   </div>
-  {
-    image && (
-      <img src={image} alt={imageAlt ?? ''} width="1200" height="675" fetchpriority="high" />
-    )
-  }
 </section>

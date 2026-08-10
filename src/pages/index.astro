@@ -7,7 +7,45 @@ import FAQ from '../components/FAQ.astro';
 import { site } from '../data/site';
 import { services } from '../data/services';
 import { regions } from '../data/areas';
-import { localBusiness, faqSchema } from '../data/schema';
+import { localBusiness, faqSchema, webSite } from '../data/schema';
+
+/**
+ * AEO(Answer Engine) · GEO(Generative Engine) 대응:
+ * - 질문형 소제목 + 첫 문장에서 바로 답하는 요약 블록(.answer-box)
+ * - 검색·AI 가 인용하기 좋은 완결형 문장으로 작성한다.
+ */
+const answerItems = [
+  {
+    q: '유품정리 비용은 어떻게 정해지나요?',
+    a: '평형이 아니라 물품 양, 층수와 반출 동선, 폐기물 종류, 특수청소 포함 여부로 정해집니다. 대한유품정리는 이 기준과 비용 범위를 먼저 공개합니다.',
+  },
+  {
+    q: '견적 후에 금액이 늘어나지 않나요?',
+    a: '견적서에 없는 항목은 청구하지 않습니다. 현장에서 새 조건이 발견되면 작업 전에 먼저 알리고 진행 여부를 확인받습니다.',
+  },
+  {
+    q: '어디에서 이용할 수 있나요?',
+    a: '서울과 경기 전 지역에서 유품정리, 고독사 유품정리, 빈집 정리를 진행합니다. 상담과 방문 견적은 무료입니다.',
+  },
+];
+
+const worries = [
+  {
+    worry: '현장에서 이것저것 추가되면서 처음 들은 금액의 두 배가 됐다는데…',
+    answer: '견적서에 없는 항목은 청구하지 않습니다. 추가가 필요하면 작업 전에 먼저 확인받습니다.',
+    keyword: '추가금 0원',
+  },
+  {
+    worry: '업체마다 부르는 값이 달라서 뭐가 적정가인지 모르겠어요.',
+    answer: '비용 범위와 산정 기준을 홈페이지에 공개하고, 그 범위 안에서 견적을 냅니다.',
+    keyword: '정찰제',
+  },
+  {
+    worry: '비교 견적을 받자니 같은 설명을 여러 번 하기가 힘들어요.',
+    answer: '동일 조건 타사 견적서를 보여주시면 그보다 낮은 금액으로 진행합니다.',
+    keyword: '최저가 보상',
+  },
+];
 
 const faqs = [
   {
@@ -36,26 +74,102 @@ const faqs = [
 <BaseLayout
   title={site.title}
   description={site.description}
-  jsonLd={[localBusiness(), faqSchema(faqs)]}
+  jsonLd={[webSite(), localBusiness(), faqSchema(faqs)]}
 >
   <Hero
-    title="유품정리 비용, 먼저 공개합니다"
+    title="유품정리, <em>값부터</em> 공개합니다"
     lead="남겨진 물건을 정중하게 정리합니다. 유품정리 · 고독사 현장 정리 · 빈집 정리. 견적서에 없는 금액은 청구하지 않습니다."
-    promises
+    quoteDoc
   />
 
-  <section class="section section--surface">
+  {/* 세 가지 약속 */}
+  <section class="section" aria-label="세 가지 약속">
     <div class="container">
-      <h2>서비스</h2>
-      <ul class="grid">
-        {services.map((service) => <ServiceCard service={service} />)}
+      <ul class="promises">
+        {
+          site.promises.map((promise) => (
+            <li>
+              <b>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+                {promise.label}
+              </b>
+              <span>{promise.detail}</span>
+            </li>
+          ))
+        }
       </ul>
     </div>
   </section>
 
+  {/* AEO 요약 — 질문에 바로 답하는 블록 */}
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="answer-box">
+        <h2>자주 찾는 답, 먼저 드립니다</h2>
+        <dl>
+          {
+            answerItems.map((item) => (
+              <>
+                <dt>{item.q}</dt>
+                <dd>{item.a}</dd>
+              </>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  {/* 차별화 — 걱정과 저희 방식 */}
+  <section class="section section--surface">
+    <div class="container">
+      <div class="section-head">
+        <p class="overline">01 — 왜 값부터 공개하나</p>
+        <h2>유품정리에서 가장 큰 걱정은 비용입니다</h2>
+        <p class="lead">
+          그래서 저희는 순서를 바꿨습니다. 비용 범위를 먼저 공개하고, 그 안에서 견적을 냅니다.
+        </p>
+      </div>
+      <ul class="compare">
+        {
+          worries.map((item) => (
+            <li>
+              <p class="worry">{item.worry}</p>
+              <p class="answer">
+                <b>{item.keyword}</b> — {item.answer}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {/* 서비스 */}
   <section class="section">
     <div class="container">
-      <h2>진행 과정</h2>
+      <div class="section-head">
+        <p class="overline">02 — 서비스</p>
+        <h2>현장에 맞는 정리를 안내드립니다</h2>
+        <p class="lead">
+          어떤 서비스에 해당하는지 애매하다면 상담 시 현장 사진을 보내주세요. 판단해 안내드립니다.
+        </p>
+      </div>
+      <ul class="grid">
+        {services.map((service, index) => <ServiceCard service={service} index={index} />)}
+      </ul>
+    </div>
+  </section>
+
+  {/* 진행 과정 */}
+  <section class="section section--surface">
+    <div class="container">
+      <div class="section-head">
+        <p class="overline">03 — 진행 과정</p>
+        <h2>상담부터 공간 정돈까지 다섯 단계</h2>
+      </div>
       <ol class="steps">
         <li><strong>상담 · 현장 확인</strong>물품 양과 반출 동선을 확인하고 일정과 비용을 안내드립니다.</li>
         <li><strong>유품 분류</strong>귀중품, 서류, 사진·기록물, 일반 물품으로 나눠 분류합니다.</li>
@@ -67,9 +181,14 @@ const faqs = [
     </div>
   </section>
 
-  <section class="section section--surface">
+  {/* 서비스 지역 */}
+  <section class="section">
     <div class="container">
-      <h2>서비스 지역</h2>
+      <div class="section-head">
+        <p class="overline">04 — 서비스 지역</p>
+        <h2>서울 · 경기 전 지역</h2>
+        <p class="lead">방문 견적 비용은 발생하지 않습니다. 그 외 지역은 일정에 따라 상담 시 안내드립니다.</p>
+      </div>
       {
         regions.map((region) => (
           <>
@@ -89,6 +208,7 @@ const faqs = [
     </div>
   </section>
 
+  {/* FAQ */}
   <section class="section">
     <div class="container">
       <FAQ items={faqs} />

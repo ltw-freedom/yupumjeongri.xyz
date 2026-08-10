@@ -29,6 +29,20 @@ export function localBusiness(areaServed: string[] = [...site.areaServed]) {
   };
 }
 
+/** 사이트 전체를 나타내는 WebSite 스키마 — 홈에서만 한 번 노출한다 */
+export function webSite() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': absoluteUrl('/#website'),
+    name: site.name,
+    url: site.url,
+    description: site.description,
+    inLanguage: 'ko',
+    publisher: { '@id': absoluteUrl('/#business') },
+  };
+}
+
 export function serviceSchema(options: {
   name: string;
   description: string;

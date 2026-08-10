@@ -18,9 +18,23 @@ const current = Astro.url.pathname;
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="site-header__logo" href="/">
-      <img src="/favicon.svg" alt="" width="26" height="26" />
+      <img src="/favicon.svg" alt="" width="28" height="28" />
       {site.name}
     </a>
+
+    <a class="button button--primary site-header__cta" href={site.consultPath}>상담 신청</a>
+
+    {/* CSS 전용 모바일 메뉴 — 체크박스는 반드시 .site-nav 앞에 있어야 한다 */}
+    <input type="checkbox" id="nav-open" class="nav-open" />
+    <label for="nav-open" class="nav-burger" aria-label="메뉴 열기">
+      <svg class="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 7h16M4 12h16M4 17h16" />
+      </svg>
+      <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </label>
+
     <nav class="site-nav" aria-label="주요 메뉴">
       <ul>
         {
@@ -37,6 +51,5 @@ const current = Astro.url.pathname;
         }
       </ul>
     </nav>
-    <a class="button button--primary" href={site.consultPath}>상담 신청</a>
   </div>
 </header>

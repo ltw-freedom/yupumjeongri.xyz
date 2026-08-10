@@ -3,14 +3,24 @@ import type { Service } from '../data/services';
 
 interface Props {
   service: Service;
+  /** 목록에서의 순번 (01, 02, …) */
+  index?: number;
 }
 
-const { service } = Astro.props;
+const { service, index } = Astro.props;
+const number = index !== undefined ? String(index + 1).padStart(2, '0') : undefined;
 ---
 
-<li class="card">
+<li class="card service-card">
+  {number && <span class="service-card__index">{number}</span>}
   <h3>
     <a href={`/service/${service.slug}/`}>{service.name}</a>
   </h3>
   <p>{service.summary}</p>
+  <span class="service-card__more">
+    자세히 보기
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  </span>
 </li>

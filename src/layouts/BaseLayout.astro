@@ -23,20 +23,37 @@ const {
   jsonLd = [],
   noindex = false,
 } = Astro.props;
+
+/** 상담 페이지에서는 하단 고정 CTA 를 겹쳐 보여주지 않는다 */
+const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
 ---
 
 <!doctype html>
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#16233D" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {/* 본문: Pretendard Variable(동적 서브셋) / 제목: Noto Serif KR */}
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap"
+    />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.name} />
@@ -57,12 +74,20 @@ const {
       ))
     }
   </head>
-  <body>
+  <body class:list={[{ 'has-mobile-cta': showMobileCta }]}>
     <a class="skip-link" href="#main">본문으로 건너뛰기</a>
     <Header />
     <main id="main">
       <slot />
     </main>
     <Footer />
+    {
+      showMobileCta && (
+        <div class="mobile-cta">
+          <a class="button button--ghost" href="/cost/">비용 보기</a>
+          <a class="button button--primary" href={site.consultPath}>무료 상담 신청</a>
+        </div>
+      )
+    }
   </body>
 </html>

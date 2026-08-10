@@ -2,17 +2,22 @@
 import { site } from '../data/site';
 import { services } from '../data/services';
 import { regions } from '../data/areas';
+
+const infoLinks = [
+  { href: '/cost/', label: '비용 안내' },
+  { href: '/process/', label: '진행 과정' },
+  { href: '/faq/', label: '자주 묻는 질문' },
+  { href: '/column/', label: '칼럼' },
+];
 ---
 
 <footer class="site-footer">
   <div class="container">
-    <div class="grid">
-      <div>
+    <div class="site-footer__grid">
+      <div class="site-footer__brand">
         <strong>{site.name}</strong>
-        <p>{site.slogan} — {site.sloganSub}</p>
-        <p>
-          <a href={site.consultPath}>상담 신청하기</a>
-        </p>
+        <p>{site.slogan}<br />{site.sloganSub}</p>
+        <a class="button--gold" href={site.consultPath}>무료 상담 신청</a>
       </div>
       <div>
         <strong>서비스</strong>
@@ -33,6 +38,18 @@ import { regions } from '../data/areas';
             regions.map((region) => (
               <li>
                 <a href={`/area/${region.slug}/`}>{region.name} 유품정리</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <strong>안내</strong>
+        <ul>
+          {
+            infoLinks.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
               </li>
             ))
           }
