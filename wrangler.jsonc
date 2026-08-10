@@ -1,0 +1,13 @@
+{
+  // 기존 Worker 이름과 일치해야 같은 곳으로 배포된다.
+  // 커스텀 도메인·라우트는 대시보드 설정을 그대로 쓰므로 여기에 적지 않는다.
+  "name": "yupumjeongri-xyz",
+  "main": "worker/index.js",
+  "compatibility_date": "2026-08-10",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // /api/* 만 Worker 를 먼저 태우고, 나머지는 정적 자산 직행(빠른 경로)
+    "run_worker_first": ["/api/*"]
+  }
+}

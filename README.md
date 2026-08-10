@@ -111,7 +111,8 @@ draft: false
 ## 상담 접수 (Slack)
 
 전화 상담은 운영하지 않는다. 접수 창구는 `/consult/` 폼 **하나뿐**이고,
-`functions/api/consult.js` (Cloudflare Pages Function)가 받아서 Slack 으로 넘긴다.
+`functions/api/consult.js` 의 핸들러가 받아서 Slack 으로 넘긴다.
+(실서비스는 Worker 로 배포되므로 `worker/index.js` 가 이 핸들러를 `/api/consult` 에 연결한다.)
 
 ```text
 /consult/  ──POST(form)──▶  /api/consult  ──▶  Slack Incoming Webhook
@@ -127,13 +128,11 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 정적 사이트라 클라이언트에 들어간 값은 **전부 공개**된다. 웹훅 URL 이 노출되면
 누구나 그 채널에 무제한으로 메시지를 밀어 넣을 수 있다. 반드시 환경변수로 둘 것.
 
-**운영** — Cloudflare Pages → 프로젝트 → Settings → Environment variables
+**운영** — Worker `yupumjeongri-xyz` 에 Secret 으로 등록되어 있다 (배포해도 유지된다).
 
-| 이름 | 타입 | 값 |
-| --- | --- | --- |
-| `SLACK_WEBHOOK_URL` | **Secret** (Plaintext 아님) | `https://hooks.slack.com/services/...` |
-
-Production / Preview 양쪽에 등록하고, 저장 후 한 번 재배포해야 반영된다.
+```bash
+npx wrangler secret put SLACK_WEBHOOK_URL --name yupumjeongri-xyz
+```
 
 **로컬** — 저장소 루트에 `.dev.vars` 를 만든다 (`.gitignore` 되어 있다).
 
@@ -163,23 +162,22 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
   칼럼 `Article`, 전 페이지 `BreadcrumbList`
 - URL 은 trailing slash 로 통일 (`astro.config.mjs` 의 `trailingSlash: 'always'`)
 
-## Cloudflare Pages 배포
+## Cloudflare Workers 배포
 
-Pages 프로젝트를 이 저장소에 연결하고:
+실서비스는 Cloudflare **Worker** `yupumjeongri-xyz` 로 서빙된다
+(정적 자산 `dist/` + `/api/consult` 핸들러, 설정은 루트 `wrangler.jsonc`).
+커스텀 도메인 `yupumjeongri.xyz` 는 대시보드에서 이 Worker 에 연결되어 있고,
+`wrangler.jsonc` 에는 routes 를 적지 않으므로 배포해도 그대로 유지된다.
 
-| 설정 | 값 |
-| --- | --- |
-| Framework preset | Astro |
-| Build command | `npm run build` |
-| Build output directory | `dist` |
-| Node version | `22` (환경변수 `NODE_VERSION=22`) |
+```bash
+npm run build && npx wrangler deploy
+```
 
-저장소 루트의 `functions/` 는 Pages 가 자동으로 잡아 `dist/` 와 나란히 배포한다.
-Astro 어댑터를 따로 붙일 필요는 없다. **배포 전에 `SLACK_WEBHOOK_URL` 환경변수를
-등록할 것** — 없으면 상담 폼이 `?error=config` 로 되돌아온다.
-
-이후 `main` 에 push 하면 자동 배포된다. 커스텀 도메인 `yupumjeongri.xyz` 는
-Pages 프로젝트의 Custom domains 에서 연결한다 (DNS·SSL 은 Cloudflare 가 처리).
+- `wrangler login` 된 계정(dlxoqkftk1@gmail.com 계정)이어야 한다.
+- `SLACK_WEBHOOK_URL` Secret 은 Worker 에 등록되어 있고 배포 후에도 유지된다.
+  없으면 상담 폼이 `?error=config` 로 되돌아온다.
+- `functions/` 디렉터리는 Pages 규약이지만, Worker 에서는 `worker/index.js` 가
+  같은 핸들러를 import 해 `/api/consult` 에 연결한다 (로직은 한 곳만 수정하면 된다).
 
 ## 남은 작업 (TODO)
 
