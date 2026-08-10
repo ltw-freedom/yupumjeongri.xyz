@@ -36,6 +36,8 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/* 네이버 서치어드바이저 소유확인 — 삭제하면 등록이 풀린다 */}
+    <meta name="naver-site-verification" content="31c67f451d279ad1942783f4c01997f59dbacce4" />
     <meta name="theme-color" content="#16233D" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
