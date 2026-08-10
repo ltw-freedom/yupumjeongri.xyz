@@ -4,3 +4,6 @@ Disallow: /api/
 Disallow: /consult/done/
 
 Sitemap: https://yupumjeongri.xyz/sitemap-index.xml
+
+# Daum 웹마스터도구 소유확인 PIN — 삭제하면 등록이 풀린다
+#DaumWebMasterTool:a131107a19c4428ef2d0336a29676806d611834c31a2710cf7dc925085e55550:7FHGSqvkpp5m21kM8rOvAQ==
