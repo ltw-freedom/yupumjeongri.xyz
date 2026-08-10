@@ -14,6 +14,21 @@ import sitemap from '@astrojs/sitemap';
  *  - 'all'  : 동 페이지 전부 포함 — 1차 웨이브 색인률이 80%를 넘으면 올린다
  */
 const SITEMAP_DONG_WAVE = 'wave1';
+
+/**
+ * @astrojs/sitemap 은 sitemap-index.xml 이라는 이름을 고정으로 쓴다.
+ * 서치어드바이저 등 관행상 기대하는 /sitemap.xml 로도 같은 내용을 서빙하도록
+ * 빌드가 끝나면 복사본을 만든다 (sitemap-index.xml 도 그대로 유지).
+ */
+const sitemapAlias = {
+  name: 'sitemap-alias',
+  hooks: {
+    'astro:build:done': async ({ dir }) => {
+      const { copyFileSync } = await import('node:fs');
+      copyFileSync(new URL('./sitemap-index.xml', dir), new URL('./sitemap.xml', dir));
+    },
+  },
+};
 const wave1Dongs = new Set(JSON.parse(readFileSync(new URL('./src/data/sitemap-wave1.json', import.meta.url), 'utf-8')));
 /** /area/{region}/{city}/{dong}/ 4단 경로인가 */
 const isDongPath = (pathname) => /^\/area\/[^/]+\/[^/]+\/[^/]+\/$/.test(pathname);
@@ -41,5 +56,6 @@ export default defineConfig({
         return SITEMAP_DONG_WAVE === 'all' || wave1Dongs.has(pathname);
       },
     }),
+    sitemapAlias,
   ],
 });
