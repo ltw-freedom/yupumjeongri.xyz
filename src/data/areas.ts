@@ -207,6 +207,15 @@ export const regions: Region[] = [
   },
 ];
 
+/**
+ * 행정 접미사(구·시·군)를 뗀 짧은 지역명 — "송파구" → "송파".
+ * 네이버 검색은 "송파 유품정리"·"송파유품정리"처럼 접미사 없이 이뤄지는 경우가
+ * 많아, 타이틀과 description 에서 정식 명칭과 함께 병기한다.
+ */
+export function cityShortName(city: Pick<City, 'name'>): string {
+  return city.name.replace(/[구시군]$/, '');
+}
+
 /** 전 지역 도시 목록 (region 정보를 붙여서 반환) */
 export const allCities = regions.flatMap((region) =>
   region.cities.map((city) => ({ ...city, region })),

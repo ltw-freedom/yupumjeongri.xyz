@@ -1,0 +1,31 @@
+---
+/**
+ * 주거 형태별 기준 가격표.
+ * /cost/ 와 지역(시·동) 페이지에서 공유한다 — 가격 공개가 이 사이트의
+ * 차별화 축이라, 지역 페이지에도 같은 표를 그대로 노출한다.
+ */
+import { basePrices } from '../data/pricing';
+---
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">주거 형태</th>
+        <th scope="col">기준 범위</th>
+        <th scope="col">범위가 달라지는 조건</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        basePrices.map((row) => (
+          <tr>
+            <th scope="row">{row.type}</th>
+            <td>{row.range}</td>
+            <td>{row.note}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

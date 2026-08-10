@@ -3,8 +3,10 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../../components/Breadcrumb.astro';
 import CTA from '../../../components/CTA.astro';
 import { regions, type Region } from '../../../data/areas';
+import { districtCities } from '../../../data/districts';
 import { services } from '../../../data/services';
 import { serviceSchema } from '../../../data/schema';
+import { site } from '../../../data/site';
 
 export function getStaticPaths() {
   return regions.map((region) => ({
@@ -18,11 +20,23 @@ interface Props {
 }
 
 const { region } = Astro.props;
+
+// 전체 시·군·구 목록 — 큐레이션(areas.ts)이 있으면 그 요약을, 없으면 기본 문구를 쓴다
+const cities = districtCities
+  .filter((city) => city.region === region.slug)
+  .map((city) => {
+    const curated = region.cities.find((c) => c.slug === city.slug);
+    return {
+      slug: city.slug,
+      name: city.name,
+      summary: curated?.summary ?? `${city.name} 전 지역(법정동 ${city.dongs.length}곳) 유품정리 · 고독사 정리 · 빈집 정리.`,
+    };
+  });
 ---
 
 <BaseLayout
-  title={`${region.name} 유품정리 | 고독사 정리 · 빈집 정리`}
-  description={`${region.name} 지역 유품정리 서비스. ${region.summary} 지역별 현장 특성과 비용에 영향을 주는 요소를 확인해 보세요.`}
+  title={`${region.name}유품정리 · ${region.name} 유품정리 비용·견적 | ${site.name}`}
+  description={`${region.name}유품정리 전문 — ${region.summary}. 구·시별 현장 특성과 비용에 영향을 주는 요소를 공개합니다.`}
   jsonLd={[
     serviceSchema({
       name: `${region.name} 유품정리`,
@@ -42,7 +56,7 @@ const { region } = Astro.props;
       <h2>{region.name} 세부 지역</h2>
       <ul class="grid">
         {
-          region.cities.map((city) => (
+          cities.map((city) => (
             <li class="card">
               <h3>
                 <a href={`/area/${region.slug}/${city.slug}/`}>{city.name} 유품정리</a>

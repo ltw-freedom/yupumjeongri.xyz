@@ -3,8 +3,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
 import { regions } from '../../data/areas';
+import { districtCities } from '../../data/districts';
 import { site } from '../../data/site';
 import { localBusiness } from '../../data/schema';
+
+const citiesByRegion = (slug: string) => districtCities.filter((city) => city.region === slug);
 ---
 
 <BaseLayout
@@ -18,8 +21,8 @@ import { localBusiness } from '../../data/schema';
     <div class="container">
       <h1>서비스 지역</h1>
       <p class="lead">
-        서울과 경기 전 지역에서 진행합니다. 아래 목록에 없는 지역도 일정에 따라 가능하니 상담 시
-        문의해 주세요.
+        서울 25개 구, 경기 31개 시·군 전 지역에서 진행합니다. 법정동 단위까지 지역별 안내 페이지를
+        제공합니다.
       </p>
 
       {
@@ -30,7 +33,7 @@ import { localBusiness } from '../../data/schema';
             </h2>
             <p>{region.summary}</p>
             <ul class="link-list">
-              {region.cities.map((city) => (
+              {citiesByRegion(region.slug).map((city) => (
                 <li>
                   <a href={`/area/${region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
                 </li>

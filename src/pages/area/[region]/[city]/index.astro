@@ -1,0 +1,218 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../../../components/Breadcrumb.astro';
+import CTA from '../../../../components/CTA.astro';
+import FAQ from '../../../../components/FAQ.astro';
+import PriceTable from '../../../../components/PriceTable.astro';
+import { getRegion, cityShortName } from '../../../../data/areas';
+import { districtCities, type DistrictCity } from '../../../../data/districts';
+import { getAliases } from '../../../../data/dongAliases';
+import { cityLead, cityFaqs } from '../../../../data/districtContent';
+import { services } from '../../../../data/services';
+import { site } from '../../../../data/site';
+import { serviceSchema, faqSchema } from '../../../../data/schema';
+import { getCollection } from 'astro:content';
+
+/**
+ * 시·군·구 페이지 — 두 티어를 한 라우트에서 처리한다.
+ *  - 큐레이션 티어(areas.ts): 손으로 쓴 지역 특징·비용 요소·FAQ 가 있는 지역
+ *  - 생성 티어(districts.ts): 법정동 데이터 기반 템플릿 페이지
+ * 두 티어 모두 법정동 링크 그리드를 노출한다 — 동 페이지가 키워드 표면이다.
+ */
+export function getStaticPaths() {
+  return districtCities.map((dc) => ({
+    params: { region: dc.region, city: dc.slug },
+    props: { dc },
+  }));
+}
+
+interface Props {
+  dc: DistrictCity;
+}
+
+const { dc } = Astro.props;
+const region = getRegion(dc.region)!;
+const curated = region.cities.find((c) => c.slug === dc.slug);
+const aliases = getAliases(dc.region, dc.slug);
+const short = cityShortName(dc);
+
+// 인접 시·군·구 (같은 광역, 목록상 앞뒤) — 내부 링크용
+const siblings = districtCities.filter((c) => c.region === dc.region && c.slug !== dc.slug);
+const myIndex = districtCities.filter((c) => c.region === dc.region).findIndex((c) => c.slug === dc.slug);
+const nearby = siblings.slice(Math.max(0, Math.min(myIndex, siblings.length - 4)), Math.max(0, Math.min(myIndex, siblings.length - 4)) + 4);
+
+// 이 지역과 연결된 칼럼 (frontmatter 의 relatedAreas 로 연결)
+const columns = await getCollection('columns', ({ data }) => !data.draft);
+const relatedColumns = columns
+  .filter((entry) => entry.data.relatedAreas.includes(dc.slug) || entry.data.relatedAreas.includes(dc.region))
+  .slice(0, 3);
+
+const faqs = curated?.faqs ?? cityFaqs(dc);
+
+// 링크 가치를 위쪽에 몰아준다 — 본문에는 앞 12개만, 나머지는 접어 둔다
+const visibleDongs = dc.dongs.slice(0, 12);
+const foldedDongs = dc.dongs.slice(12);
+const summary = curated?.summary ?? `${dc.name} 전 지역 유품정리 · 고독사 정리 · 빈집 정리. 법정동 ${dc.dongs.length}곳 전체 방문 견적.`;
+
+const title = `${dc.name}유품정리 · ${short} 유품정리 비용·견적 | ${site.name}`;
+const description = `${short}유품정리 전문 — ${summary} 비용 범위를 먼저 공개하고, 견적서 외 추가금 없이 진행합니다.`;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  jsonLd={[
+    serviceSchema({
+      name: `${dc.name} 유품정리`,
+      description: summary,
+      path: `/area/${dc.region}/${dc.slug}/`,
+      areaServed: [dc.name],
+    }),
+    faqSchema(faqs),
+  ]}
+>
+  <Breadcrumb
+    items={[
+      { label: '지역', href: '/area/' },
+      { label: region.name, href: `/area/${dc.region}/` },
+      { label: dc.name },
+    ]}
+  />
+
+  <section class="section">
+    <div class="container">
+      <h1>{dc.name} 유품정리</h1>
+      <p class="lead">{curated ? curated.summary : cityLead(dc)}</p>
+
+      {
+        curated && (
+          <>
+            <h2>{dc.name} 현장의 특징</h2>
+            <ul>
+              {curated.traits.map((trait) => (
+                <li>{trait}</li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+
+      <h2>{dc.name} 유품정리 비용</h2>
+      <p>
+        지역과 무관하게 같은 기준을 적용합니다. 범위가 달라지는 것은 물품 양, 반출 동선, 특수청소
+        여부뿐입니다.
+      </p>
+      <PriceTable />
+      <p class="note">
+        확정 금액은 현장 확인 후 항목별 견적서로 드리며, 견적서에 없는 금액은 청구하지 않습니다.
+        <a href="/cost/">비용 산정 기준 전체 보기</a>
+      </p>
+
+      {
+        curated && (
+          <>
+            <h2>{dc.name} 유품정리 비용에 영향을 주는 요소</h2>
+            <ul>
+              {curated.costFactors.map((factor) => (
+                <li>{factor}</li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+
+      <h2>{dc.name} 법정동별 유품정리 안내</h2>
+      <p>{dc.name}의 모든 법정동에서 진행합니다. 해당 지역을 선택하면 상세 안내를 볼 수 있습니다.</p>
+      <ul class="link-list">
+        {
+          aliases.map((alias) => (
+            <li>
+              <a href={`/area/${dc.region}/${dc.slug}/${alias.slug}/`}>
+                {alias.name} 유품정리
+              </a>
+            </li>
+          ))
+        }
+        {
+          visibleDongs.map((dong) => (
+            <li>
+              <a href={`/area/${dc.region}/${dc.slug}/${dong.slug}/`}>{dong.name} 유품정리</a>
+            </li>
+          ))
+        }
+      </ul>
+      {
+        foldedDongs.length > 0 && (
+          <details>
+            <summary>나머지 {foldedDongs.length}개 지역 보기</summary>
+            <ul class="link-list">
+              {foldedDongs.map((dong) => (
+                <li>
+                  <a href={`/area/${dc.region}/${dc.slug}/${dong.slug}/`}>{dong.name} 유품정리</a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )
+      }
+
+      <h2>{dc.name}에서 제공하는 서비스</h2>
+      <ul class="grid">
+        {
+          services.map((service) => (
+            <li class="card">
+              <h3>
+                <a href={`/service/${service.slug}/`}>{service.name}</a>
+              </h3>
+              <p>{service.summary}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2>진행 과정</h2>
+      <ol class="steps">
+        <li><strong>현장 확인</strong>물품 양과 반출 동선을 확인하고 항목별 견적을 안내드립니다.</li>
+        <li><strong>유품 분류</strong>서류·기록물과 일반 물품을 나눠 분류합니다.</li>
+        <li><strong>보관품 선별</strong>전달해 드릴 물건을 따로 포장합니다.</li>
+        <li><strong>폐기 · 반출</strong>폐기물을 종류별로 분리해 처리합니다.</li>
+        <li><strong>공간 정돈</strong>반출 후 청소까지 마무리합니다.</li>
+      </ol>
+      <p><a href="/process/">진행 과정 자세히 보기</a></p>
+
+      <FAQ title={`${dc.name} 유품정리 자주 묻는 질문`} items={faqs} />
+
+      {
+        relatedColumns.length > 0 && (
+          <>
+            <h2>관련 칼럼</h2>
+            <ul class="link-list">
+              {relatedColumns.map((entry) => (
+                <li>
+                  <a href={`/column/${entry.id}/`}>{entry.data.title}</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+
+      {
+        nearby.length > 0 && (
+          <>
+            <h2>인근 지역</h2>
+            <ul class="link-list">
+              {nearby.map((item) => (
+                <li>
+                  <a href={`/area/${dc.region}/${item.slug}/`}>{item.name} 유품정리</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </div>
+  </section>
+
+  <CTA title={`${dc.name} 유품정리 상담`} body="현장 사진 몇 장이면 대략적인 범위와 비용을 안내드립니다." />
+</BaseLayout>
