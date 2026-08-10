@@ -55,7 +55,7 @@ const foldedDongs = dc.dongs.slice(12);
 const summary = curated?.summary ?? `${dc.name} 전 지역 유품정리 · 고독사 정리 · 빈집 정리. 법정동 ${dc.dongs.length}곳 전체 방문 견적.`;
 
 const title = `${dc.name}유품정리 · ${short} 유품정리 비용·견적 | ${site.name}`;
-const description = `${short}유품정리 전문 — ${summary} 비용 범위를 먼저 공개하고, 견적서 외 추가금 없이 진행합니다.`;
+const description = `${short}유품정리 업체 — ${summary} 비용 범위를 먼저 공개하고, 견적서 외 추가금 없이 진행합니다.`;
 ---
 
 <BaseLayout
@@ -105,6 +105,7 @@ const description = `${short}유품정리 전문 — ${summary} 비용 범위를
       <PriceTable />
       <p class="note">
         확정 금액은 현장 확인 후 항목별 견적서로 드리며, 견적서에 없는 금액은 청구하지 않습니다.
+        다른 유품정리 업체의 동일 조건 견적서를 갖고 계시면 그보다 낮은 금액으로 진행합니다.
         <a href="/cost/">비용 산정 기준 전체 보기</a>
       </p>
 

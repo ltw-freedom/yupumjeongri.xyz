@@ -63,7 +63,7 @@ const faqs = dongFaqs(dc, unit);
 // 지역명을 3중으로 쌓지 않는다 ("송파구 잠실동 유품정리 · 잠실 유품정리 …" ×) —
 // 클릭률이 떨어진다. 짧은 지역명 변형("잠실유품정리")은 description 이 받는다.
 const title = `${display} 유품정리 비용·견적 | ${site.name}`;
-const description = `${short}유품정리 — ${display} 유품정리·고독사 특수청소·빈집 정리. 비용 범위를 먼저 공개하고, 견적서 외 추가금 없이 진행합니다. 무료 방문 견적.`;
+const description = `${short}유품정리 업체 — ${display} 유품정리·고독사 특수청소·빈집 정리. 비용 범위를 먼저 공개하고, 견적서 외 추가금 없이 진행합니다. 무료 방문 견적.`;
 ---
 
 <BaseLayout
@@ -97,7 +97,8 @@ const description = `${short}유품정리 — ${display} 유품정리·고독사
       <p>{dongCostNote(dc, unit)}</p>
       <PriceTable />
       <p class="note">
-        확정 금액은 현장 확인 후 항목별 견적서로 드립니다.
+        확정 금액은 현장 확인 후 항목별 견적서로 드립니다. 다른 유품정리 업체의 동일 조건
+        견적서를 갖고 계시면 그보다 낮은 금액으로 진행합니다.
         <a href="/cost/">비용 산정 기준과 단가 전체 보기</a>
       </p>
 
