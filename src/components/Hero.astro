@@ -1,0 +1,27 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  title: string;
+  lead: string;
+  /** hero 이미지는 첫 화면이라 lazy 를 붙이지 않는다 */
+  image?: string;
+  imageAlt?: string;
+}
+
+const { title, lead, image, imageAlt } = Astro.props;
+---
+
+<section class="hero container">
+  <h1>{title}</h1>
+  <p class="lead">{lead}</p>
+  <div class="hero__actions">
+    <a class="button button--primary" href={site.telHref}>전화 상담 {site.tel}</a>
+    <a class="button button--ghost" href={site.consultUrl} rel="noopener">온라인 상담 신청</a>
+  </div>
+  {
+    image && (
+      <img src={image} alt={imageAlt ?? ''} width="1200" height="675" fetchpriority="high" />
+    )
+  }
+</section>

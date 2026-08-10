@@ -1,0 +1,37 @@
+---
+import { site } from '../data/site';
+
+const nav = [
+  { href: '/service/', label: '서비스' },
+  { href: '/cost/', label: '비용' },
+  { href: '/process/', label: '진행과정' },
+  { href: '/area/', label: '지역' },
+  { href: '/column/', label: '칼럼' },
+  { href: '/faq/', label: 'FAQ' },
+];
+
+const current = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a class="site-header__logo" href="/">{site.name}</a>
+    <nav class="site-nav" aria-label="주요 메뉴">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                aria-current={current.startsWith(item.href) ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <a class="button button--primary" href={site.telHref}>{site.tel}</a>
+  </div>
+</header>

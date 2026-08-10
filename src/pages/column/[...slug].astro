@@ -1,0 +1,80 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CTA from '../../components/CTA.astro';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { allCities } from '../../data/areas';
+import { absoluteUrl } from '../../data/site';
+
+export async function getStaticPaths() {
+  const columns = await getCollection('columns', ({ data }) => !data.draft);
+  return columns.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'columns'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const linkedAreas = allCities.filter((city) => entry.data.relatedAreas.includes(city.slug));
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.publishedAt.toISOString(),
+  url: absoluteUrl(`/column/${entry.id}/`),
+  author: { '@id': absoluteUrl('/#business') },
+};
+---
+
+<BaseLayout
+  title={`${entry.data.title} | 유품정리연구소 칼럼`}
+  description={entry.data.description}
+  jsonLd={[articleSchema]}
+>
+  <Breadcrumb items={[{ label: '칼럼', href: '/column/' }, { label: entry.data.title }]} />
+
+  <article class="section">
+    <div class="container">
+      <h1>{entry.data.title}</h1>
+      <p class="note">
+        <time datetime={entry.data.publishedAt.toISOString()}>
+          {entry.data.publishedAt.toLocaleDateString('ko-KR')}
+        </time>
+      </p>
+
+      <Content />
+
+      {
+        linkedAreas.length > 0 && (
+          <>
+            <h2>관련 지역</h2>
+            <ul class="link-list">
+              {linkedAreas.map((city) => (
+                <li>
+                  <a href={`/area/${city.region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+
+      <h2>함께 보면 좋은 페이지</h2>
+      <ul class="link-list">
+        <li><a href="/cost/">비용 안내</a></li>
+        <li><a href="/process/">진행 과정</a></li>
+        <li><a href="/column/">다른 칼럼</a></li>
+      </ul>
+    </div>
+  </article>
+
+  <CTA />
+</BaseLayout>

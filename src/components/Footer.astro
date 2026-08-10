@@ -1,0 +1,46 @@
+---
+import { site } from '../data/site';
+import { services } from '../data/services';
+import { regions } from '../data/areas';
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="grid">
+      <div>
+        <strong>{site.name}</strong>
+        <p>{site.description}</p>
+        <p>
+          상담 전화 <a href={site.telHref}>{site.tel}</a>
+        </p>
+      </div>
+      <div>
+        <strong>서비스</strong>
+        <ul>
+          {
+            services.map((service) => (
+              <li>
+                <a href={`/service/${service.slug}/`}>{service.name}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div>
+        <strong>지역</strong>
+        <ul>
+          {
+            regions.map((region) => (
+              <li>
+                <a href={`/area/${region.slug}/`}>{region.name} 유품정리</a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+    <p class="note">
+      © {new Date().getFullYear()} {site.name}. 상담·접수는 비워도에서 처리됩니다.
+    </p>
+  </div>
+</footer>

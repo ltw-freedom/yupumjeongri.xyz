@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CTA from '../../components/CTA.astro';
+import { regions } from '../../data/areas';
+import { site } from '../../data/site';
+import { localBusiness } from '../../data/schema';
+---
+
+<BaseLayout
+  title={`서비스 지역 | 서울 · 경기 유품정리 - ${site.name}`}
+  description="서울과 경기 주요 지역의 유품정리 서비스 안내입니다. 지역별 현장 특성과 비용에 영향을 주는 요소를 정리했습니다."
+  jsonLd={[localBusiness()]}
+>
+  <Breadcrumb items={[{ label: '지역' }]} />
+
+  <section class="section">
+    <div class="container">
+      <h1>서비스 지역</h1>
+      <p class="lead">
+        서울과 경기 전 지역에서 진행합니다. 아래 목록에 없는 지역도 일정에 따라 가능하니 상담 시
+        문의해 주세요.
+      </p>
+
+      {
+        regions.map((region) => (
+          <>
+            <h2>
+              <a href={`/area/${region.slug}/`}>{region.name}</a>
+            </h2>
+            <p>{region.summary}</p>
+            <ul class="link-list">
+              {region.cities.map((city) => (
+                <li>
+                  <a href={`/area/${region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        ))
+      }
+    </div>
+  </section>
+
+  <CTA />
+</BaseLayout>

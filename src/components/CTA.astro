@@ -1,0 +1,26 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  body?: string;
+}
+
+const {
+  title = '어디서부터 시작해야 할지 모르겠다면',
+  body = '현장 사진 몇 장만으로도 대략적인 범위와 비용을 안내드립니다. 결정은 그다음에 하셔도 됩니다.',
+} = Astro.props;
+---
+
+<section class="section">
+  <div class="container">
+    <div class="cta">
+      <h2>{title}</h2>
+      <p>{body}</p>
+      <div class="cta__actions">
+        <a class="button button--primary" href={site.telHref}>전화 상담 {site.tel}</a>
+        <a class="button button--ghost" href={site.consultUrl} rel="noopener">온라인 상담 신청</a>
+      </div>
+    </div>
+  </div>
+</section>

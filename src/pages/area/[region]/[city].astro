@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../../components/Breadcrumb.astro';
+import CTA from '../../../components/CTA.astro';
+import FAQ from '../../../components/FAQ.astro';
+import { regions, nearbyCities, type City, type Region } from '../../../data/areas';
+import { services } from '../../../data/services';
+import { serviceSchema, faqSchema } from '../../../data/schema';
+import { getCollection } from 'astro:content';
+
+export function getStaticPaths() {
+  return regions.flatMap((region) =>
+    region.cities.map((city) => ({
+      params: { region: region.slug, city: city.slug },
+      props: { region, city },
+    })),
+  );
+}
+
+interface Props {
+  region: Region;
+  city: City;
+}
+
+const { region, city } = Astro.props;
+const nearby = nearbyCities(region.slug, city.slug);
+
+// 이 지역과 연결된 칼럼 (frontmatter 의 relatedAreas 로 연결)
+const columns = await getCollection('columns', ({ data }) => !data.draft);
+const relatedColumns = columns
+  .filter((entry) => entry.data.relatedAreas.includes(city.slug) || entry.data.relatedAreas.includes(region.slug))
+  .slice(0, 3);
+---
+
+<BaseLayout
+  title={`${city.name} 유품정리 | 고독사 정리 · 빈집 정리`}
+  description={city.summary}
+  jsonLd={[
+    serviceSchema({
+      name: `${city.name} 유품정리`,
+      description: city.summary,
+      path: `/area/${region.slug}/${city.slug}/`,
+      areaServed: [city.name],
+    }),
+    faqSchema(city.faqs),
+  ]}
+>
+  <Breadcrumb
+    items={[
+      { label: '지역', href: '/area/' },
+      { label: region.name, href: `/area/${region.slug}/` },
+      { label: city.name },
+    ]}
+  />
+
+  <section class="section">
+    <div class="container">
+      <h1>{city.name} 유품정리</h1>
+      <p class="lead">{city.summary}</p>
+
+      <h2>{city.name} 현장의 특징</h2>
+      <ul>
+        {city.traits.map((trait) => <li>{trait}</li>)}
+      </ul>
+
+      <h2>서비스 범위</h2>
+      <p>{city.name} 전 지역에서 방문 상담과 작업을 진행합니다. 주요 생활권은 다음과 같습니다.</p>
+      <ul class="link-list">
+        {city.coverage.map((area) => <li><span>{area}</span></li>)}
+      </ul>
+
+      <h2>{city.name}에서 제공하는 서비스</h2>
+      <ul class="grid">
+        {
+          services.map((service) => (
+            <li class="card">
+              <h3>
+                <a href={`/service/${service.slug}/`}>{service.name}</a>
+              </h3>
+              <p>{service.summary}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2>진행 과정</h2>
+      <ol class="steps">
+        <li><strong>현장 확인</strong>물품 양과 반출 동선을 확인하고 항목별 견적을 안내드립니다.</li>
+        <li><strong>유품 분류</strong>귀중품·서류·기록물과 일반 물품을 나눠 분류합니다.</li>
+        <li><strong>보관품 선별</strong>전달해 드릴 물건을 따로 포장합니다.</li>
+        <li><strong>폐기 · 반출</strong>폐기물을 종류별로 분리해 처리합니다.</li>
+        <li><strong>공간 정돈</strong>반출 후 청소까지 마무리합니다.</li>
+      </ol>
+      <p><a href="/process/">진행 과정 자세히 보기</a></p>
+
+      <h2>{city.name}에서 비용에 영향을 주는 요소</h2>
+      <ul>
+        {city.costFactors.map((factor) => <li>{factor}</li>)}
+      </ul>
+      <p><a href="/cost/">비용 산정 기준 전체 보기</a></p>
+
+      <FAQ title={`${city.name} 유품정리 자주 묻는 질문`} items={city.faqs} />
+
+      {
+        relatedColumns.length > 0 && (
+          <>
+            <h2>관련 칼럼</h2>
+            <ul class="link-list">
+              {relatedColumns.map((entry) => (
+                <li>
+                  <a href={`/column/${entry.id}/`}>{entry.data.title}</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+
+      {
+        nearby.length > 0 && (
+          <>
+            <h2>인근 지역</h2>
+            <ul class="link-list">
+              {nearby.map((item) => (
+                <li>
+                  <a href={`/area/${region.slug}/${item.slug}/`}>{item.name} 유품정리</a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+    </div>
+  </section>
+
+  <CTA title={`${city.name} 유품정리 상담`} body="현장 사진 몇 장이면 대략적인 범위와 비용을 안내드립니다." />
+</BaseLayout>

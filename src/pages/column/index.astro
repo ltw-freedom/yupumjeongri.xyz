@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CTA from '../../components/CTA.astro';
+import { getCollection } from 'astro:content';
+import { site } from '../../data/site';
+
+const columns = (await getCollection('columns', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+---
+
+<BaseLayout
+  title={`칼럼 | 유품정리를 준비하는 분들을 위한 안내 - ${site.name}`}
+  description="유품정리를 처음 겪는 분들이 자주 막히는 지점을 정리한 글 모음입니다. 준비물, 비용 구조, 고독사 현장 대응, 임대차 정산까지."
+>
+  <Breadcrumb items={[{ label: '칼럼' }]} />
+
+  <section class="section">
+    <div class="container">
+      <h1>칼럼</h1>
+      <p class="lead">
+        유품정리는 대부분 처음 겪는 일입니다. 미리 알아두면 결정이 수월해지는 것들을 정리했습니다.
+      </p>
+
+      <ul class="grid">
+        {
+          columns.map((entry) => (
+            <li class="card">
+              <h2>
+                <a href={`/column/${entry.id}/`}>{entry.data.title}</a>
+              </h2>
+              <p>{entry.data.description}</p>
+              <p class="note">
+                <time datetime={entry.data.publishedAt.toISOString()}>
+                  {entry.data.publishedAt.toLocaleDateString('ko-KR')}
+                </time>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <CTA />
+</BaseLayout>

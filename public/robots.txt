@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yupumjeongri.xyz/sitemap-index.xml

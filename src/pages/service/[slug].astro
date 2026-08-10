@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CTA from '../../components/CTA.astro';
+import FAQ from '../../components/FAQ.astro';
+import { services, type Service } from '../../data/services';
+import { regions } from '../../data/areas';
+import { serviceSchema, faqSchema } from '../../data/schema';
+
+export function getStaticPaths() {
+  return services.map((service) => ({
+    params: { slug: service.slug },
+    props: { service },
+  }));
+}
+
+interface Props {
+  service: Service;
+}
+
+const { service } = Astro.props;
+const others = services.filter((item) => item.slug !== service.slug);
+---
+
+<BaseLayout
+  title={service.title}
+  description={service.description}
+  jsonLd={[
+    serviceSchema({
+      name: service.name,
+      description: service.description,
+      path: `/service/${service.slug}/`,
+    }),
+    faqSchema(service.faqs),
+  ]}
+>
+  <Breadcrumb items={[{ label: '서비스', href: '/service/' }, { label: service.name }]} />
+
+  <section class="section">
+    <div class="container">
+      <h1>{service.name}</h1>
+      <p class="lead">{service.lead}</p>
+
+      <h2>이런 경우에 필요합니다</h2>
+      <ul>
+        {service.cases.map((item) => <li>{item}</li>)}
+      </ul>
+
+      <h2>{service.name} 진행 과정</h2>
+      <ol class="steps">
+        {
+          service.steps.map((step) => (
+            <li>
+              <strong>{step.title}</strong>
+              {step.body}
+            </li>
+          ))
+        }
+      </ol>
+
+      <h2>비용은 어떻게 정해지나요</h2>
+      <p>
+        물품 양, 주거 형태와 층수, 반출 동선, 폐기물 종류가 기본 요소이고 여기에 특수청소·소독 포함
+        여부가 더해집니다. 항목별 기준은 <a href="/cost/">비용 안내</a>에 정리해 두었습니다.
+      </p>
+
+      <FAQ items={service.faqs} />
+
+      <h2>지역별 안내</h2>
+      <ul class="link-list">
+        {
+          regions.map((region) => (
+            <li>
+              <a href={`/area/${region.slug}/`}>{region.name} {service.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2>다른 서비스</h2>
+      <ul class="link-list">
+        {
+          others.map((item) => (
+            <li>
+              <a href={`/service/${item.slug}/`}>{item.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <CTA />
+</BaseLayout>

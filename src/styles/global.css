@@ -1,0 +1,387 @@
+:root {
+  --color-text: #1f2328;
+  --color-muted: #5b6470;
+  --color-line: #e3e6ea;
+  --color-bg: #ffffff;
+  --color-surface: #f7f8f9;
+  --color-accent: #2f5d50;
+  --color-accent-dark: #234639;
+
+  --max-width: 68rem;
+  --radius: 10px;
+  --space: 1rem;
+
+  --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Malgun Gothic', 'Segoe UI', system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--color-text);
+  background: var(--color-bg);
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.5rem);
+}
+
+h2 {
+  font-size: clamp(1.35rem, 1.1rem + 1.1vw, 1.7rem);
+  margin-top: 2.5rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+  margin-top: 1.75rem;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul {
+  padding-left: 1.2em;
+}
+
+li {
+  margin-bottom: 0.35rem;
+}
+
+.container {
+  width: min(100% - 2.5rem, var(--max-width));
+  margin-inline: auto;
+}
+
+.section {
+  padding-block: clamp(2.5rem, 5vw, 4rem);
+}
+
+.section--surface {
+  background: var(--color-surface);
+}
+
+.lead {
+  font-size: 1.08rem;
+  color: var(--color-muted);
+}
+
+/* --- 버튼 --- */
+.button {
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.button--primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.button--primary:hover {
+  background: var(--color-accent-dark);
+}
+
+.button--ghost {
+  border-color: var(--color-line);
+  color: var(--color-text);
+  background: #fff;
+}
+
+/* --- 그리드 --- */
+.grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  background: #fff;
+  margin: 0;
+}
+
+.card h3 {
+  margin-top: 0;
+}
+
+.card p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- 단계 목록 --- */
+.steps {
+  list-style: none;
+  padding: 0;
+  counter-reset: step;
+}
+
+.steps li {
+  position: relative;
+  padding-left: 2.75rem;
+  margin-bottom: 1.25rem;
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.steps strong {
+  display: block;
+}
+
+/* --- 헤더 / 푸터 --- */
+.site-header {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.site-header__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding-block: 1rem;
+}
+
+.site-header__logo {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-text);
+  text-decoration: none;
+  margin-right: auto;
+}
+
+.site-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current='page'] {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.site-footer {
+  border-top: 1px solid var(--color-line);
+  margin-top: 3rem;
+  padding-block: 2rem;
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.site-footer a {
+  color: var(--color-muted);
+}
+
+/* --- breadcrumb --- */
+.breadcrumb {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  padding-top: 1rem;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumb li + li::before {
+  content: '›';
+  margin-right: 0.4rem;
+}
+
+/* --- FAQ --- */
+.faq details {
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.9rem 0;
+}
+
+.faq summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.faq details > p {
+  margin: 0.6rem 0 0;
+  color: var(--color-muted);
+}
+
+/* --- CTA --- */
+.cta {
+  background: var(--color-accent);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  text-align: center;
+}
+
+.cta h2 {
+  margin-top: 0;
+  color: #fff;
+}
+
+.cta p {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
+.cta .button--primary {
+  background: #fff;
+  color: var(--color-accent);
+}
+
+.cta .button--ghost {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: #fff;
+}
+
+/* --- Hero --- */
+.hero {
+  padding-block: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.hero h1 {
+  max-width: 20ch;
+}
+
+.hero .lead {
+  max-width: 46ch;
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+/* --- 링크 목록 --- */
+.link-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.link-list a {
+  display: inline-block;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--color-text);
+}
+
+.link-list a:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.7rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  background: #fff;
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}

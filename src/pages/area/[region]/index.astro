@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../../components/Breadcrumb.astro';
+import CTA from '../../../components/CTA.astro';
+import { regions, type Region } from '../../../data/areas';
+import { services } from '../../../data/services';
+import { serviceSchema } from '../../../data/schema';
+
+export function getStaticPaths() {
+  return regions.map((region) => ({
+    params: { region: region.slug },
+    props: { region },
+  }));
+}
+
+interface Props {
+  region: Region;
+}
+
+const { region } = Astro.props;
+---
+
+<BaseLayout
+  title={`${region.name} 유품정리 | 고독사 정리 · 빈집 정리`}
+  description={`${region.name} 지역 유품정리 서비스. ${region.summary} 지역별 현장 특성과 비용에 영향을 주는 요소를 확인해 보세요.`}
+  jsonLd={[
+    serviceSchema({
+      name: `${region.name} 유품정리`,
+      description: region.summary,
+      path: `/area/${region.slug}/`,
+      areaServed: [region.name],
+    }),
+  ]}
+>
+  <Breadcrumb items={[{ label: '지역', href: '/area/' }, { label: region.name }]} />
+
+  <section class="section">
+    <div class="container">
+      <h1>{region.name} 유품정리</h1>
+      <p class="lead">{region.intro}</p>
+
+      <h2>{region.name} 세부 지역</h2>
+      <ul class="grid">
+        {
+          region.cities.map((city) => (
+            <li class="card">
+              <h3>
+                <a href={`/area/${region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
+              </h3>
+              <p>{city.summary}</p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2>{region.name}에서 진행하는 서비스</h2>
+      <ul class="link-list">
+        {
+          services.map((service) => (
+            <li>
+              <a href={`/service/${service.slug}/`}>{service.name}</a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="note">
+        목록에 없는 지역도 진행 가능합니다. <a href="/cost/">비용 안내</a>와{' '}
+        <a href="/process/">진행 과정</a>도 함께 확인해 보세요.
+      </p>
+    </div>
+  </section>
+
+  <CTA />
+</BaseLayout>

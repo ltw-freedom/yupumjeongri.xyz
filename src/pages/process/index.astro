@@ -1,0 +1,86 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import CTA from '../../components/CTA.astro';
+import { site } from '../../data/site';
+
+const steps = [
+  {
+    title: '상담',
+    body: '전화 또는 온라인으로 접수합니다. 주소, 주거 형태, 대략적인 물품 양, 희망 일정 정도만 알려주시면 됩니다. 사진이 있으면 훨씬 정확합니다.',
+  },
+  {
+    title: '현장 확인',
+    body: '방문해 물품 양, 반출 동선, 폐기물 종류를 확인합니다. 고독사 현장의 경우 오염 범위와 냄새 확산 정도를 함께 확인합니다.',
+  },
+  {
+    title: '견적 · 일정 확정',
+    body: '작업 항목을 구분한 견적서를 드립니다. 동의하신 범위 안에서만 진행하며, 임대차 반환 기한 등 정해진 일정이 있으면 그에 맞춰 조율합니다.',
+  },
+  {
+    title: '유품 분류',
+    body: '귀중품, 서류, 사진·기록물, 일반 물품으로 나눕니다. 현금·귀금속·중요 서류가 나오면 별도로 보관하고 목록으로 정리해 전달합니다.',
+  },
+  {
+    title: '보관품 선별 · 전달',
+    body: '남기실 물건을 따로 포장합니다. 유가족이 원거리에 계시면 택배로 발송해 드립니다.',
+  },
+  {
+    title: '폐기 · 반출',
+    body: '폐기물은 종류별로 분리해 규정에 맞춰 처리합니다. 재사용 가능한 물품은 협의 후 기부하거나 매각 대금을 정산에 반영합니다.',
+  },
+  {
+    title: '청소 · 공간 정돈',
+    body: '반출 후 청소를 진행합니다. 고독사 현장은 소독·탈취를 포함하고, 필요 시 자재 철거까지 진행합니다.',
+  },
+  {
+    title: '마무리 확인',
+    body: '작업 전후 사진을 공유해 드립니다. 원거리 유가족은 사진으로 확인 후 마무리합니다.',
+  },
+];
+---
+
+<BaseLayout
+  title={`유품정리 진행 과정 | 상담부터 공간 정돈까지 - ${site.name}`}
+  description="유품정리 진행 과정을 단계별로 안내합니다. 상담, 현장 확인, 견적, 유품 분류, 보관품 선별, 폐기 반출, 청소, 마무리 확인까지."
+>
+  <Breadcrumb items={[{ label: '진행과정' }]} />
+
+  <section class="section">
+    <div class="container">
+      <h1>유품정리 진행 과정</h1>
+      <p class="lead">
+        어느 단계에서 유가족의 결정이 필요한지 미리 알아두시면 준비가 수월합니다. 아래 8단계로
+        진행합니다.
+      </p>
+
+      <ol class="steps">
+        {
+          steps.map((step) => (
+            <li>
+              <strong>{step.title}</strong>
+              {step.body}
+            </li>
+          ))
+        }
+      </ol>
+
+      <h2>유가족이 준비하면 좋은 것</h2>
+      <ul>
+        <li>보관하고 싶은 물건의 대략적인 목록 (사진, 앨범, 서류, 특정 가구 등)</li>
+        <li>임대차 계약 종료일 등 정해진 기한</li>
+        <li>관리사무소 연락처 (엘리베이터 사용 신청이 필요한 경우)</li>
+        <li>현장 사진 (전화 상담 시 견적 범위를 좁히는 데 도움이 됩니다)</li>
+      </ul>
+
+      <h2>함께 보면 좋은 페이지</h2>
+      <ul class="link-list">
+        <li><a href="/cost/">비용 안내</a></li>
+        <li><a href="/service/">서비스 안내</a></li>
+        <li><a href="/faq/">자주 묻는 질문</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <CTA />
+</BaseLayout>

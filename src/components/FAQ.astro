@@ -1,0 +1,22 @@
+---
+interface Props {
+  title?: string;
+  items: { q: string; a: string }[];
+}
+
+const { title = '자주 묻는 질문', items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="faq">
+      <h2>{title}</h2>
+      {items.map((item) => (
+        <details>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </section>
+  )
+}
