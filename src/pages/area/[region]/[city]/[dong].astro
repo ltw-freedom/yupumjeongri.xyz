@@ -63,7 +63,8 @@ const faqs = dongFaqs(dc, unit);
 // 지역명을 3중으로 쌓지 않는다 ("송파구 잠실동 유품정리 · 잠실 유품정리 …" ×) —
 // 클릭률이 떨어진다. 짧은 지역명 변형("잠실유품정리")은 description 이 받는다.
 const title = `${display} 유품정리 비용·견적 | ${site.name}`;
-const description = `${short}유품정리 업체 — ${display} 유품정리·고독사 특수청소·빈집 정리. 비용 범위를 먼저 공개하고, 견적서 외 추가금 없이 진행합니다. 무료 방문 견적.`;
+// 네이버 서치어드바이저 권고: 설명문 80자 이내
+const description = `${short}유품정리 업체 — ${display} 유품정리·고독사 특수청소·빈집 정리. 비용 공개·추가금 0원·무료 방문 견적.`;
 ---
 
 <BaseLayout
