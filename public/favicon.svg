@@ -1,11 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="7" fill="#2f5d50" />
-  <path
-    d="M8 12.5h16M8 12.5v11a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5v-11M12.5 12.5V9a3.5 3.5 0 0 1 7 0v3.5"
-    fill="none"
-    stroke="#ffffff"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="대한유품정리">
+  <!--
+    추모 국화. 16px 에서 뭉개지지 않도록 꽃잎을 10장으로 제한하고
+    바깥 10장 / 안쪽 10장(18도 엇갈림) 두 겹으로만 밀도를 만든다.
+    꽃잎을 더 늘리면 작은 크기에서 원형 덩어리로 보인다.
+  -->
+  <rect width="32" height="32" rx="7" fill="#16233D" />
+
+  <g transform="translate(16 16)" fill="#ffffff">
+    <!-- 바깥 꽃잎 10장 (36도 간격) -->
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(36)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(72)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(108)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(144)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(180)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(216)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(252)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(288)" />
+    <rect x="-1.7" y="-12.4" width="3.4" height="7.6" rx="1.7" transform="rotate(324)" />
+
+    <!-- 안쪽 꽃잎 10장 (18도 엇갈림) -->
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(18)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(54)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(90)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(126)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(162)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(198)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(234)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(270)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(306)" />
+    <rect x="-1.5" y="-9.8" width="3" height="5.4" rx="1.5" transform="rotate(342)" />
+
+    <!-- 꽃심. 바깥 꽃잎이 시작되는 r=4.8 을 넘겨야 안쪽 꽃잎 사이 틈이 고리처럼 비치지 않는다. -->
+    <circle r="5" />
+    <circle r="2.8" fill="#C8892A" />
+  </g>
 </svg>

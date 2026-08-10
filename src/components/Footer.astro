@@ -9,9 +9,9 @@ import { regions } from '../data/areas';
     <div class="grid">
       <div>
         <strong>{site.name}</strong>
-        <p>{site.description}</p>
+        <p>{site.slogan} — {site.sloganSub}</p>
         <p>
-          상담 전화 <a href={site.telHref}>{site.tel}</a>
+          <a href={site.consultPath}>상담 신청하기</a>
         </p>
       </div>
       <div>
@@ -39,8 +39,7 @@ import { regions } from '../data/areas';
         </ul>
       </div>
     </div>
-    <p class="note">
-      © {new Date().getFullYear()} {site.name}. 상담·접수는 비워도에서 처리됩니다.
-    </p>
+    <p class="note">{site.legalNotice}</p>
+    <p class="note">© {new Date().getFullYear()} {site.name}</p>
   </div>
 </footer>

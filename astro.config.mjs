@@ -10,5 +10,10 @@ export default defineConfig({
   build: {
     format: 'directory',
   },
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // noindex 인 페이지를 사이트맵에 넣으면 신호가 어긋난다.
+      filter: (page) => !page.includes('/consult/done/'),
+    }),
+  ],
 });

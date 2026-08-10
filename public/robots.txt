@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /consult/done/
 
 Sitemap: https://yupumjeongri.xyz/sitemap-index.xml

@@ -4,20 +4,34 @@ import { site } from '../data/site';
 interface Props {
   title: string;
   lead: string;
+  /** 세 가지 약속(정찰제·추가금 0원·최저가 보상) 노출 여부 */
+  promises?: boolean;
   /** hero 이미지는 첫 화면이라 lazy 를 붙이지 않는다 */
   image?: string;
   imageAlt?: string;
 }
 
-const { title, lead, image, imageAlt } = Astro.props;
+const { title, lead, promises = false, image, imageAlt } = Astro.props;
 ---
 
 <section class="hero container">
   <h1>{title}</h1>
   <p class="lead">{lead}</p>
+  {
+    promises && (
+      <ul class="promises">
+        {site.promises.map((promise) => (
+          <li>
+            <b>{promise.label}</b>
+            <span>{promise.detail}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
   <div class="hero__actions">
-    <a class="button button--primary" href={site.telHref}>전화 상담 {site.tel}</a>
-    <a class="button button--ghost" href={site.consultUrl} rel="noopener">온라인 상담 신청</a>
+    <a class="button button--primary" href={site.consultPath}>상담 신청하기</a>
+    <a class="button button--ghost" href="/cost/">비용 먼저 보기</a>
   </div>
   {
     image && (

@@ -4,8 +4,14 @@
   --color-line: #e3e6ea;
   --color-bg: #ffffff;
   --color-surface: #f7f8f9;
-  --color-accent: #2f5d50;
-  --color-accent-dark: #234639;
+  --color-accent: #16233D;
+  --color-accent-dark: #0e1730;
+  /*
+   * 금액·숫자에만 쓰는 포인트 컬러. 본문 링크나 버튼에는 쓰지 않는다.
+   * 흰 배경 대비 5.5:1 로 WCAG AA 를 넘긴다. 파비콘의 밝은 금색(#C8892A)은
+   * 네이비 배경 위에서만 쓰는 값이라 여기와 다르다.
+   */
+  --color-gold: #8f5e14;
 
   --max-width: 68rem;
   --radius: 10px;
@@ -85,6 +91,11 @@ li {
 .container {
   width: min(100% - 2.5rem, var(--max-width));
   margin-inline: auto;
+}
+
+/* 폼처럼 한 줄 길이가 짧아야 읽기 편한 페이지용 */
+.container--narrow {
+  max-width: 42rem;
 }
 
 .section {
@@ -192,11 +203,21 @@ li {
 }
 
 .site-header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-weight: 700;
   font-size: 1.05rem;
+  letter-spacing: -0.02em;
   color: var(--color-text);
   text-decoration: none;
   margin-right: auto;
+}
+
+.site-header__logo img {
+  width: 26px;
+  height: 26px;
+  flex: none;
 }
 
 .site-nav ul {
@@ -326,6 +347,38 @@ li {
   margin-top: 1.5rem;
 }
 
+/* --- 세 가지 약속 배지 (site.promises) --- */
+.promises {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.promises li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.promises b {
+  color: var(--color-accent);
+}
+
+.promises b::before {
+  content: '✓';
+  margin-right: 0.3rem;
+  color: var(--color-gold);
+}
+
+.promises span {
+  color: var(--color-muted);
+}
+
 /* --- 링크 목록 --- */
 .link-list {
   display: flex;
@@ -371,6 +424,98 @@ td {
 .note {
   font-size: 0.9rem;
   color: var(--color-muted);
+}
+
+/* --- 상담 폼 --- */
+.form {
+  margin: 2rem 0 1rem;
+}
+
+.field {
+  margin-bottom: 1.4rem;
+}
+
+.field > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.field .req {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  margin-left: 0.35rem;
+  vertical-align: 0.1em;
+}
+
+.field input[type='text'],
+.field select,
+.field textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.8rem;
+}
+
+.field textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.field input:focus-visible,
+.field select:focus-visible,
+.field textarea:focus-visible,
+.button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.field .hint {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  margin: 0.4rem 0 0;
+}
+
+/* 체크박스 줄은 라벨 안에 입력을 넣어 터치 영역을 넓힌다 */
+.field--check > label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.field--check input[type='checkbox'] {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: 0.32rem;
+  flex: none;
+  accent-color: var(--color-accent);
+}
+
+/* 허니팟. display:none 은 일부 봇이 걸러내므로 화면 밖으로 밀어낸다. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form-error {
+  border: 1px solid #b42318;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: #fef3f2;
+  color: #912018;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
 }
 
 .skip-link {

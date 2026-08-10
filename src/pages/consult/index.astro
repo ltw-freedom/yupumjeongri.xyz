@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { site } from '../../data/site';
+import { services } from '../../data/services';
+
+/**
+ * 정적 페이지 + Cloudflare Pages Function(POST /api/consult) 조합.
+ * JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 303 리다이렉트로 알려준다.
+ */
+const errors: Record<string, string> = {
+  required: '성함, 연락처, 개인정보 수집 동의는 반드시 입력해 주세요.',
+  send: '전송 중 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.',
+  form: '입력 내용을 읽지 못했습니다. 다시 시도해 주세요.',
+  config: '접수 시스템 점검 중입니다. 잠시 후 다시 시도해 주세요.',
+};
+---
+
+<BaseLayout
+  title={`상담 신청 | ${site.name}`}
+  description="유품정리 상담 신청. 성함과 연락처, 지역만 남겨주시면 비용 범위와 진행 방법을 회신해 드립니다. 상담과 견적에는 비용이 들지 않습니다."
+  noindex={false}
+>
+  <Breadcrumb items={[{ label: '상담 신청' }]} />
+
+  <section class="section">
+    <div class="container container--narrow">
+      <h1>상담 신청</h1>
+      <p class="lead">
+        성함과 연락처만 남겨주셔도 됩니다. 지역과 대략적인 상황을 함께 적어주시면 첫 회신에서
+        비용 범위까지 안내드릴 수 있습니다. 상담과 견적에는 비용이 들지 않습니다.
+      </p>
+
+      {/* 서버가 ?error= 로 되돌려 보낸 경우에만 보이는 안내. JS 없이 동작한다. */}
+      <div id="form-error" class="form-error" role="alert" hidden></div>
+
+      <form class="form" method="POST" action="/api/consult">
+        <div class="field">
+          <label for="name">성함 <span class="req">필수</span></label>
+          <input id="name" name="name" type="text" required maxlength="40" autocomplete="name" />
+        </div>
+
+        <div class="field">
+          <label for="contact">연락처 <span class="req">필수</span></label>
+          <input
+            id="contact"
+            name="contact"
+            type="text"
+            required
+            maxlength="60"
+            autocomplete="tel"
+            placeholder="휴대폰 번호 또는 이메일"
+          />
+          <p class="hint">회신 받으실 방법을 적어주세요. 카카오톡 아이디도 괜찮습니다.</p>
+        </div>
+
+        <div class="field">
+          <label for="region">지역</label>
+          <input
+            id="region"
+            name="region"
+            type="text"
+            maxlength="60"
+            placeholder="예: 서울 관악구, 성남시 분당구"
+          />
+        </div>
+
+        <div class="field">
+          <label for="type">필요한 서비스</label>
+          <select id="type" name="type">
+            <option value="">선택 안 함 / 잘 모르겠음</option>
+            {services.map((service) => <option value={service.name}>{service.name}</option>)}
+            <option value="기타">기타</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="message">상담 내용</label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            maxlength="2000"
+            placeholder="주거 형태(원룸·아파트 등), 층수와 엘리베이터 유무, 대략적인 짐의 양, 희망 일정을 적어주시면 범위를 훨씬 좁힐 수 있습니다."
+          ></textarea>
+        </div>
+
+        {/* 허니팟 — 사람에게는 보이지 않는다. 값이 차 있으면 서버가 봇으로 처리한다. */}
+        <div class="honeypot" aria-hidden="true">
+          <label for="company">회사명</label>
+          <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="field field--check">
+          <label for="privacy">
+            <input id="privacy" name="privacy" type="checkbox" required value="agreed" />
+            <span>개인정보 수집·이용에 동의합니다 <span class="req">필수</span></span>
+          </label>
+          <p class="hint">
+            수집 항목: {site.privacy.items} · 이용 목적: {site.privacy.purpose} · 보유 기간:{' '}
+            {site.privacy.retention}. 동의를 거부하실 수 있으나, 이 경우 상담 회신이 어렵습니다.
+          </p>
+        </div>
+
+        <button class="button button--primary" type="submit">상담 신청 보내기</button>
+      </form>
+
+      <h2>접수 이후</h2>
+      <ol class="steps">
+        <li><strong>회신</strong>남겨주신 연락처로 연락드려 상황을 확인합니다.</li>
+        <li><strong>비용 범위 안내</strong>사진을 보내주시면 범위를 좁혀 안내드립니다.</li>
+        <li><strong>현장 확인</strong>방문해 물품 양과 반출 동선을 확인합니다. 방문 비용은 없습니다.</li>
+        <li><strong>항목별 견적서</strong>작업 항목과 금액을 구분해 서면으로 드립니다.</li>
+      </ol>
+
+      <p class="note">
+        견적서에 없는 작업은 임의로 진행하지 않습니다. {site.guaranteeShort}
+      </p>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ errors }}>
+    // 서버가 붙여 보낸 ?error= 코드를 사람이 읽을 문장으로 바꾼다.
+    const code = new URLSearchParams(location.search).get('error');
+    const box = document.getElementById('form-error');
+    if (code && box) {
+      box.textContent = errors[code] ?? errors.send;
+      box.hidden = false;
+      box.scrollIntoView({ block: 'center' });
+    }
+  </script>
+</BaseLayout>

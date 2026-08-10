@@ -14,6 +14,11 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+# Cloudflare Pages Functions 로컬 시크릿 (SLACK_WEBHOOK_URL). 절대 커밋 금지.
+.dev.vars
+
+# OG 이미지 디버그용 중간 산출물 (public/og-image.png 만 커밋한다)
+scripts/og-image.svg
 
 # macOS / editors
 .DS_Store

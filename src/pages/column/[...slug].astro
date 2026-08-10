@@ -4,7 +4,7 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { allCities } from '../../data/areas';
-import { absoluteUrl } from '../../data/site';
+import { site, absoluteUrl } from '../../data/site';
 
 export async function getStaticPaths() {
   const columns = await getCollection('columns', ({ data }) => !data.draft);
@@ -35,7 +35,7 @@ const articleSchema = {
 ---
 
 <BaseLayout
-  title={`${entry.data.title} | 유품정리연구소 칼럼`}
+  title={`${entry.data.title} | ${site.name} 칼럼`}
   description={entry.data.description}
   jsonLd={[articleSchema]}
 >

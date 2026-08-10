@@ -12,9 +12,20 @@ export function localBusiness(areaServed: string[] = [...site.areaServed]) {
     '@id': absoluteUrl('/#business'),
     name: site.name,
     url: site.url,
-    telephone: site.tel,
     description: site.description,
+    slogan: site.slogan,
     areaServed,
+    // 전화 상담을 운영하지 않으므로 telephone 은 넣지 않는다.
+    // 대신 접수 창구를 명시해 둔다.
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      url: absoluteUrl(site.consultPath),
+      availableLanguage: 'Korean',
+      areaServed: 'KR',
+    },
+    // priceRange 는 /cost/ 에 실제 범위를 공개한 뒤에 추가한다.
+    // 페이지에 없는 값을 구조화 데이터에만 넣으면 불일치가 된다.
   };
 }
 
