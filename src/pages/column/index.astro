@@ -31,11 +31,6 @@ const columns = (await getCollection('columns', ({ data }) => !data.draft)).sort
                 <a href={`/column/${entry.id}/`}>{entry.data.title}</a>
               </h2>
               <p>{entry.data.description}</p>
-              <p class="note">
-                <time datetime={entry.data.publishedAt.toISOString()}>
-                  {entry.data.publishedAt.toLocaleDateString('ko-KR')}
-                </time>
-              </p>
             </li>
           ))
         }

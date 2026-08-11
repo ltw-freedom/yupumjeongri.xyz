@@ -44,11 +44,6 @@ const articleSchema = {
   <article class="section">
     <div class="container">
       <h1>{entry.data.title}</h1>
-      <p class="note">
-        <time datetime={entry.data.publishedAt.toISOString()}>
-          {entry.data.publishedAt.toLocaleDateString('ko-KR')}
-        </time>
-      </p>
 
       <Content />
 
