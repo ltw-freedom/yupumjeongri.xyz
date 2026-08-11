@@ -11,10 +11,24 @@
 export type PriceRow = {
   /** 주거 형태 */
   type: string;
-  /** 기준 범위 */
+  /** 기준 범위 — 화면에 보이는 표기는 항상 이 문자열이 담당한다 */
   range: string;
   /** 범위가 달라지는 조건 */
   note: string;
+  /**
+   * 구조화 데이터(Offer)용 숫자, 단위는 원.
+   * range 문자열을 파싱하지 않고 따로 적는다 — 표기를 바꿔도 스키마가 깨지지 않게.
+   * 둘을 고칠 때는 반드시 같이 고칠 것.
+   */
+  minPrice: number;
+  /** 상한이 없는 구간('250만원부터')은 생략한다 */
+  maxPrice?: number;
+  /**
+   * 단독 금액이 아니라 다른 항목에 더해지는 추가분인가.
+   * true 면 Offer 로 내보내지 않는다 — '위 금액 + 80만원'을 80만원짜리 상품으로
+   * 오해하게 만드는 구조화 데이터는 실제 페이지 내용과 불일치다.
+   */
+  additive?: boolean;
 };
 
 export type UnitRate = {
@@ -29,33 +43,60 @@ export const basePrices: PriceRow[] = [
     type: '원룸 · 오피스텔 (10평 이하)',
     range: '40만 ~ 90만원',
     note: '짐이 적어 1톤 이내로 끝나면 30만원대에 마무리되기도 합니다.',
+    minPrice: 400_000,
+    maxPrice: 900_000,
   },
   {
     type: '투룸 (15평 안팎)',
     range: '90만 ~ 160만원',
     note: '폐기물 양과 엘리베이터 유무에 따라 범위 안에서 달라집니다.',
+    minPrice: 900_000,
+    maxPrice: 1_600_000,
   },
   {
     type: '아파트 · 주택 20평대',
     range: '150만 ~ 250만원',
     note: '살림 규모가 크면 차량과 인력이 추가됩니다.',
+    minPrice: 1_500_000,
+    maxPrice: 2_500_000,
   },
   {
     type: '아파트 · 주택 30평 이상',
     range: '250만원부터',
     note: '물량 편차가 커서 방문 확인 후 확정 견적으로 안내드립니다.',
+    minPrice: 2_500_000,
   },
   {
     type: '고독사 특수청소 포함',
     range: '위 금액 + 80만 ~ 200만원',
     note: '오염 범위, 소독 횟수, 자재 철거 여부에 따라 달라집니다.',
+    minPrice: 800_000,
+    maxPrice: 2_000_000,
+    additive: true,
   },
   {
     type: '빈집 · 쓰레기집 정리',
     range: '원룸 기준 50만 ~ 150만원',
     note: '쌓인 폐기물 양이 기준입니다. 평형보다 짐의 부피가 좌우합니다.',
+    minPrice: 500_000,
+    maxPrice: 1_500_000,
   },
 ];
+
+/**
+ * Offer 로 내보낼 수 있는 행. 추가분(additive)은 단독으로 구매할 수 있는 금액이 아니라 뺀다.
+ */
+export const offerablePrices: PriceRow[] = basePrices.filter((row) => !row.additive);
+
+/**
+ * 사이트 전체 가격 하한·상한 (원). LocalBusiness.priceRange 와 AggregateOffer 에 쓴다.
+ * '250만원부터' 처럼 상한이 없는 행은 하한을 상한 후보로 본다 —
+ * 없는 상한을 지어내는 것보다 낮게 잡는 쪽이 안전하다.
+ */
+export const priceBounds = {
+  low: Math.min(...offerablePrices.map((row) => row.minPrice)),
+  high: Math.max(...offerablePrices.map((row) => row.maxPrice ?? row.minPrice)),
+};
 
 /** 견적서를 구성하는 단가 — 견적 근거를 그대로 공개한다 */
 export const unitRates: UnitRate[] = [

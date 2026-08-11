@@ -68,6 +68,8 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
       description: summary,
       path: `/area/${dc.region}/${dc.slug}/`,
       areaServed: [dc.name],
+      // 아래 본문에 PriceTable 을 그대로 싣는다 — 표에 있는 금액이므로 Offer 로 내보낸다
+      withPrices: true,
     }),
     faqSchema(faqs),
   ]}

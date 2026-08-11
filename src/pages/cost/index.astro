@@ -4,7 +4,7 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
 import FAQ from '../../components/FAQ.astro';
 import { site } from '../../data/site';
-import { faqSchema } from '../../data/schema';
+import { faqSchema, priceOffers } from '../../data/schema';
 import { basePrices, unitRates } from '../../data/pricing';
 
 const factors = [
@@ -65,7 +65,7 @@ const faqs = [
 <BaseLayout
   title={`유품정리 비용 | 원룸 40만원대부터, 기준 가격 공개 - ${site.name}`}
   description="유품정리 비용 공개 — 원룸 40만~90만원, 투룸 90만~160만원, 20평대 150만~250만원. 폐기물·인력·장비 단가까지 안내합니다."
-  jsonLd={[faqSchema(faqs)]}
+  jsonLd={[priceOffers(), faqSchema(faqs)]}
 >
   <Breadcrumb items={[{ label: '비용' }]} />
 

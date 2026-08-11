@@ -199,9 +199,13 @@ npm run build && npx wrangler deploy
 
 배포 전 필수:
 
-- [ ] **`/cost/` 에 서비스별 비용 범위(최소~최대) 공개** — 이 사이트의 핵심 자산.
-      숫자가 들어가면 `localBusiness()` 에 `priceRange`, 가격표에 `Offer` /
-      `PriceSpecification` JSON-LD 를 함께 추가한다. 확정 전까지 임의 금액 표기 금지.
+- [x] **`/cost/` 에 서비스별 비용 범위(최소~최대) 공개** — 이 사이트의 핵심 자산.
+      `localBusiness()` 에 `priceRange`, 가격표에 `AggregateOffer` / `Offer` /
+      `PriceSpecification` JSON-LD 까지 붙었다. 표시 문자열(`range`)과 스키마용
+      숫자(`minPrice`/`maxPrice`)가 `pricing.ts` 에 나란히 있으니 **항상 같이 고칠 것**.
+      `Offer` 는 `PriceTable` 을 실제로 렌더하는 페이지(`/cost/`, 지역 페이지)에서만 붙인다.
+- [ ] **기준 가격의 부가세 별도 여부 명시** — `/cost/` 본문에 없다. 그래서 `PriceSpecification`
+      에 `valueAddedTaxIncluded` 를 넣지 않았다. 견적 분쟁이 가장 잦은 지점이므로 확정할 것.
 - [ ] **`/guarantee/` 최저가 보상제 페이지** — 적용 조건(동일 조건의 정의, 유효 기간,
       제외 항목, 증빙 방법)을 확정해야 작성 가능. 조건 없는 보상 문구는 쓰지 않는다.
 - [ ] **Cloudflare Pages 에 `SLACK_WEBHOOK_URL` Secret 등록** — 이거 없으면 상담 접수가 안 된다.
