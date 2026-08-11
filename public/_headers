@@ -1,0 +1,13 @@
+# Cloudflare Workers 정적 자산 헤더 규칙 (Astro 가 public/ → dist/ 로 복사한다).
+#
+# .txt 자산은 기본적으로 `Content-Type: text/plain` 으로만 나가서 charset 이 빠진다.
+# 이 세 파일은 전부 한글이고, robots.txt 와 llms*.txt 는 사람이 아니라 크롤러·LLM 이
+# 읽는 파일이라 인코딩 추측에 맡기면 안 된다. 명시해 둔다.
+/robots.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
