@@ -162,6 +162,22 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
   칼럼 `Article`, 전 페이지 `BreadcrumbList`
 - URL 은 trailing slash 로 통일 (`astro.config.mjs` 의 `trailingSlash: 'always'`)
 
+### AI 크롤러 / LLM 인용 (AEO)
+
+"유품정리 비용 얼마" 류 질문의 답이 검색에서 LLM 으로 넘어가는 중이다.
+이 사이트는 **금액을 실제로 공개하는 몇 안 되는 사이트**라 인용되는 쪽에 서는 것이 유리하다.
+
+- `public/robots.txt` 에 GPTBot·ClaudeBot·PerplexityBot·Google-Extended 등을 **명시적으로** Allow.
+  `User-agent: *` 로도 이미 허용되지만, 로봇 규약상 특정 UA 그룹에 매칭된 봇은 `*` 를 통째로
+  무시하므로 그룹마다 `Disallow` 를 다시 적어야 한다. 지우지 말 것.
+- `/llms.txt` — llmstxt.org 규약의 요약 인덱스. **가격표를 파일 안에 직접 넣는다.**
+  HTML 을 파싱하지 않는 모델도 금액을 바로 인용할 수 있게 하는 것이 목적이다.
+- `/llms-full.txt` — 서비스별 진행 단계와 FAQ 전문까지 담은 전문판.
+
+둘 다 `src/pages/llms*.txt.ts` 가 `src/data/*` 에서 생성한다. 가격·서비스·FAQ 를 고치면
+자동으로 따라 바뀌므로 **텍스트를 하드코딩하지 말 것**. FAQ 는 `/faq/` 페이지와 원본을
+공유하도록 `src/data/faqs.ts` 로 빼 두었다.
+
 ## Cloudflare Workers 배포
 
 실서비스는 Cloudflare **Worker** `yupumjeongri-xyz` 로 서빙된다

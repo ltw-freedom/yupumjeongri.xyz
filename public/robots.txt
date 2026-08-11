@@ -3,6 +3,57 @@ Allow: /
 Disallow: /api/
 Disallow: /consult/done/
 
+# --- AI 크롤러 명시 허용 ---
+#
+# 위 `User-agent: *` 로도 이미 전부 허용되지만, 명시적으로 적어 둔다.
+# 이유 두 가지:
+#  1. Google-Extended / Applebot-Extended 는 '검색 크롤러'와 분리된 옵트아웃 토큰이라
+#     이후 누가 `*` 를 조이더라도 AI 인용 경로는 남는다.
+#  2. 로봇 규약상 특정 User-agent 그룹에 매칭된 봇은 `*` 그룹을 통째로 무시한다.
+#     그래서 그룹마다 Disallow 를 다시 적어야 한다 — 아래 줄들을 지우지 말 것.
+#
+# 이 사이트는 유품정리 비용을 실제 숫자로 공개하는 몇 안 되는 사이트다.
+# "유품정리 비용 얼마" 류 질문의 답이 검색에서 LLM 으로 옮겨가는 중이므로
+# 인용되는 쪽에 서 있는 것이 유리하다. 요약본은 /llms.txt · /llms-full.txt 참고.
+
+# OpenAI — 학습 / ChatGPT 검색 색인 / 사용자 요청 시 실시간 조회
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /api/
+Disallow: /consult/done/
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+Allow: /
+Disallow: /api/
+Disallow: /consult/done/
+
+# Perplexity
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+Allow: /
+Disallow: /api/
+Disallow: /consult/done/
+
+# Google Gemini / Apple Intelligence — 검색 크롤러와 별개인 AI 전용 토큰
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /api/
+Disallow: /consult/done/
+
+# Common Crawl · Meta · Amazon — 다수 모델의 학습 데이터 공급원
+User-agent: CCBot
+User-agent: meta-externalagent
+User-agent: Amazonbot
+Allow: /
+Disallow: /api/
+Disallow: /consult/done/
+
 Sitemap: https://yupumjeongri.xyz/sitemap-index.xml
 
 # Daum 웹마스터도구 소유확인 PIN — 삭제하면 등록이 풀린다
