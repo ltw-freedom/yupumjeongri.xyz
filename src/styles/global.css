@@ -1259,27 +1259,17 @@ tbody th {
   min-height: 8rem;
 }
 
-.field .hint {
+/* 입력 아래 보조 설명 + 폼 맨 아래 개인정보 고지 */
+.field .hint,
+.form > .hint {
   font-size: 0.85rem;
   color: var(--color-muted);
   margin: 0.4rem 0 0;
 }
 
-/* 체크박스 줄은 라벨 안에 입력을 넣어 터치 영역을 넓힌다 */
-.field--check > label {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.field--check input[type='checkbox'] {
-  width: 1.2rem;
-  height: 1.2rem;
-  margin-top: 0.3rem;
-  flex: none;
-  accent-color: var(--color-accent);
+.form > .hint {
+  margin-top: 1rem;
+  text-align: center;
 }
 
 .form > .button {

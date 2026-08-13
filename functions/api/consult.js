@@ -22,6 +22,19 @@ function redirect(url, origin) {
   return new Response(null, { status: 303, headers: { Location: new URL(url, origin).href } });
 }
 
+/**
+ * 휴대폰 번호만 받는다. 하이픈·공백·국가번호(+82) 표기를 모두 010… 형태로 맞춘 뒤 검증하고,
+ * Slack 에는 정규화된 값을 넘긴다 (같은 번호가 표기만 달리 쌓이는 것을 막는다).
+ * 형식이 아니면 null 을 돌려준다.
+ */
+function normalizePhone(raw) {
+  const digits = raw.replace(/\D/g, '').replace(/^82/, '0');
+  if (!/^01[016789]\d{7,8}$/.test(digits)) return null;
+  return digits.length === 11
+    ? `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
+    : `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const origin = new URL(request.url).origin;
@@ -45,15 +58,20 @@ export async function onRequestPost(context) {
     return redirect('/consult/done/', origin);
   }
 
-  const name = field(form, 'name', 40);
-  const contact = field(form, 'contact', 60);
+  const nickname = field(form, 'nickname', 40);
+  const rawPhone = field(form, 'phone', 20);
   const region = field(form, 'region', 60);
   const type = field(form, 'type', 40);
   const message = field(form, 'message', 2000);
-  const agreed = form.get('privacy') !== null;
 
-  if (!name || !contact || !agreed) {
+  if (!nickname || !rawPhone) {
     return redirect('/consult/?error=required', origin);
+  }
+
+  // 브라우저 pattern 검증은 우회될 수 있으므로 서버에서 다시 본다.
+  const phone = normalizePhone(rawPhone);
+  if (!phone) {
+    return redirect('/consult/?error=phone', origin);
   }
 
   const receivedAt = new Intl.DateTimeFormat('ko-KR', {
@@ -63,15 +81,15 @@ export async function onRequestPost(context) {
   }).format(new Date());
 
   const rows = [
-    ['성함', name],
-    ['연락처', contact],
+    ['닉네임', nickname],
+    ['휴대폰', phone],
     ['지역', region || '—'],
     ['서비스', type || '—'],
     ['접수 시각', `${receivedAt} (KST)`],
   ];
 
   const payload = {
-    text: `새 상담 신청 — ${name} / ${contact}`, // 알림 미리보기용
+    text: `새 상담 신청 — ${nickname} / ${phone}`, // 알림 미리보기용
     blocks: [
       {
         type: 'header',
@@ -89,7 +107,7 @@ export async function onRequestPost(context) {
         : []),
       {
         type: 'context',
-        elements: [{ type: 'mrkdwn', text: `yupumjeongri.xyz · 개인정보 수집 동의 완료` }],
+        elements: [{ type: 'mrkdwn', text: `yupumjeongri.xyz · 닉네임 접수 (실명 아닐 수 있음)` }],
       },
     ],
   };
