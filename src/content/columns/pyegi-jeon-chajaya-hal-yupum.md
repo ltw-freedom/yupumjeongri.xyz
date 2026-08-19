@@ -1,5 +1,5 @@
 ---
-title: 유품 버리기 전에 꼭 찾아야 할 물건들
+title: 유품정리, 버리기 전에 꼭 찾아야 할 물건들
 description: 유품정리에서 폐기물에 한번 섞이면 되돌릴 수 없습니다. 통장·인감·유언장, 그리고 현금이 실제로 나오는 자리를 현장 경험대로 정리했습니다.
 publishedAt: 2026-08-19
 relatedAreas: ['gangnam', 'seocho', 'mapo']
