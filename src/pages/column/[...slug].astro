@@ -2,9 +2,11 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
+import FAQ from '../../components/FAQ.astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { allCities } from '../../data/areas';
 import { site, absoluteUrl } from '../../data/site';
+import { faqSchema } from '../../data/schema';
 
 export async function getStaticPaths() {
   const columns = await getCollection('columns', ({ data }) => !data.draft);
@@ -23,21 +25,40 @@ const { Content } = await render(entry);
 
 const linkedAreas = allCities.filter((city) => entry.data.relatedAreas.includes(city.slug));
 
+const pageUrl = absoluteUrl(`/column/${entry.id}/`);
+
+// author 를 @id 참조만으로 두면 이 페이지 안에서 노드가 풀리지 않아 빈 값으로
+// 읽힌다. name·url 을 인라인해 단독으로도 유효하게 만들고 @id 로 홈과도 잇는다.
+const business = {
+  '@type': 'Organization',
+  '@id': absoluteUrl('/#business'),
+  name: site.name,
+  url: site.url,
+};
+
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: entry.data.title,
   description: entry.data.description,
   datePublished: entry.data.publishedAt.toISOString(),
-  url: absoluteUrl(`/column/${entry.id}/`),
-  author: { '@id': absoluteUrl('/#business') },
+  dateModified: (entry.data.updatedAt ?? entry.data.publishedAt).toISOString(),
+  url: pageUrl,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': pageUrl },
+  inLanguage: 'ko',
+  image: absoluteUrl('/og-image.png'),
+  author: business,
+  publisher: business,
 };
 ---
 
 <BaseLayout
   title={`${entry.data.title} | ${site.name} 칼럼`}
   description={entry.data.description}
-  jsonLd={[articleSchema]}
+  jsonLd={[articleSchema, ...(entry.data.faq.length > 0 ? [faqSchema(entry.data.faq)] : [])]}
+  ogType="article"
+  publishedAt={entry.data.publishedAt}
+  updatedAt={entry.data.updatedAt}
 >
   <Breadcrumb items={[{ label: '칼럼', href: '/column/' }, { label: entry.data.title }]} />
 
@@ -46,6 +67,8 @@ const articleSchema = {
       <h1>{entry.data.title}</h1>
 
       <Content />
+
+      <FAQ items={entry.data.faq} />
 
       {
         linkedAreas.length > 0 && (

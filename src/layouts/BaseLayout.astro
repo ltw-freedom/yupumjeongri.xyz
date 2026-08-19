@@ -13,6 +13,10 @@ interface Props {
   /** 페이지별 구조화 데이터 (JSON-LD) */
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
+  /** 칼럼 등 글 페이지는 'article' — article:published_time 메타가 함께 나간다 */
+  ogType?: 'website' | 'article';
+  publishedAt?: Date;
+  updatedAt?: Date;
 }
 
 const {
@@ -22,6 +26,9 @@ const {
   ogImage = new URL('/og-image.png', Astro.site).href,
   jsonLd = [],
   noindex = false,
+  ogType = 'website',
+  publishedAt,
+  updatedAt,
 } = Astro.props;
 
 /** 상담 페이지에서는 하단 고정 CTA 를 겹쳐 보여주지 않는다 */
@@ -58,7 +65,13 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
       href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&display=swap"
     />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
+    {ogType === 'article' && publishedAt && (
+      <meta property="article:published_time" content={publishedAt.toISOString()} />
+    )}
+    {ogType === 'article' && updatedAt && (
+      <meta property="article:modified_time" content={updatedAt.toISOString()} />
+    )}
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
