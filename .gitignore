@@ -26,3 +26,6 @@ scripts/og-image.svg
 .DS_Store
 .vscode/
 .idea/
+
+# 네이버 SERP 저장본 (키워드 리서치용 로컬 파일)
+web_*.html
