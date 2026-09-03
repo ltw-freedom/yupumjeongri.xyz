@@ -61,6 +61,7 @@ export async function onRequestPost(context) {
   const nickname = field(form, 'nickname', 40);
   const rawPhone = field(form, 'phone', 20);
   const region = field(form, 'region', 60);
+  const contact = field(form, 'contact', 20);
   const type = field(form, 'type', 40);
   const message = field(form, 'message', 2000);
 
@@ -83,6 +84,7 @@ export async function onRequestPost(context) {
   const rows = [
     ['닉네임', nickname],
     ['휴대폰', phone],
+    ['회신 방법', contact || '—'],
     ['지역', region || '—'],
     ['서비스', type || '—'],
     ['접수 시각', `${receivedAt} (KST)`],

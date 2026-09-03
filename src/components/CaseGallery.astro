@@ -1,0 +1,83 @@
+---
+import { Image } from 'astro:assets';
+import { cases as allCases, type CaseStudy } from '../data/cases';
+
+/**
+ * 작업 사례 — 정리 전 / 정리 후 사진 한 쌍 + 사실 위주 캡션.
+ * 금액은 적지 않는다. 사례별 금액은 조건이 달라 비교가 안 되고,
+ * 공개 가격표(/cost/)와 어긋나 보일 수 있다.
+ */
+interface Props {
+  items?: CaseStudy[];
+  limit?: number;
+  overline?: string;
+  heading?: string;
+  lead?: string;
+  /** 더 보기 링크를 홈 사례 섹션으로 걸지 여부 */
+  moreLink?: boolean;
+}
+
+const { items = allCases, limit, overline, heading, lead, moreLink = false } = Astro.props;
+const shown = limit ? items.slice(0, limit) : items;
+---
+
+<div class="cases">
+  {
+    heading && (
+      <div class="section-head">
+        {overline && <p class="overline">{overline}</p>}
+        <h2>{heading}</h2>
+        {lead && <p class="lead">{lead}</p>}
+      </div>
+    )
+  }
+
+  <ul class="cases__list">
+    {
+      shown.map((item) => (
+        <li class="case">
+          <div class="case__pair">
+            <figure class="case__shot">
+              <Image
+                src={item.before}
+                alt={`${item.area} ${item.housing} ${item.scene} 정리 전`}
+                widths={[480, 800]}
+                sizes="(min-width: 900px) 24vw, 46vw"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>정리 전</figcaption>
+            </figure>
+            <figure class="case__shot case__shot--after">
+              <Image
+                src={item.after}
+                alt={`${item.area} ${item.housing} ${item.scene} 정리 후`}
+                widths={[480, 800]}
+                sizes="(min-width: 900px) 24vw, 46vw"
+                loading="lazy"
+                decoding="async"
+              />
+              <figcaption>정리 후</figcaption>
+            </figure>
+          </div>
+          <div class="case__meta">
+            <p class="case__title">
+              <b>{item.area}</b>
+              <span class="case__type">{item.type}</span>
+            </p>
+            <p class="case__sub">
+              {item.housing} · {item.scene} · {item.date}
+            </p>
+            <p class="case__note">{item.note}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="cases__disclaimer">
+    모두 저희가 직접 진행한 현장 사진입니다. 개인이 특정될 수 있는 물건·서류가 찍힌 장면과
+    오염이 직접 드러나는 장면은 싣지 않았습니다.
+    {moreLink && <a href="/#cases">사례 더 보기</a>}
+  </p>
+</div>

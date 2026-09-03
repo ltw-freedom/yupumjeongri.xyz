@@ -1,0 +1,48 @@
+---
+import { Image } from 'astro:assets';
+import type { Photo } from '../data/cases';
+
+/**
+ * 현장 사진 띠 — 3~4장을 나란히 놓고 캡션을 단다.
+ * 신뢰 요소로 쓰는 것이므로 캡션은 "무슨 작업 · 어디" 사실만 적는다.
+ */
+interface Props {
+  photos: Photo[];
+  heading?: string;
+  lead?: string;
+  /** 본문 중간에 끼워 넣는 작은 버전 (제목 작게, 여백 적게) */
+  compact?: boolean;
+}
+
+const { photos, heading, lead, compact = false } = Astro.props;
+---
+
+<div class:list={['photo-strip', { 'photo-strip--compact': compact }]}>
+  {
+    heading && (
+      <div class="photo-strip__head">
+        {compact ? <h3>{heading}</h3> : <h2>{heading}</h2>}
+        {lead && <p>{lead}</p>}
+      </div>
+    )
+  }
+  <ul class="photo-strip__list" data-count={photos.length}>
+    {
+      photos.map((photo) => (
+        <li>
+          <figure>
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              widths={[480, 800]}
+              sizes="(min-width: 900px) 30vw, 92vw"
+              loading="lazy"
+              decoding="async"
+            />
+            {photo.caption && <figcaption>{photo.caption}</figcaption>}
+          </figure>
+        </li>
+      ))
+    }
+  </ul>
+</div>

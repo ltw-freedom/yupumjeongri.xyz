@@ -4,12 +4,14 @@ import Breadcrumb from '../../../../components/Breadcrumb.astro';
 import CTA from '../../../../components/CTA.astro';
 import FAQ from '../../../../components/FAQ.astro';
 import PriceTable from '../../../../components/PriceTable.astro';
+import PhotoStrip from '../../../../components/PhotoStrip.astro';
 import { getRegion } from '../../../../data/areas';
 import { districtCities, nearbyDongs, type DistrictCity, type DistrictDong } from '../../../../data/districts';
 import { dongAliases, type DongAlias } from '../../../../data/dongAliases';
 import { dongDisplayName, dongShortName, dongLead, dongCostNote, dongFaqs } from '../../../../data/districtContent';
 import { services } from '../../../../data/services';
 import { site } from '../../../../data/site';
+import { photos } from '../../../../data/cases';
 import { serviceSchema, faqSchema } from '../../../../data/schema';
 import { getCollection } from 'astro:content';
 
@@ -144,6 +146,12 @@ const description = `${short}유품정리 업체 — ${display} 유품정리·�
         <li><strong>공간 정돈</strong>반출 후 청소까지 마무리합니다.</li>
       </ol>
       <p><a href="/process/">진행 과정 자세히 보기</a></p>
+
+      <PhotoStrip
+        photos={[photos.teamLoadingTruck, photos.sortedBagsGuitar, photos.kitchenAfter]}
+        heading="직접 진행한 현장"
+        compact
+      />
 
       <FAQ title={`${display} 유품정리 자주 묻는 질문`} items={faqs} />
 

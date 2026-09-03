@@ -4,9 +4,12 @@ import Hero from '../components/Hero.astro';
 import CTA from '../components/CTA.astro';
 import ServiceCard from '../components/ServiceCard.astro';
 import FAQ from '../components/FAQ.astro';
+import PhotoStrip from '../components/PhotoStrip.astro';
+import CaseGallery from '../components/CaseGallery.astro';
 import { site } from '../data/site';
 import { services } from '../data/services';
 import { regions } from '../data/areas';
+import { photos } from '../data/cases';
 import { localBusiness, faqSchema, webSite } from '../data/schema';
 
 /**
@@ -69,6 +72,9 @@ const faqs = [
     a: '서울과 경기 전 지역에서 진행합니다. 그 외 지역도 일정에 따라 가능하니 상담 시 문의해 주세요.',
   },
 ];
+
+/** 히어로 아래 사진 띠 — 팀·장비·현장이 한눈에 보이는 컷 3장 */
+const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyHighrise];
 ---
 
 <BaseLayout
@@ -80,6 +86,7 @@ const faqs = [
     title="유품정리, <em>값부터</em> 공개합니다"
     lead="남겨진 물건을 정중하게 정리합니다. 유품정리 · 고독사 현장 정리 · 빈집 정리. 견적서에 없는 금액은 청구하지 않습니다."
     quoteDoc
+    image={photos.heroLadderTruck}
   />
 
   {/* 세 가지 약속 */}
@@ -100,6 +107,17 @@ const faqs = [
           ))
         }
       </ul>
+    </div>
+  </section>
+
+  {/* 실제 현장 — 사진으로 먼저 보여준다 */}
+  <section class="section" style="padding-top: 0;" aria-label="실제 현장 사진">
+    <div class="container">
+      <PhotoStrip
+        photos={fieldPhotos}
+        heading="직접 진행한 현장입니다"
+        lead="2026년 8월 서울·경기에서 진행한 현장 사진입니다. 작업은 저희 인력이 직접 합니다."
+      />
     </div>
   </section>
 
@@ -147,11 +165,22 @@ const faqs = [
     </div>
   </section>
 
+  {/* 작업 사례 — 정리 전·후 */}
+  <section class="section" id="cases">
+    <div class="container">
+      <CaseGallery
+        overline="02 — 작업 사례"
+        heading="정리 전과 후, 그대로 보여드립니다"
+        lead="같은 자리에서 찍은 사진입니다. 어디까지 해드리는지 말보다 사진이 정확합니다."
+      />
+    </div>
+  </section>
+
   {/* 서비스 */}
-  <section class="section">
+  <section class="section section--surface">
     <div class="container">
       <div class="section-head">
-        <p class="overline">02 — 서비스</p>
+        <p class="overline">03 — 서비스</p>
         <h2>현장에 맞는 정리를 안내드립니다</h2>
         <p class="lead">
           어떤 서비스에 해당하는지 애매하다면 상담 시 현장 상황을 적어주세요. 판단해 안내드립니다.
@@ -164,10 +193,10 @@ const faqs = [
   </section>
 
   {/* 진행 과정 */}
-  <section class="section section--surface">
+  <section class="section">
     <div class="container">
       <div class="section-head">
-        <p class="overline">03 — 진행 과정</p>
+        <p class="overline">04 — 진행 과정</p>
         <h2>상담부터 공간 정돈까지 다섯 단계</h2>
       </div>
       <ol class="steps">
@@ -182,10 +211,10 @@ const faqs = [
   </section>
 
   {/* 서비스 지역 */}
-  <section class="section">
+  <section class="section section--surface">
     <div class="container">
       <div class="section-head">
-        <p class="overline">04 — 서비스 지역</p>
+        <p class="overline">05 — 서비스 지역</p>
         <h2>서울 · 경기 전 지역</h2>
         <p class="lead">방문 견적 비용은 발생하지 않습니다. 그 외 지역은 일정에 따라 상담 시 안내드립니다.</p>
       </div>

@@ -1371,3 +1371,297 @@ tbody th {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   현장 사진 — 히어로 사진 + 견적서 카드 겹침, 사진 띠, 작업 사례(전·후)
+   사진은 신뢰 요소다. 장식이 아니라 "실제로 이렇게 한다"의 증거이므로
+   과한 필터·둥근 모서리 없이 문서에 붙인 사진처럼 담백하게 둔다.
+   ========================================================================== */
+.hero__media {
+  position: relative;
+  animation: rise 0.8s var(--ease-out) 0.2s both;
+}
+
+.hero__photo {
+  margin: 0;
+  position: relative;
+}
+
+.hero__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-line-strong);
+  box-shadow: var(--shadow-float);
+  background: var(--color-surface);
+}
+
+.hero__photo figcaption {
+  position: absolute;
+  top: 0.8rem;
+  left: 0.8rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(22, 35, 61, 0.86);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(6px);
+}
+
+/* 사진 위에 견적서 카드를 겹쳐 올린다 — 현장과 가격 약속이 한 화면에 */
+.hero__media--with-doc .hero__doc {
+  animation: none;
+  margin-top: -3.5rem;
+  padding-inline: 1rem;
+}
+
+.hero__media--with-doc .quote-doc {
+  max-width: 19rem;
+  padding: 1.3rem 1.2rem 1.1rem;
+  transform: rotate(-1deg);
+  font-size: 0.9rem;
+}
+
+.hero__media--with-doc .quote-doc__title {
+  font-size: 1.05rem;
+}
+
+.hero__media--with-doc .quote-doc__rows li {
+  font-size: 0.86rem;
+  margin-bottom: 0.4rem;
+}
+
+@media (min-width: 900px) {
+  .hero__media--with-doc {
+    padding-bottom: 2.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .hero__media--with-doc .hero__doc {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    width: 62%;
+  }
+}
+
+/* --- 사진 띠 --- */
+.photo-strip {
+  margin: 0;
+}
+
+.photo-strip__head {
+  margin-bottom: 1.25rem;
+}
+
+.photo-strip__head h2,
+.photo-strip__head h3 {
+  margin-bottom: 0.35em;
+}
+
+.photo-strip__head p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.photo-strip__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
+
+.photo-strip__list figure {
+  margin: 0;
+}
+
+.photo-strip__list img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+}
+
+.photo-strip__list figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+/* 본문 사이에 끼우는 작은 버전 */
+.photo-strip--compact {
+  margin: 2rem 0 2.5rem;
+}
+
+.photo-strip--compact .photo-strip__head h3 {
+  font-size: 1.05rem;
+}
+
+.photo-strip--compact .photo-strip__list {
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+}
+
+.photo-strip--compact .photo-strip__list figcaption {
+  font-size: 0.8rem;
+}
+
+/* --- 작업 사례: 정리 전 / 정리 후 --- */
+.cases {
+  margin: 2.5rem 0 2rem;
+}
+
+.section > .container > .cases:first-child {
+  margin-top: 0;
+}
+
+.cases__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
+.case {
+  margin: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.case__pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  background: var(--color-line);
+}
+
+.case__shot {
+  position: relative;
+  margin: 0;
+}
+
+.case__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.case__shot figcaption {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: rgba(32, 38, 52, 0.78);
+  color: #fff;
+}
+
+.case__shot--after figcaption {
+  background: rgba(143, 94, 20, 0.9);
+}
+
+.case__meta {
+  padding: 1rem 1.2rem 1.15rem;
+}
+
+.case__title {
+  margin: 0 0 0.15rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.case__type {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  letter-spacing: 0.06em;
+}
+
+.case__sub {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-faint);
+}
+
+.case__note {
+  margin: 0;
+  font-size: 0.93rem;
+  color: var(--color-muted);
+}
+
+.cases__disclaimer {
+  margin: 1rem 0 0;
+  font-size: 0.82rem;
+  color: var(--color-faint);
+}
+
+.cases__disclaimer a {
+  margin-left: 0.4rem;
+  white-space: nowrap;
+}
+
+/* --- 상담 폼: 회신 방법 라디오 --- */
+.choice {
+  border: 0;
+  padding: 0;
+  margin: 0 0 1.4rem;
+  min-width: 0;
+}
+
+.choice legend {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  padding: 0;
+}
+
+.choice__item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.8rem;
+  margin-bottom: 0.45rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-bg);
+  cursor: pointer;
+}
+
+.choice__item:has(input:checked) {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+
+.choice__item input {
+  accent-color: var(--color-accent);
+  width: 1.05rem;
+  height: 1.05rem;
+  margin: 0;
+}

@@ -3,8 +3,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
 import FAQ from '../../components/FAQ.astro';
+import PhotoStrip from '../../components/PhotoStrip.astro';
+import CaseGallery from '../../components/CaseGallery.astro';
 import { services, type Service } from '../../data/services';
 import { regions } from '../../data/areas';
+import { photos, casesByService, type Photo } from '../../data/cases';
 import { serviceSchema, faqSchema } from '../../data/schema';
 
 export function getStaticPaths() {
@@ -20,6 +23,19 @@ interface Props {
 
 const { service } = Astro.props;
 const others = services.filter((item) => item.slug !== service.slug);
+
+/** 서비스별 현장 사진 — 해당 서비스의 실제 장면만 고른다 */
+const servicePhotos: Record<string, Photo[]> = {
+  yupumjeongri: [photos.sortedBagsGuitar, photos.teamLoadingTruck, photos.roomBeforeBed],
+  'godoksa-yupumjeongri': [photos.ppeHallway, photos.teamCrate, photos.kitchenAfter],
+  'binjip-jeongri': [photos.bagsVolume, photos.heroLadderTruck, photos.loadingBagsSunny],
+};
+const gallery = servicePhotos[service.slug] ?? [];
+const serviceKey = service.slug as Parameters<typeof casesByService>[0];
+const related = casesByService(serviceKey, 2);
+// 해당 서비스 사례가 아직 없으면 제목에 서비스명을 붙이지 않는다 (다른 서비스 사례가 채워진다)
+const hasOwnCase = related.some((c) => c.service === serviceKey);
+const caseHeading = hasOwnCase ? `${service.name} 진행 사례` : '최근 진행 사례';
 ---
 
 <BaseLayout
@@ -41,6 +57,8 @@ const others = services.filter((item) => item.slug !== service.slug);
       <h1>{service.name}</h1>
       <p class="lead">{service.lead}</p>
 
+      {gallery.length > 0 && <PhotoStrip photos={gallery} compact />}
+
       <h2>이런 경우에 필요합니다</h2>
       <ul>
         {service.cases.map((item) => <li>{item}</li>)}
@@ -57,6 +75,8 @@ const others = services.filter((item) => item.slug !== service.slug);
           ))
         }
       </ol>
+
+      <CaseGallery items={related} heading={caseHeading} moreLink />
 
       <h2>비용은 어떻게 정해지나요</h2>
       <p>

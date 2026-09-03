@@ -1,14 +1,21 @@
 ---
+import { Image } from 'astro:assets';
 import { site } from '../data/site';
+import type { Photo } from '../data/cases';
 
 interface Props {
   title: string;
   lead: string;
   /** 견적서 카드(정찰제 시각화) 노출 여부 — 홈에서만 켠다 */
   quoteDoc?: boolean;
+  /**
+   * 우측 현장 사진. quoteDoc 과 함께 주면 사진 위에 견적서 카드가 겹쳐 올라간다
+   * (실제 현장 + 가격 약속을 한 화면에). 사진만 주면 사진만 나온다.
+   */
+  image?: Photo;
 }
 
-const { title, lead, quoteDoc = false } = Astro.props;
+const { title, lead, quoteDoc = false, image } = Astro.props;
 
 /** 견적서 카드 항목 — 브랜드 약속을 문서 형식으로 보여준다 */
 const quoteRows = [
@@ -28,31 +35,52 @@ const quoteRows = [
         <a class="button button--primary" href={site.consultPath}>무료 상담 신청하기</a>
         <a class="button button--ghost" href="/cost/">비용 먼저 보기</a>
       </div>
-      <p class="hero__reassure">상담·방문 견적 무료 · 상담 후 계약 의무 없음</p>
+      <p class="hero__reassure">
+        상담·방문 견적 무료 · 계약 의무 없음 · 닉네임과 휴대폰 번호만으로 신청
+      </p>
     </div>
 
     {
-      quoteDoc && (
-        <div class="hero__doc" aria-hidden="true">
-          <div class="quote-doc">
-            <div class="quote-doc__head">
-              <p class="quote-doc__title">견적서</p>
-              <p class="quote-doc__sub">Estimate</p>
+      (image || quoteDoc) && (
+        <div class:list={['hero__media', { 'hero__media--with-doc': image && quoteDoc }]}>
+          {image && (
+            <figure class="hero__photo">
+              <Image
+                src={image.src}
+                alt={image.alt}
+                widths={[640, 960, 1280]}
+                sizes="(min-width: 900px) 42vw, 92vw"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+              />
+              {image.caption && <figcaption>실제 현장 · {image.caption}</figcaption>}
+            </figure>
+          )}
+
+          {quoteDoc && (
+            <div class="hero__doc" aria-hidden="true">
+              <div class="quote-doc">
+                <div class="quote-doc__head">
+                  <p class="quote-doc__title">견적서</p>
+                  <p class="quote-doc__sub">Estimate</p>
+                </div>
+                <ul class="quote-doc__rows">
+                  {quoteRows.map((row) => (
+                    <li>
+                      <span>{row.label}</span>
+                      <span class="dots" />
+                      <span class:list={['val', { 'val--gold': row.gold }]}>{row.value}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div class="quote-doc__foot">
+                  <p>합계는 견적서에 적힌 그대로. 현장에서 늘어나지 않습니다.</p>
+                  <span class="seal">정찰</span>
+                </div>
+              </div>
             </div>
-            <ul class="quote-doc__rows">
-              {quoteRows.map((row) => (
-                <li>
-                  <span>{row.label}</span>
-                  <span class="dots" />
-                  <span class:list={['val', { 'val--gold': row.gold }]}>{row.value}</span>
-                </li>
-              ))}
-            </ul>
-            <div class="quote-doc__foot">
-              <p>합계는 견적서에 적힌 그대로. 현장에서 늘어나지 않습니다.</p>
-              <span class="seal">정찰</span>
-            </div>
-          </div>
+          )}
         </div>
       )
     }
