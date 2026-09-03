@@ -293,9 +293,19 @@ writeFileSync(join(root, 'src/data/districts.ts'), banner + body, 'utf-8');
 // ---------------------------------------------------------------------------
 const CURATED_CITY_SLUGS = ['gangnam', 'songpa', 'seocho', 'gwanak', 'mapo', 'seongnam', 'suwon', 'goyang'];
 const aliases = JSON.parse(readFileSync(join(root, 'src/data/dongAliases.json'), 'utf-8'));
+/**
+ * 큐레이션 지역 밖이지만 생활권 이름이 곧 법정동이라 별칭 페이지를 만들지 않는 곳.
+ * "평촌 유품정리"·"다산 유품정리"는 이 법정동 페이지가 받으므로 1차 웨이브에 같이 넣는다.
+ * (분당·판교·일산은 큐레이션 지역인 성남·고양의 법정동이라 이미 포함된다.)
+ */
+const WAVE1_KEYWORD_DONGS = [
+  '/area/gyeonggi/anyang/pyeongchon/', // 평촌동 — 평촌신도시
+  '/area/gyeonggi/namyangju/dasan/', // 다산동 — 다산신도시
+];
 const wave1 = [
-  // 신도시 별칭(위례·동탄·광교)은 검색 가치가 커서 항상 1차 웨이브에 넣는다
+  // 신도시 별칭(위례·동탄·광교·수지·운정)은 검색 가치가 커서 항상 1차 웨이브에 넣는다
   ...aliases.map((alias) => `/area/${alias.region}/${alias.citySlug}/${alias.slug}/`),
+  ...WAVE1_KEYWORD_DONGS,
   ...result
     .filter((city) => CURATED_CITY_SLUGS.includes(city.slug))
     .flatMap((city) => city.dongs.map((dong) => `/area/${city.region}/${city.slug}/${dong.slug}/`)),
