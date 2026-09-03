@@ -2,7 +2,6 @@
 import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import type { Photo } from '../data/cases';
-import KakaoButton from './KakaoButton.astro';
 
 interface Props {
   title: string;
@@ -33,12 +32,11 @@ const quoteRows = [
       <h1 set:html={title} />
       <p class="lead">{lead}</p>
       <div class="hero__actions">
-        <a class="button button--primary" href={site.consultPath}>무료 상담 신청하기</a>
-        <KakaoButton />
+        <a class="button button--primary" href={site.consultPath}>상담 신청하기</a>
         <a class="button button--ghost" href="/cost/">비용 먼저 보기</a>
       </div>
       <p class="hero__reassure">
-        {site.responsePromise} · 상담·방문 견적 무료 · 계약 의무 없음
+        {site.responsePromise} · 상담 후 계약 의무 없음
       </p>
     </div>
 

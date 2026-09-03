@@ -15,8 +15,6 @@ export const site = {
    */
   consultPath: '/consult/',
   consultDonePath: '/consult/done/',
-  /** 카카오톡 오픈채팅 1:1 — 폼이 부담스러운 분을 위한 두 번째 창구. 전화는 여전히 운영하지 않는다. */
-  kakaoUrl: 'https://open.kakao.com/o/seAX7TLi',
   /** 접수 후 회신 약속. 히어로·CTA·푸터·상담 페이지·완료 페이지가 같은 문장을 쓴다. 바꿀 땐 여기만. */
   responsePromise: '상담 신청 후 늦어도 30분 안에 연락드립니다',
   /** 사업장 표시 — 푸터와 LocalBusiness 스키마. 사업자등록번호·대표자는 확정되면 여기에 추가. */

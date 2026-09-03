@@ -1667,64 +1667,12 @@ tbody th {
 }
 
 /* ==========================================================================
-   카카오톡 1:1 채널 · 회신 약속 · 사업장 표시
+   회신 약속 · 사업장 표시
    ========================================================================== */
-.button--kakao {
-  gap: 0.45rem;
-  background: #fee500;
-  color: #191919;
-  border: 1px solid #ecd400;
-}
-
-.button--kakao:hover {
-  background: #f6dc00;
-  color: #191919;
-}
-
-.kakao-box {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.25rem;
-  margin: 1.5rem 0 0;
-  padding: 1rem 1.2rem;
-  border: 1px dashed var(--color-line-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-}
-
-.kakao-box p {
-  margin: 0;
-  flex: 1 1 18rem;
-  font-size: 0.95rem;
-  color: var(--color-muted);
-}
-
 .cta__reassure {
   margin: 1rem 0 0;
   font-size: 0.9rem;
   color: var(--color-muted);
-}
-
-.mobile-cta .button--kakao {
-  flex: none;
-}
-
-.site-footer__kakao {
-  margin: 0.9rem 0 0;
-  font-size: 0.9rem;
-}
-
-.site-footer__kakao a {
-  color: #fff;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.site-footer__kakao span {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .site-footer__address {
@@ -1736,5 +1684,11 @@ tbody th {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   font-style: normal;
   font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.site-footer__promise {
+  margin: 0.9rem 0 0;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
 }

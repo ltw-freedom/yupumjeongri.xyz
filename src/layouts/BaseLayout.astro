@@ -1,7 +1,6 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import KakaoButton from '../components/KakaoButton.astro';
 import { site } from '../data/site';
 import '../styles/global.css';
 
@@ -101,8 +100,8 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
     {
       showMobileCta && (
         <div class="mobile-cta">
-          <KakaoButton label="카카오톡" />
-          <a class="button button--primary" href={site.consultPath}>무료 상담 신청</a>
+          <a class="button button--ghost" href="/cost/">비용 보기</a>
+          <a class="button button--primary" href={site.consultPath}>상담 신청</a>
         </div>
       )
     }
