@@ -1,0 +1,24 @@
+---
+import { site } from '../data/site';
+
+/**
+ * 카카오톡 1:1 오픈채팅 버튼. 폼이 부담스러운 분을 위한 두 번째 창구.
+ * 전화 상담은 여전히 운영하지 않으므로 "전화" 문구는 넣지 않는다.
+ */
+interface Props {
+  label?: string;
+  class?: string;
+}
+
+const { label = '카카오톡 1:1 문의', class: extra } = Astro.props;
+---
+
+<a class:list={['button', 'button--kakao', extra]} href={site.kakaoUrl} target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <path
+      fill="currentColor"
+      d="M12 3C6.48 3 2 6.47 2 10.75c0 2.72 1.78 5.1 4.46 6.47l-.98 3.66c-.07.27.24.49.47.33l4.3-2.87c.57.07 1.15.11 1.75.11 5.52 0 10-3.47 10-7.7S17.52 3 12 3z"
+    />
+  </svg>
+  {label}
+</a>

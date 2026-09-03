@@ -18,6 +18,10 @@ const infoLinks = [
         <strong>{site.name}</strong>
         <p>{site.slogan}<br />{site.sloganSub}</p>
         <a class="button--gold" href={site.consultPath}>무료 상담 신청</a>
+        <p class="site-footer__kakao">
+          <a href={site.kakaoUrl} target="_blank" rel="noopener">카카오톡 1:1 문의</a>
+          <span>· {site.responsePromise}</span>
+        </p>
       </div>
       <div>
         <strong>서비스</strong>
@@ -56,6 +60,11 @@ const infoLinks = [
         </ul>
       </div>
     </div>
+    {/* 사업자 표시 — 상호·주소. 사업자등록번호·대표자는 확정되면 site.ts 에 추가해 여기 같이 넣는다 */}
+    <address class="site-footer__address">
+      <span>상호 {site.name}</span>
+      <span>주소 {site.address.full}</span>
+    </address>
     <p class="note">{site.legalNotice}</p>
     <p class="note">© {new Date().getFullYear()} {site.name}</p>
   </div>

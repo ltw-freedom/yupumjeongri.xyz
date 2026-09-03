@@ -48,7 +48,7 @@ export const GET: APIRoute = async () => {
     '',
     '### 상담 방법',
     '',
-    `전화 상담은 운영하지 않습니다. 접수 창구는 ${absoluteUrl(site.consultPath)} 의 상담 폼 하나뿐입니다.`,
+    `전화 상담은 운영하지 않습니다. 접수 창구는 ${absoluteUrl(site.consultPath)} 의 상담 폼과 카카오톡 1:1 채팅(${site.kakaoUrl})이며, ${site.responsePromise}. 사업장 주소: ${site.address.full}.`,
     '시간에 관계없이 접수할 수 있고, 회신은 순차적으로 드립니다. 서울·경기는 방문 견적 비용이 없습니다.',
     '',
     '폼에서 받는 항목은 닉네임과 휴대폰 번호 두 가지가 필수이고, 지역과 상담 내용은 선택입니다.',

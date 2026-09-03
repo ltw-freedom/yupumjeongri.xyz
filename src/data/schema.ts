@@ -16,15 +16,32 @@ export function localBusiness(areaServed: string[] = [...site.areaServed]) {
     description: site.description,
     slogan: site.slogan,
     areaServed,
-    // 전화 상담을 운영하지 않으므로 telephone 은 넣지 않는다.
-    // 대신 접수 창구를 명시해 둔다.
-    contactPoint: {
-      '@type': 'ContactPoint',
-      contactType: 'customer service',
-      url: absoluteUrl(site.consultPath),
-      availableLanguage: 'Korean',
-      areaServed: 'KR',
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'KR',
+      addressRegion: site.address.region,
+      addressLocality: site.address.locality,
+      streetAddress: site.address.street,
     },
+    // 전화 상담을 운영하지 않으므로 telephone 은 넣지 않는다.
+    // 대신 접수 창구(폼·카카오톡)를 명시해 둔다.
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer service',
+        url: absoluteUrl(site.consultPath),
+        availableLanguage: 'Korean',
+        areaServed: 'KR',
+      },
+      {
+        '@type': 'ContactPoint',
+        contactType: 'customer service',
+        name: '카카오톡 1:1 채팅',
+        url: site.kakaoUrl,
+        availableLanguage: 'Korean',
+        areaServed: 'KR',
+      },
+    ],
     // /cost/ 에 공개한 기준 가격표에서 그대로 뽑아 쓴다 (pricing.ts).
     // 표기를 바꾸면 여기도 같이 바뀌므로 페이지와 어긋날 일이 없다.
     priceRange: `${(priceBounds.low / 10_000).toLocaleString('ko-KR')}만원~${(priceBounds.high / 10_000).toLocaleString('ko-KR')}만원`,
