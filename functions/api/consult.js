@@ -58,14 +58,12 @@ export async function onRequestPost(context) {
     return redirect('/consult/done/', origin);
   }
 
-  const nickname = field(form, 'nickname', 40);
   const rawPhone = field(form, 'phone', 20);
   const region = field(form, 'region', 60);
-  const contact = field(form, 'contact', 20);
   const type = field(form, 'type', 40);
   const message = field(form, 'message', 2000);
 
-  if (!nickname || !rawPhone) {
+  if (!rawPhone) {
     return redirect('/consult/?error=required', origin);
   }
 
@@ -82,16 +80,14 @@ export async function onRequestPost(context) {
   }).format(new Date());
 
   const rows = [
-    ['닉네임', nickname],
     ['휴대폰', phone],
-    ['회신 방법', contact || '—'],
     ['지역', region || '—'],
     ['서비스', type || '—'],
     ['접수 시각', `${receivedAt} (KST)`],
   ];
 
   const payload = {
-    text: `새 상담 신청 — ${nickname} / ${phone}`, // 알림 미리보기용
+    text: `새 상담 신청 — ${phone}`, // 알림 미리보기용
     blocks: [
       {
         type: 'header',
@@ -109,7 +105,7 @@ export async function onRequestPost(context) {
         : []),
       {
         type: 'context',
-        elements: [{ type: 'mrkdwn', text: `yupumjeongri.xyz · 닉네임 접수 (실명 아닐 수 있음)` }],
+        elements: [{ type: 'mrkdwn', text: `yupumjeongri.xyz 상담 폼 · 상담 종료 후 바로 파기` }],
       },
     ],
   };
