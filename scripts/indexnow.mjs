@@ -12,7 +12,9 @@
  * 사용법 (dist/ 가 있어야 하므로 build 뒤에 실행):
  *   node scripts/indexnow.mjs --all            사이트맵의 전체 URL 제출 (초기 1회, 대규모 개편 뒤)
  *   node scripts/indexnow.mjs --recent [days]  최근 N일(기본 14) 안에 발행·수정된 칼럼 + 칼럼 목록 + 홈
- *   node scripts/indexnow.mjs /column/foo/ /cost/   지정한 경로만
+ *   node scripts/indexnow.mjs column/foo/ cost/     지정한 경로만
+ *     (Git Bash 는 `/column/...` 같은 인자를 Windows 경로로 바꿔 버린다. 앞 슬래시를 빼고 쓰거나
+ *      MSYS_NO_PATHCONV=1 을 붙일 것. PowerShell 에서는 상관없다.)
  *
  * IndexNow 규약상 "바뀐 URL" 만 보내는 것이 원칙이다. 배포 스크립트는 --recent 를 쓰고,
  * --all 은 손으로만 돌린다 (같은 URL 을 매일 전량 재제출하면 신호 가치가 떨어진다).
