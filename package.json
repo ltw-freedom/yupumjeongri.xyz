@@ -8,7 +8,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "og": "node scripts/build-og.mjs"
+    "og": "node scripts/build-og.mjs",
+    "indexnow": "node scripts/indexnow.mjs",
+    "deploy": "npm run build && wrangler deploy && node scripts/indexnow.mjs --recent"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

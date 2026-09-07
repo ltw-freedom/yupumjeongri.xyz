@@ -1,13 +1,16 @@
 {
   // 기존 Worker 이름과 일치해야 같은 곳으로 배포된다.
   // 커스텀 도메인·라우트는 대시보드 설정을 그대로 쓰므로 여기에 적지 않는다.
+  // 커스텀 도메인 yupumjeongri.xyz + 라우트 www.yupumjeongri.xyz/* (www 는 worker/index.js 가 apex 로 301).
   "name": "yupumjeongri-xyz",
   "main": "worker/index.js",
   "compatibility_date": "2026-08-10",
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
-    // /api/* 만 Worker 를 먼저 태우고, 나머지는 정적 자산 직행(빠른 경로)
-    "run_worker_first": ["/api/*"]
+    // 모든 요청이 Worker 를 먼저 탄다. www → apex 301 은 Worker 안에서만 할 수 있는데
+    // (www 는 DNS 레코드가 외부 관리라 커스텀 도메인 대신 라우트 www.yupumjeongri.xyz/* 로 붙였다)
+    // run_worker_first 는 경로 패턴만 받고 호스트를 구분하지 못한다. 트래픽이 작아 비용 차이는 없다.
+    "run_worker_first": true
   }
 }

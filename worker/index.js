@@ -12,7 +12,15 @@ import { onRequestPost, onRequestGet } from '../functions/api/consult.js';
 
 export default {
   async fetch(request, env) {
-    const { pathname } = new URL(request.url);
+    const url = new URL(request.url);
+    const { pathname } = url;
+
+    // www 는 Worker 커스텀 도메인으로만 붙여 두고 여기서 apex 로 301 보낸다.
+    // (2026-09-07 이전엔 www 에 DNS 만 있고 Worker 가 없어 522 가 났다.)
+    if (url.hostname.startsWith('www.')) {
+      url.hostname = url.hostname.slice(4);
+      return Response.redirect(url.href, 301);
+    }
 
     if (pathname === '/api/consult' || pathname === '/api/consult/') {
       const context = { request, env };
