@@ -4,7 +4,8 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
 import FAQ from '../../components/FAQ.astro';
 import { getCollection, render, type CollectionEntry } from 'astro:content';
-import { allCities } from '../../data/areas';
+import { getRegion } from '../../data/areas';
+import { districtCities } from '../../data/districts';
 import { site, absoluteUrl } from '../../data/site';
 import { faqSchema } from '../../data/schema';
 
@@ -23,7 +24,15 @@ interface Props {
 const { entry } = Astro.props;
 const { Content } = await render(entry);
 
-const linkedAreas = allCities.filter((city) => entry.data.relatedAreas.includes(city.slug));
+// relatedAreas 는 시군구 slug(districts, 56곳 전부) 또는 광역 slug(seoul/gyeonggi)를 받는다.
+// 예전엔 큐레이션 8곳(areas.ts)에서만 찾아서 파주·부천·용인 같은 slug 가 조용히 버려졌다.
+const linkedAreas = entry.data.relatedAreas.flatMap((slug) => {
+  const city = districtCities.find((c) => c.slug === slug);
+  if (city) return [{ href: `/area/${city.region}/${city.slug}/`, name: city.name }];
+  const region = getRegion(slug);
+  if (region) return [{ href: `/area/${region.slug}/`, name: region.name }];
+  return [];
+});
 
 const pageUrl = absoluteUrl(`/column/${entry.id}/`);
 
@@ -75,9 +84,9 @@ const articleSchema = {
           <>
             <h2>관련 지역</h2>
             <ul class="link-list">
-              {linkedAreas.map((city) => (
+              {linkedAreas.map((area) => (
                 <li>
-                  <a href={`/area/${city.region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
+                  <a href={area.href}>{area.name} 유품정리</a>
                 </li>
               ))}
             </ul>
