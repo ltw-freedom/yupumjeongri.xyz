@@ -1,0 +1,168 @@
+---
+import { site } from '../data/site';
+import { marketComparison, marketComparisonNote } from '../data/pricing';
+
+/**
+ * "왜 대한유품정리에 먼저 상담해야 하나" — 비교·근거·선언을 한 블록에 모은다.
+ *
+ * 방문자가 검색 결과에서 광고 업체 여럿을 보고 들어온 상태라는 전제로 쓴다.
+ * 그래서 "정중한 소개"가 아니라 "다른 데와 무엇이 다르고 왜 더 싼가"에 바로 답한다.
+ *
+ *  - full   : 홈. 비교표 + 시장 가격 비교 + 저렴한 이유 + 선언.
+ *  - compact: 지역 페이지·서비스 페이지. 비교표 + 저렴한 이유(짧게) + 선언.
+ *
+ * 문구 원칙 (표시광고법 제3조·5조):
+ *  - 특정 업체를 지목하지 않는다. 왼쪽 열은 "흔히 겪는 방식"이다.
+ *  - "국내 최저가"류 절대 표현은 쓰지 않는다. 조건이 붙은 "최저가 보상"만 쓴다.
+ *  - 시장 가격 비교는 조사 시점·기준(marketComparisonNote)을 반드시 같이 노출한다.
+ *  - "무료"라는 단어는 쓰지 않는다 (사이트 전체 원칙).
+ */
+interface Props {
+  variant?: 'full' | 'compact';
+  /** 지역 페이지에서 제목에 지역명을 붙인다 */
+  areaName?: string;
+  /** 섹션 번호 표기(홈의 01 — … 형식). full 에서만 쓴다 */
+  overline?: string;
+}
+
+const { variant = 'full', areaName, overline = '01 — 왜 대한유품정리인가' } = Astro.props;
+
+/** 흔히 겪는 방식 ↔ 우리 방식. 왼쪽은 업계 일반의 불만, 오른쪽은 문서로 고정한 약속. */
+const rows = [
+  {
+    item: '비용 확인',
+    common: '전화해야 알려주고, 그마저 "현장을 봐야 안다"로 끝납니다.',
+    ours: '주거 형태별 범위와 폐기물·인력 단가까지 홈페이지에 공개합니다. 전화 한 통 없이 지금 확인할 수 있습니다.',
+  },
+  {
+    item: '견적 뒤 추가금',
+    common: '작업 중에 "이건 별도"가 붙어 처음 금액의 배가 되기도 합니다.',
+    ours: '견적서에 없는 항목은 청구하지 않습니다. 새 조건이 나오면 작업 전에 먼저 알리고 진행 여부를 확인받습니다.',
+  },
+  {
+    item: '"저렴하다"는 말',
+    common: '근거 없이 말로만 저렴하고, 비교하면 그렇지 않은 경우가 많습니다.',
+    ours: '동일 조건 타사 견적서를 보여주시면 그보다 낮은 금액으로 진행합니다. 말이 아니라 조건입니다.',
+  },
+  {
+    item: '상담',
+    common: '전화를 받는 순간부터 영업이 시작되고, 이후 광고 문자가 옵니다.',
+    ours: '휴대폰 번호 하나로 접수하고 30분 안에 사람이 회신합니다. 광고 문자는 없고, 상담이 끝나면 번호를 바로 파기합니다.',
+  },
+  {
+    item: '방문 견적',
+    common: '출장비를 요구하거나, 방문한 김에 그 자리에서 계약을 재촉합니다.',
+    ours: '방문 견적에 비용이 들지 않고 계약 의무도 없습니다. 항목별 견적서를 받아 보시고 결정하시면 됩니다.',
+  },
+  {
+    item: '작업 인력',
+    common: '소개·하청으로 넘어가 견적 낸 사람과 작업하는 사람이 다릅니다.',
+    ours: '저희 인력이 직접 작업합니다. 견적을 낸 사람이 현장까지 책임집니다.',
+  },
+];
+
+/** 왜 저렴한가 — 구조적인 이유만 적는다. 감성 문구는 넣지 않는다. */
+const reasons = [
+  {
+    title: '전화 영업을 하지 않습니다',
+    body: '콜센터와 상담 영업 인력을 두지 않고 폼 하나로 접수합니다. 그 인건비가 견적에 실리지 않습니다.',
+  },
+  {
+    title: '가격을 먼저 공개합니다',
+    body: '범위를 공개하면 비교 견적 전화와 흥정이 줄고, 그만큼 견적 내는 비용이 줄어듭니다. 줄어든 만큼 금액을 낮춥니다.',
+  },
+  {
+    title: '직접 작업합니다',
+    body: '소개 수수료와 하청 마진이 없습니다. 견적서에 적힌 단가(폐기물 1톤 40만~55만원, 인력 1인 10만~15만원)가 곧 원가 구조입니다.',
+  },
+];
+
+const heading = areaName ? `${areaName} 유품정리, 왜 대한유품정리인가` : '왜 대한유품정리에 먼저 상담하셔야 하나';
+---
+
+<section class:list={['whyus', { 'whyus--compact': variant === 'compact' }]} aria-labelledby="whyus-heading">
+  {variant === 'full' ? (
+    <div class="section-head">
+      <p class="overline">{overline}</p>
+      <h2 id="whyus-heading">{heading}</h2>
+      <p class="lead">
+        검색하면 업체가 수십 곳 나옵니다. 저희가 다른 점은 딱 하나, 말로 하는 약속을 전부 문서와 숫자로
+        바꿔 놓았다는 것입니다. 아래 표의 오른쪽 열이 그 문서입니다.
+      </p>
+    </div>
+  ) : (
+    <h2 id="whyus-heading">{heading}</h2>
+  )}
+
+  <div class="table-wrap">
+    <table class="whyus-table">
+      <thead>
+        <tr>
+          <th scope="col">항목</th>
+          <th scope="col">흔히 겪는 방식</th>
+          <th scope="col" class="ours">{site.name}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr>
+              <th scope="row">{row.item}</th>
+              <td class="common">{row.common}</td>
+              <td class="ours">{row.ours}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {
+    variant === 'full' && (
+      <>
+        <h3 class="whyus__sub">같은 집, 얼마나 차이 나나</h3>
+        <div class="table-wrap">
+          <table class="whyus-table whyus-table--price">
+            <thead>
+              <tr>
+                <th scope="col">주거 형태</th>
+                <th scope="col">가격을 공개한 다른 업체</th>
+                <th scope="col" class="ours">{site.name}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {marketComparison.map((row) => (
+                <tr>
+                  <th scope="row">{row.type}</th>
+                  <td class="common">{row.market}</td>
+                  <td class="ours">
+                    <b>{row.ours}</b>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="note">{marketComparisonNote} 단가와 산정 기준은 <a href="/cost/">비용 페이지</a>에 전부 적어 두었습니다.</p>
+      </>
+    )
+  }
+
+  <h3 class="whyus__sub">왜 이 금액이 가능한가</h3>
+  <ol class="reasons">
+    {
+      reasons.map((reason) => (
+        <li>
+          <b>{reason.title}</b>
+          {variant === 'full' && <p>{reason.body}</p>}
+          {variant === 'compact' && <p>{reason.body.split('. ')[0]}.</p>}
+        </li>
+      ))
+    }
+  </ol>
+
+  <p class="whyus__punch">
+    다른 곳 견적서, 그대로 들고 오십시오. 그보다 낮게 진행합니다.<br />
+    <span>견적서에 없는 돈은 한 푼도 받지 않습니다. 계약 의무 없이 먼저 비용 범위부터 들어 보십시오.</span>
+  </p>
+</section>

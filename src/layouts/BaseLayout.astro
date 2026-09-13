@@ -106,6 +106,30 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
       )
     }
 
+    {/*
+      회신 시각 — "지금 신청하면 오후 3:40 전에 연락드립니다".
+      site.responsePromise(30분)를 방문자의 '지금'으로 환산해 보여준다. 막연한 "30분 안에"보다
+      구체적인 시각이 사람이 기다리고 있다는 신호가 된다. JS 가 없으면 요소가 hidden 으로 남아
+      정적 문장만 보인다. 접수 완료 페이지(data-reply-by="done")는 "늦어도 …"로 읽히게 한다.
+    */}
+    <script is:inline>
+      (function () {
+        var els = document.querySelectorAll('[data-reply-by]');
+        if (!els.length) return;
+        var at = new Date(Date.now() + 30 * 60 * 1000);
+        var time = new Intl.DateTimeFormat('ko-KR', {
+          timeZone: 'Asia/Seoul',
+          hour: 'numeric',
+          minute: '2-digit',
+        }).format(at);
+        els.forEach(function (el) {
+          var done = el.getAttribute('data-reply-by') === 'done';
+          el.textContent = (done ? '늦어도 ' : '지금 신청하면 ') + time + ' 전에 연락드립니다';
+          el.hidden = false;
+        });
+      })();
+    </script>
+
     {/* 네이버 애널리틱스 — 서치어드바이저와 같은 계정으로 유입/전환을 본다 */}
     <script is:inline type="text/javascript" src="//wcs.pstatic.net/wcslog.js"></script>
     <script is:inline type="text/javascript">

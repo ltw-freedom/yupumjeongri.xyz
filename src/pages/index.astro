@@ -6,9 +6,11 @@ import ServiceCard from '../components/ServiceCard.astro';
 import FAQ from '../components/FAQ.astro';
 import PhotoStrip from '../components/PhotoStrip.astro';
 import CaseGallery from '../components/CaseGallery.astro';
+import WhyUs from '../components/WhyUs.astro';
 import { site } from '../data/site';
 import { services } from '../data/services';
 import { regions } from '../data/areas';
+import { districtCities } from '../data/districts';
 import { photos } from '../data/cases';
 import { localBusiness, faqSchema, webSite } from '../data/schema';
 
@@ -32,24 +34,6 @@ const answerItems = [
   },
 ];
 
-const worries = [
-  {
-    worry: '현장에서 이것저것 추가되면서 처음 들은 금액의 두 배가 됐다는데…',
-    answer: '견적서에 없는 항목은 청구하지 않습니다. 추가가 필요하면 작업 전에 먼저 확인받습니다.',
-    keyword: '추가금 0원',
-  },
-  {
-    worry: '업체마다 부르는 값이 달라서 뭐가 적정가인지 모르겠어요.',
-    answer: '비용 범위와 산정 기준을 홈페이지에 공개하고, 그 범위 안에서 견적을 냅니다.',
-    keyword: '정찰제',
-  },
-  {
-    worry: '비교 견적을 받자니 같은 설명을 여러 번 하기가 힘들어요.',
-    answer: '동일 조건 타사 견적서를 보여주시면 그보다 낮은 금액으로 진행합니다.',
-    keyword: '최저가 보상',
-  },
-];
-
 const faqs = [
   {
     q: '견적서에 없던 금액이 나중에 추가되나요?',
@@ -57,7 +41,7 @@ const faqs = [
   },
   {
     q: '다른 업체보다 비싸면 어떻게 되나요?',
-    a: '최저가 보상제를 운영합니다. 동일 조건으로 받으신 타사 견적서를 보여주시면 그보다 낮은 금액으로 진행합니다. 적용 조건은 최저가 보상 안내 페이지에 정리해 두었습니다.',
+    a: '최저가 보상제를 운영합니다. 동일 조건으로 받으신 타사 견적서를 보여주시면 그보다 낮은 금액으로 진행합니다. 조건은 하나입니다. 같은 주소·같은 작업 범위로 받은 타사 서면 견적서를 작업 전에 보여주시면 됩니다.',
   },
   {
     q: '상담하면 바로 계약해야 하나요?',
@@ -140,28 +124,10 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
     </div>
   </section>
 
-  {/* 차별화 — 걱정과 저희 방식 */}
+  {/* 차별화 — 흔한 방식과 비교, 시장 가격 비교, 왜 저렴한가 */}
   <section class="section section--surface">
     <div class="container">
-      <div class="section-head">
-        <p class="overline">01 — 왜 값부터 공개하나</p>
-        <h2>유품정리에서 가장 큰 걱정은 비용입니다</h2>
-        <p class="lead">
-          그래서 저희는 순서를 바꿨습니다. 비용 범위를 먼저 공개하고, 그 안에서 견적을 냅니다.
-        </p>
-      </div>
-      <ul class="compare">
-        {
-          worries.map((item) => (
-            <li>
-              <p class="worry">{item.worry}</p>
-              <p class="answer">
-                <b>{item.keyword}</b> — {item.answer}
-              </p>
-            </li>
-          ))
-        }
-      </ul>
+      <WhyUs variant="full" overline="01 — 왜 대한유품정리인가" />
     </div>
   </section>
 
@@ -216,20 +182,25 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
       <div class="section-head">
         <p class="overline">05 — 서비스 지역</p>
         <h2>서울 · 경기 전 지역</h2>
-        <p class="lead">방문 견적 비용은 발생하지 않습니다. 그 외 지역은 일정에 따라 상담 시 안내드립니다.</p>
+        <p class="lead">
+          서울 25개 구와 경기 31개 시·군 어디든 같은 기준 가격으로 진행합니다. 방문 견적 비용은 발생하지
+          않습니다.
+        </p>
       </div>
       {
         regions.map((region) => (
           <>
             <h3>
-              <a href={`/area/${region.slug}/`}>{region.name}</a>
+              <a href={`/area/${region.slug}/`}>{region.name} 유품정리</a>
             </h3>
             <ul class="link-list">
-              {region.cities.map((city) => (
-                <li>
-                  <a href={`/area/${region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
-                </li>
-              ))}
+              {districtCities
+                .filter((city) => city.region === region.slug)
+                .map((city) => (
+                  <li>
+                    <a href={`/area/${region.slug}/${city.slug}/`}>{city.name} 유품정리</a>
+                  </li>
+                ))}
             </ul>
           </>
         ))

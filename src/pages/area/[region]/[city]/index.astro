@@ -5,8 +5,10 @@ import CTA from '../../../../components/CTA.astro';
 import FAQ from '../../../../components/FAQ.astro';
 import PriceTable from '../../../../components/PriceTable.astro';
 import CaseGallery from '../../../../components/CaseGallery.astro';
+import WhyUs from '../../../../components/WhyUs.astro';
 import { getRegion, cityShortName } from '../../../../data/areas';
 import { districtCities, type DistrictCity } from '../../../../data/districts';
+import { nearbyDistricts } from '../../../../data/adjacency';
 import { getAliases } from '../../../../data/dongAliases';
 import { cityLead, cityFaqs } from '../../../../data/districtContent';
 import { services } from '../../../../data/services';
@@ -38,10 +40,8 @@ const curated = region.cities.find((c) => c.slug === dc.slug);
 const aliases = getAliases(dc.region, dc.slug);
 const short = cityShortName(dc);
 
-// 인접 시·군·구 (같은 광역, 목록상 앞뒤) — 내부 링크용
-const siblings = districtCities.filter((c) => c.region === dc.region && c.slug !== dc.slug);
-const myIndex = districtCities.filter((c) => c.region === dc.region).findIndex((c) => c.slug === dc.slug);
-const nearby = siblings.slice(Math.max(0, Math.min(myIndex, siblings.length - 4)), Math.max(0, Math.min(myIndex, siblings.length - 4)) + 4);
+// 인접 시·군·구 — 실제 지리·생활권 기준(adjacency.ts). 광역이 달라도(노원 ↔ 의정부) 이어 준다.
+const nearby = nearbyDistricts(dc.slug, 4);
 
 // 이 지역과 연결된 칼럼 (frontmatter 의 relatedAreas 로 연결)
 const columns = await getCollection('columns', ({ data }) => !data.draft);
@@ -196,6 +196,8 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
         moreLink
       />
 
+      <WhyUs variant="compact" areaName={dc.name} />
+
       <FAQ title={`${dc.name} 유품정리 자주 묻는 질문`} items={faqs} />
 
       {
@@ -220,7 +222,7 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
             <ul class="link-list">
               {nearby.map((item) => (
                 <li>
-                  <a href={`/area/${dc.region}/${item.slug}/`}>{item.name} 유품정리</a>
+                  <a href={`/area/${item.region}/${item.slug}/`}>{item.name} 유품정리</a>
                 </li>
               ))}
             </ul>

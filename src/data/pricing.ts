@@ -126,3 +126,27 @@ export const unitRates: UnitRate[] = [
     note: '일반 유품정리에 소독을 더하는 경우의 추가분입니다.',
   },
 ];
+
+/**
+ * 시장 비교 — 같은 주거 형태에서 가격을 공개한 다른 업체의 범위와 우리 기준 범위.
+ * 이 파일 머리의 2026년 8월 조사 자료(평형별 가격 공개 업체)를 그대로 옮긴 것이다.
+ * 페이지에는 업체명을 적지 않는다 — 표시광고법상 비교 광고는 객관적 근거가 있어야 하므로
+ * 조사 시점과 기준을 문장으로 함께 노출한다(marketComparisonNote).
+ * 조사 자료를 갱신하면 이 표와 파일 머리 주석, basePrices 를 같이 고칠 것.
+ */
+export type MarketRow = {
+  type: string;
+  /** 가격을 공개한 다른 업체들의 범위 */
+  market: string;
+  /** 우리 기준 범위 — basePrices 의 range 와 반드시 같아야 한다 */
+  ours: string;
+};
+
+export const marketComparison: MarketRow[] = [
+  { type: '원룸 · 오피스텔', market: '80만 ~ 120만원', ours: '40만 ~ 90만원' },
+  { type: '투룸', market: '120만 ~ 180만원', ours: '90만 ~ 160만원' },
+  { type: '아파트 · 주택 20평대', market: '180만 ~ 250만원', ours: '150만 ~ 250만원' },
+];
+
+export const marketComparisonNote =
+  '2026년 8월, 평형별 가격을 홈페이지에 공개한 유품정리 업체들의 자료를 조사한 범위입니다. 가격을 공개하지 않는 업체는 비교에서 뺐습니다. 조사 시점 이후 바뀐 값이 있을 수 있습니다.';
