@@ -180,6 +180,17 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
   칼럼 `Article`, 전 페이지 `BreadcrumbList`
 - URL 은 trailing slash 로 통일 (`astro.config.mjs` 의 `trailingSlash: 'always'`)
 
+### 네이버 순위 — 건드리기 전에 읽을 것
+
+2026-09 기준 **시군구 페이지가 "{지역} 유품정리" 54개 키워드 중 29개에서 네이버 웹 영역 12위 안**
+(1위 10개)에 든다. 분석·기준선·재측정 방법은 [`docs/seo-naver.md`](docs/seo-naver.md).
+
+- 순위는 시군구 템플릿에서 나온다 — `src/pages/area/[region]/[city]/index.astro` 의 `title`
+  ("송파구유품정리 · 송파 유품정리 …")·`description`("송파유품정리 업체 — …")과 `cityShortName()`.
+  **이 패턴은 바꾸지 말 것.** 고쳐야 하면 일부 지역에 먼저 적용하고 순위를 재서 확인한다.
+- URL·slug 변경, `.xyz` → `.co.kr` 도메인 이전, 동 페이지 사이트맵 전량 투입은 순위 리셋 위험이 있다.
+- 순위 재측정: `node scripts/naver-rank.mjs` (정기 실행은 보류 중, 필요할 때 수동)
+
 ### AI 크롤러 / LLM 인용 (AEO)
 
 "유품정리 비용 얼마" 류 질문의 답이 검색에서 LLM 으로 넘어가는 중이다.
@@ -236,5 +247,6 @@ npm run build && npx wrangler deploy
 
 - [ ] `public/images/` 에 실제 현장 사진(WebP) 추가 후 각 페이지에 배치
 - [ ] `.co.kr` / `.kr` 도메인 확보 후 `.xyz` 를 301 리다이렉트로 붙이는 안 검토
+      — **보류.** `.xyz` 로 네이버 순위가 잡혔다 (`docs/seo-naver.md`). 순위가 몇 달 안정된 뒤 다시 판단
 - [ ] 각 페이지 첫 문단을 40~60자 직답형으로 정리 (AEO 발췌 최적화)
 - [ ] 2차: 서울 25개 구, 경기 주요 도시 확장

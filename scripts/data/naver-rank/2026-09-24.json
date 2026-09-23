@@ -1,0 +1,511 @@
+{
+ "date": "2026-09-24",
+ "rows": [
+  {
+   "slug": "jongno",
+   "name": "종로구",
+   "query": "종로 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "01099382923.wazzang.com/",
+   "total": 11
+  },
+  {
+   "slug": "jung",
+   "name": "중구",
+   "query": "서울 중구 유품정리",
+   "rank": null,
+   "url": null,
+   "top": null,
+   "total": null,
+   "note": "기준선은 모호한 검색어로 재서 비교 제외"
+  },
+  {
+   "slug": "yongsan",
+   "name": "용산구",
+   "query": "용산 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "m.blog.naver.com/jkh0898/224419260254",
+   "total": 10
+  },
+  {
+   "slug": "seongdong",
+   "name": "성동구",
+   "query": "성동 유품정리",
+   "rank": 2,
+   "url": "/area/seoul/seongdong/",
+   "top": "www.allbaruncare.co.kr/",
+   "total": 10
+  },
+  {
+   "slug": "gwangjin",
+   "name": "광진구",
+   "query": "광진 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "gwangjin.yoopoom.com/",
+   "total": 15
+  },
+  {
+   "slug": "dongdaemun",
+   "name": "동대문구",
+   "query": "동대문 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "ddm.yoopoom.com/",
+   "total": 13
+  },
+  {
+   "slug": "jungnang",
+   "name": "중랑구",
+   "query": "중랑 유품정리",
+   "rank": 2,
+   "url": "/area/seoul/jungnang/",
+   "top": "jungnang.yoopoom.com/",
+   "total": 12
+  },
+  {
+   "slug": "seongbuk",
+   "name": "성북구",
+   "query": "성북 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "seoul.olbaruncare.com/gu/seongbuk",
+   "total": 8
+  },
+  {
+   "slug": "gangbuk",
+   "name": "강북구",
+   "query": "강북 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "toysyee.imain.kr/",
+   "total": 12
+  },
+  {
+   "slug": "dobong",
+   "name": "도봉구",
+   "query": "도봉 유품정리",
+   "rank": 2,
+   "url": "/area/seoul/dobong/",
+   "top": "unhaeclean.co.kr/seo/bereavement-cleaning/seoul-dobong-gu.html",
+   "total": 13
+  },
+  {
+   "slug": "nowon",
+   "name": "노원구",
+   "query": "노원 유품정리",
+   "rank": 3,
+   "url": "/area/seoul/nowon/",
+   "top": "uridongne.itpage.kr/",
+   "total": 13
+  },
+  {
+   "slug": "eunpyeong",
+   "name": "은평구",
+   "query": "은평 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/eunpyeong/",
+   "top": "yupumjeongri.xyz/area/seoul/eunpyeong/",
+   "total": 10
+  },
+  {
+   "slug": "seodaemun",
+   "name": "서대문구",
+   "query": "서대문 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "cleanworks.kr/서대문구-유품정리/",
+   "total": 9
+  },
+  {
+   "slug": "mapo",
+   "name": "마포구",
+   "query": "마포 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/mapo/",
+   "top": "yupumjeongri.xyz/area/seoul/mapo/",
+   "total": 9
+  },
+  {
+   "slug": "yangcheon",
+   "name": "양천구",
+   "query": "양천 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/yangcheon/",
+   "top": "yupumjeongri.xyz/area/seoul/yangcheon/",
+   "total": 14
+  },
+  {
+   "slug": "gangseo",
+   "name": "강서구",
+   "query": "강서 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/gangseo/",
+   "top": "yupumjeongri.xyz/area/seoul/gangseo/",
+   "total": 14
+  },
+  {
+   "slug": "guro",
+   "name": "구로구",
+   "query": "구로 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/guro/",
+   "top": "yupumjeongri.xyz/area/seoul/guro/",
+   "total": 15
+  },
+  {
+   "slug": "geumcheon",
+   "name": "금천구",
+   "query": "금천 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "galmuricare.com/area/geumcheon/",
+   "total": 11
+  },
+  {
+   "slug": "yeongdeungpo",
+   "name": "영등포구",
+   "query": "영등포 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/yeongdeungpo/",
+   "top": "yupumjeongri.xyz/area/seoul/yeongdeungpo/",
+   "total": 14
+  },
+  {
+   "slug": "dongjak",
+   "name": "동작구",
+   "query": "동작 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "dongjak.yoopoom.com/",
+   "total": 13
+  },
+  {
+   "slug": "gwanak",
+   "name": "관악구",
+   "query": "관악 유품정리",
+   "rank": 2,
+   "url": "/area/seoul/gwanak/",
+   "top": "m.blog.naver.com/jkh0898/224417136804",
+   "total": 14
+  },
+  {
+   "slug": "seocho",
+   "name": "서초구",
+   "query": "서초 유품정리",
+   "rank": 1,
+   "url": "/area/seoul/seocho/",
+   "top": "yupumjeongri.xyz/area/seoul/seocho/",
+   "total": 15
+  },
+  {
+   "slug": "gangnam",
+   "name": "강남구",
+   "query": "강남 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "gangnam.yoopoom.com/",
+   "total": 14
+  },
+  {
+   "slug": "songpa",
+   "name": "송파구",
+   "query": "송파 유품정리",
+   "rank": 5,
+   "url": "/area/seoul/songpa/",
+   "top": "songpa.yoopoom.com/",
+   "total": 12
+  },
+  {
+   "slug": "gangdong",
+   "name": "강동구",
+   "query": "강동 유품정리",
+   "rank": 3,
+   "url": "/area/seoul/gangdong/",
+   "top": "seoul.olbaruncare.com/gu/gangdong",
+   "total": 15
+  },
+  {
+   "slug": "suwon",
+   "name": "수원시",
+   "query": "수원 유품정리",
+   "rank": 2,
+   "url": "/area/gyeonggi/suwon/",
+   "top": "m.blog.naver.com/editor_park_magazine/224419429498",
+   "total": 11
+  },
+  {
+   "slug": "seongnam",
+   "name": "성남시",
+   "query": "성남 유품정리",
+   "rank": 3,
+   "url": "/area/gyeonggi/seongnam/",
+   "top": "duct.kokoo.kr/",
+   "total": 10
+  },
+  {
+   "slug": "uijeongbu",
+   "name": "의정부시",
+   "query": "의정부 유품정리",
+   "rank": 3,
+   "url": "/area/gyeonggi/uijeongbu/",
+   "top": "sbgrecycl.ibsy.kr/",
+   "total": 12
+  },
+  {
+   "slug": "anyang",
+   "name": "안양시",
+   "query": "안양 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "hanlove.nhub.kr/",
+   "total": 10
+  },
+  {
+   "slug": "bucheon",
+   "name": "부천시",
+   "query": "부천 유품정리",
+   "rank": 3,
+   "url": "/area/gyeonggi/bucheon/",
+   "top": "m.blog.naver.com/eoghqkr21/224419404785",
+   "total": 11
+  },
+  {
+   "slug": "gwangmyeong",
+   "name": "광명시",
+   "query": "광명 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "www.gyeonggi.gajogae-yupum.com/gwangmyeong.html",
+   "total": 9
+  },
+  {
+   "slug": "pyeongtaek",
+   "name": "평택시",
+   "query": "평택 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "xn--oy2b21ktvf91aj03b.kr/",
+   "total": 11
+  },
+  {
+   "slug": "dongducheon",
+   "name": "동두천시",
+   "query": "동두천 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "yupum-info.netlify.app/유품정리/경기도/동두천시/보산동/",
+   "total": 12
+  },
+  {
+   "slug": "ansan",
+   "name": "안산시",
+   "query": "안산 유품정리",
+   "rank": 2,
+   "url": "/area/gyeonggi/ansan/",
+   "top": "m.blog.naver.com/alrud2406/224414640486",
+   "total": 12
+  },
+  {
+   "slug": "goyang",
+   "name": "고양시",
+   "query": "고양 유품정리",
+   "rank": 3,
+   "url": "/area/gyeonggi/goyang/",
+   "top": "www.biwooda.com/forum/view/1010630",
+   "total": 12
+  },
+  {
+   "slug": "gwacheon",
+   "name": "과천시",
+   "query": "과천 유품정리",
+   "rank": 2,
+   "url": "/area/gyeonggi/gwacheon/",
+   "top": "www.yupum.allbarunclean.com/regions/gwacheon/",
+   "total": 8
+  },
+  {
+   "slug": "guri",
+   "name": "구리시",
+   "query": "구리 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "gddnvna.phub.kr/",
+   "total": 11
+  },
+  {
+   "slug": "namyangju",
+   "name": "남양주시",
+   "query": "남양주 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "namyangju.olbaruncare.com/",
+   "total": 13
+  },
+  {
+   "slug": "osan",
+   "name": "오산시",
+   "query": "오산 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "gyeonggi.gajogae.com/region/sigungu/osan",
+   "total": 4
+  },
+  {
+   "slug": "siheung",
+   "name": "시흥시",
+   "query": "시흥 유품정리",
+   "rank": 3,
+   "url": "/area/gyeonggi/siheung/",
+   "top": "m.blog.naver.com/h4t0fx9au/224420535679",
+   "total": 13
+  },
+  {
+   "slug": "gunpo",
+   "name": "군포시",
+   "query": "군포 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "dhcleanup.com/유품-정리/군포시-유품-정리-시-분류와-보관이-중요한-이유",
+   "total": 8
+  },
+  {
+   "slug": "uiwang",
+   "name": "의왕시",
+   "query": "의왕 유품정리",
+   "rank": 1,
+   "url": "/area/gyeonggi/uiwang/",
+   "top": "yupumjeongri.xyz/area/gyeonggi/uiwang/",
+   "total": 4
+  },
+  {
+   "slug": "hanam",
+   "name": "하남시",
+   "query": "하남 유품정리",
+   "rank": 1,
+   "url": "/area/gyeonggi/hanam/",
+   "top": "yupumjeongri.xyz/area/gyeonggi/hanam/",
+   "total": 10
+  },
+  {
+   "slug": "yongin",
+   "name": "용인시",
+   "query": "용인 유품정리",
+   "rank": 2,
+   "url": "/area/gyeonggi/yongin/",
+   "top": "m.blog.naver.com/godals1012/224419987725",
+   "total": 10
+  },
+  {
+   "slug": "paju",
+   "name": "파주시",
+   "query": "파주 유품정리",
+   "rank": 9,
+   "url": "/column/paju-yupumjeongri-pyeonghyeong/",
+   "top": "m.blog.naver.com/jkh0898/224421304592",
+   "total": 12
+  },
+  {
+   "slug": "icheon",
+   "name": "이천시",
+   "query": "이천 유품정리",
+   "rank": 1,
+   "url": "/area/gyeonggi/icheon/",
+   "top": "yupumjeongri.xyz/area/gyeonggi/icheon/",
+   "total": 11
+  },
+  {
+   "slug": "anseong",
+   "name": "안성시",
+   "query": "안성 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "gyeonggi.gajogae.com/region/sigungu/anseong",
+   "total": 6
+  },
+  {
+   "slug": "gimpo",
+   "name": "김포시",
+   "query": "김포 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "m.blog.naver.com/fre1oiluo/224419343396",
+   "total": 13
+  },
+  {
+   "slug": "hwaseong",
+   "name": "화성시",
+   "query": "화성 유품정리",
+   "rank": 2,
+   "url": "/area/gyeonggi/hwaseong/",
+   "top": "m.blog.naver.com/hwane0325/224420456902",
+   "total": 8
+  },
+  {
+   "slug": "gwangju",
+   "name": "광주시",
+   "query": "경기 광주 유품정리",
+   "rank": null,
+   "url": null,
+   "top": null,
+   "total": null,
+   "note": "기준선은 모호한 검색어로 재서 비교 제외"
+  },
+  {
+   "slug": "yangju",
+   "name": "양주시",
+   "query": "양주 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "miso.kr/blog/양주-유품정리-특수청소-비용",
+   "total": 9
+  },
+  {
+   "slug": "pocheon",
+   "name": "포천시",
+   "query": "포천 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "pocheon.allbarunclean.com/",
+   "total": 11
+  },
+  {
+   "slug": "yeoju",
+   "name": "여주시",
+   "query": "여주 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "banananx.com/place/155944",
+   "total": 5
+  },
+  {
+   "slug": "yeoncheon",
+   "name": "연천군",
+   "query": "연천 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "galmuricare.com/area/yeoncheon/",
+   "total": 13
+  },
+  {
+   "slug": "gapyeong",
+   "name": "가평군",
+   "query": "가평 유품정리",
+   "rank": null,
+   "url": null,
+   "top": "m.blog.naver.com/psty007/224419865692",
+   "total": 11
+  },
+  {
+   "slug": "yangpyeong",
+   "name": "양평군",
+   "query": "양평 유품정리",
+   "rank": 4,
+   "url": "/area/gyeonggi/yangpyeong/",
+   "top": "gyeonggi.gajogae.com/region/sigungu/yangpyeong",
+   "total": 6
+  }
+ ]
+}
