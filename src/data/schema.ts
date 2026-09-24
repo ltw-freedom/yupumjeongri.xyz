@@ -1,5 +1,5 @@
 import { site, absoluteUrl } from './site';
-import { offerablePrices, priceBounds } from './pricing';
+import { offerablePrices, priceBounds, vatIncluded } from './pricing';
 
 /**
  * 구조화 데이터는 "많이 넣는 것"이 아니라 "페이지 내용과 일치하는 것"이 중요하다.
@@ -15,6 +15,9 @@ export function localBusiness(areaServed: string[] = [...site.areaServed]) {
     url: site.url,
     description: site.description,
     slogan: site.slogan,
+    // 리치 결과 검사기가 LocalBusiness 에 요구하는 항목. 로고는 파비콘, 대표 이미지는 OG 이미지.
+    image: absoluteUrl('/og-image.png'),
+    logo: absoluteUrl('/favicon.svg'),
     areaServed,
     address: {
       '@type': 'PostalAddress',
@@ -72,7 +75,8 @@ export function aggregateOffer(path: string) {
         minPrice: row.minPrice,
         // 상한이 없는 구간('250만원부터')은 maxPrice 를 아예 내보내지 않는다.
         ...(row.maxPrice === undefined ? {} : { maxPrice: row.maxPrice }),
-        // valueAddedTaxIncluded 는 페이지에 부가세 별도 여부가 명시되기 전까지 넣지 않는다.
+        // 표기 금액은 전부 부가세 별도 (pricing.ts 의 vatIncluded)
+        valueAddedTaxIncluded: vatIncluded,
       },
     })),
   };
@@ -87,7 +91,7 @@ export function priceOffers() {
     serviceType: '유품정리',
     description: '주거 형태별 기준 가격을 공개하고, 그 범위 안에서 견적을 냅니다.',
     url: absoluteUrl('/cost/'),
-    provider: { '@id': absoluteUrl('/#business') },
+    provider: provider(),
     areaServed: [...site.areaServed],
     offers: aggregateOffer('/cost/'),
   };
@@ -107,6 +111,17 @@ export function webSite() {
   };
 }
 
+/**
+ * Service.provider — @id 만 두면 그 노드가 정의되지 않은 페이지(지역·서비스)에서 빈 참조가 된다.
+ * name·url 을 같이 넣어 단독으로도 읽히게 하고, @id 로 홈의 LocalBusiness 와 잇는다.
+ */
+const provider = () => ({
+  '@type': 'LocalBusiness',
+  '@id': absoluteUrl('/#business'),
+  name: site.name,
+  url: site.url,
+});
+
 export function serviceSchema(options: {
   name: string;
   description: string;
@@ -125,7 +140,7 @@ export function serviceSchema(options: {
     description: options.description,
     url: absoluteUrl(options.path),
     serviceType: options.name,
-    provider: { '@id': absoluteUrl('/#business') },
+    provider: provider(),
     areaServed: options.areaServed ?? [...site.areaServed],
     ...(options.withPrices ? { offers: aggregateOffer(options.path) } : {}),
   };

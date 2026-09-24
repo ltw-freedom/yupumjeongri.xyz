@@ -1,0 +1,52 @@
+---
+import FormHidden from './FormHidden.astro';
+import { site } from '../data/site';
+
+/**
+ * 빠른 상담 — 휴대폰 번호 한 칸 + 버튼. 상담 페이지로 한 번 더 이동하지 않고 그 자리에서 접수한다.
+ *
+ * 전화 상담이 없는 사이트라 "지금 바로 연락이 닿는다"는 감각을 폼이 대신해야 한다.
+ * 버튼 문구는 사이트 전체에서 '상담 신청'으로 통일한다.
+ *
+ * 받는 항목은 /consult/ 와 같다(휴대폰 번호 + 선택 항목). 고지 문장도 site.privacy 를 그대로 쓴다.
+ */
+interface Props {
+  id: string;
+  /** 지역 페이지에서 페이지의 지역명을 함께 보낸다 (예: '서울 마포구') */
+  regionHint?: string;
+  /** dark: 네이비 CTA 밴드 안 / light: 종이 배경 */
+  tone?: 'light' | 'dark';
+  label?: string;
+}
+
+const { id, regionHint, tone = 'light', label = '휴대폰 번호만 남겨주세요' } = Astro.props;
+---
+
+<form class:list={['quick-consult', `quick-consult--${tone}`]} method="POST" action="/api/consult" data-consult>
+  <label class="quick-consult__label" for={`${id}-phone`}>{label}</label>
+  <div class="quick-consult__row">
+    <input
+      id={`${id}-phone`}
+      name="phone"
+      type="tel"
+      required
+      maxlength="20"
+      inputmode="tel"
+      autocomplete="tel"
+      pattern="01[016789](-| )?[0-9]{3,4}(-| )?[0-9]{4}"
+      placeholder="010-1234-5678"
+      aria-describedby={`${id}-assure`}
+    />
+    <button class="button button--primary" type="submit">상담 신청</button>
+  </div>
+  <p class="quick-consult__error" data-phone-error role="alert" hidden></p>
+  <FormHidden id={id} regionHint={regionHint} />
+  <ul class="quick-consult__assure" id={`${id}-assure`}>
+    <li>계약 의무 없음</li>
+    <li>광고 문자 없음</li>
+    <li>상담 끝나면 번호 파기</li>
+  </ul>
+  <p class="quick-consult__more">
+    상황을 자세히 남기고 싶다면 <a href={site.consultPath}>상담 신청서 작성</a>
+  </p>
+</form>

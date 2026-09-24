@@ -39,7 +39,8 @@ const pageUrl = absoluteUrl(`/column/${entry.id}/`);
 // author 를 @id 참조만으로 두면 이 페이지 안에서 노드가 풀리지 않아 빈 값으로
 // 읽힌다. name·url 을 인라인해 단독으로도 유효하게 만들고 @id 로 홈과도 잇는다.
 const business = {
-  '@type': 'Organization',
+  // 홈의 /#business 노드와 타입을 맞춘다 (Organization 으로 두면 같은 @id 에 타입이 둘이 된다)
+  '@type': 'LocalBusiness',
   '@id': absoluteUrl('/#business'),
   name: site.name,
   url: site.url,
@@ -76,6 +77,9 @@ const articleSchema = {
       <h1>{entry.data.title}</h1>
 
       <Content />
+
+      {/* 금액이 나오는 글에만 붙인다 — 사이트의 모든 표기 금액은 부가세 별도 (pricing.ts) */}
+      {entry.body?.includes('만원') && <p class="note">글에 나온 대한유품정리 금액은 모두 부가세(VAT) 별도입니다.</p>}
 
       <FAQ items={entry.data.faq} />
 

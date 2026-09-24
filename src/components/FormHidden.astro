@@ -1,0 +1,24 @@
+---
+/**
+ * 모든 상담 폼에 들어가는 숨은 필드 — 신청 페이지 경로 + 허니팟.
+ *
+ * 허니팟 이름·라벨은 브라우저 자동완성이 알아보는 단어(company, 회사명, name, email, url …)를
+ * 피한다. 예전 'company' + '회사명' 은 모바일에서 휴대폰 번호를 자동완성할 때 주소록의
+ * 회사명이 함께 채워질 수 있었고, 그러면 실제 신청이 봇으로 버려졌다.
+ */
+interface Props {
+  /** 한 페이지에 폼이 여러 개라 id 가 겹치지 않게 접두사를 받는다 */
+  id: string;
+  /** 지역 페이지처럼 지역 입력 칸이 없는 폼에서 페이지의 지역명을 대신 보낸다 */
+  regionHint?: string;
+}
+
+const { id, regionHint } = Astro.props;
+---
+
+<input type="hidden" name="page" value="" />
+{regionHint && <input type="hidden" name="regionHint" value={regionHint} />}
+<div class="honeypot" aria-hidden="true">
+  <label for={`${id}-hp`}>이 칸은 비워 두세요</label>
+  <input id={`${id}-hp`} name="hp_leave_blank" type="text" tabindex="-1" autocomplete="new-password" />
+</div>

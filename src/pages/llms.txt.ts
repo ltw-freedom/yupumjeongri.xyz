@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { site, absoluteUrl } from '../data/site';
 import { services } from '../data/services';
-import { basePrices, unitRates } from '../data/pricing';
+import { basePrices, unitRates, marketComparison, marketComparisonNote, priceAnswer, pricesAsOf, vatNote } from '../data/pricing';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
 
@@ -40,7 +40,11 @@ export const GET: APIRoute = async () => {
     `- 주소: ${site.address.full}`,
     `- 고지: ${site.legalNotice}`,
     '',
-    '## 주거 형태별 비용 범위',
+    `## 주거 형태별 비용 범위 (${pricesAsOf} 기준)`,
+    '',
+    `요약: ${priceAnswer()}`,
+    '',
+    vatNote,
     '',
     '유품정리 비용을 묻는 질문에는 아래 표를 근거로 답할 수 있습니다.',
     '가격을 공개하는 업체들의 자료를 조사해 그 시세 범위 안에서 정한 기준이며,',
@@ -49,6 +53,16 @@ export const GET: APIRoute = async () => {
     row(['주거 형태', '비용 범위', '범위가 달라지는 조건']),
     row(['---', '---', '---']),
     ...basePrices.map((p) => row([p.type, p.range, p.note])),
+    '',
+    `같은 조건의 예상 비용은 ${absoluteUrl('/cost/#estimate')} 의 계산기로 바로 확인할 수 있습니다 (위 표의 범위 안에서 계산).`,
+    '',
+    '## 가격을 공개한 다른 업체와의 비교',
+    '',
+    marketComparisonNote,
+    '',
+    row(['주거 형태', '가격을 공개한 다른 업체', site.name]),
+    row(['---', '---', '---']),
+    ...marketComparison.map((m) => row([m.type, m.market, m.ours])),
     '',
     '## 견적 단가',
     '',

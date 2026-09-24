@@ -1,0 +1,55 @@
+---
+import QuickConsult from './QuickConsult.astro';
+import { priceRow, pricesAsOf, vatLabel } from '../data/pricing';
+
+/**
+ * 지역 페이지 첫 화면 — 가격 요약 + 약속 + 번호 칸.
+ *
+ * 네이버 유입은 대부분 시·군·구 / 동 페이지로 들어온다(docs/seo-naver.md).
+ * 예전에는 첫 화면이 제목과 설명 문단뿐이라 모바일에서 가격도, 연락 수단도 스크롤해야 보였다.
+ * 이 블록은 H1 과 lead 아래에 "얼마인지 · 왜 믿을 수 있는지 · 어떻게 연락하는지"를 한 화면에 모은다.
+ *
+ * title·description·H1·URL 은 건드리지 않는다 — 순위 요인이다. 이 블록은 본문 추가일 뿐이다.
+ */
+interface Props {
+  /** 표시용 지역명 (예: '마포구', '송파구 잠실동') */
+  name: string;
+  /** Slack 에 넘길 지역 (예: '서울 마포구') */
+  regionHint: string;
+}
+
+const { name, regionHint } = Astro.props;
+
+const rows = [
+  { label: '원룸 · 오피스텔', value: priceRow('oneroom').range },
+  { label: '투룸', value: priceRow('tworoom').range },
+  { label: '아파트 · 주택 20평대', value: priceRow('apt20').range },
+  { label: '고독사 특수청소', value: priceRow('special').range.replace('위 금액 ', '') },
+];
+---
+
+<div class="area-quick">
+  <div class="area-quick__price">
+    <p class="area-quick__title">
+      {name} 유품정리 기준 비용 <span>{pricesAsOf} 기준 · {vatLabel}</span>
+    </p>
+    <dl class="area-quick__rows">
+      {
+        rows.map((row) => (
+          <div>
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <ul class="area-quick__trust">
+      <li>견적서 외 추가금 0원</li>
+      <li>저희 인력이 직접 작업</li>
+      <li>방문 견적 비용 없음</li>
+    </ul>
+    <a class="area-quick__calc" href="#estimate">우리 집 조건으로 계산해 보기 →</a>
+  </div>
+
+  <QuickConsult id="area" regionHint={regionHint} label={`${name} 유품정리, 번호만 남기시면 최대한 빠르게 연락드립니다`} />
+</div>

@@ -1,0 +1,259 @@
+---
+import FormHidden from './FormHidden.astro';
+import { estimator, vatLabel } from '../data/pricing';
+import { site } from '../data/site';
+
+/**
+ * 예상 비용 계산기 — "값부터 공개합니다"를 한 단계 더 밀어붙인 기능.
+ *
+ * 가격표는 "원룸 40만~90만원"처럼 범위라서, 보는 사람은 결국 "그래서 우리 집은?"을 묻게 되고
+ * 그 질문의 답을 들으려면 번호를 남겨야 했다. 계산기는 번호 없이 먼저 답을 준다.
+ * 답을 받은 사람이 "이 조건으로 정확한 견적"을 요청하는 흐름이 번호를 먼저 요구하는 것보다 자연스럽다.
+ * 고른 조건은 신청과 함께 Slack 으로 넘어가 첫 회신에서 다시 묻지 않아도 된다.
+ *
+ * 금액은 전부 pricing.ts 의 공개 값에서 계산한다 (estimator 주석 참고). 새 금액을 만들지 않는다.
+ * JS 가 없으면 결과 칸만 비고, 고른 조건과 번호는 그대로 접수된다.
+ */
+interface Props {
+  heading?: string;
+  /** 지역 페이지에서 페이지의 지역명을 함께 보낸다 */
+  regionHint?: string;
+  overline?: string;
+}
+
+const {
+  heading = '우리 집은 얼마쯤 나올까요',
+  regionHint,
+  overline = '30초 예상 비용',
+} = Astro.props;
+
+const specialOptions = [
+  { value: '아니요', label: '아니요' },
+  { value: '예', label: '예 (고독사·오염 현장)' },
+  { value: '잘 모르겠음', label: '잘 모르겠어요' },
+];
+---
+
+<section class="estimate" id="estimate" aria-labelledby="estimate-heading">
+  <div class="section-head estimate__head">
+    <p class="overline">{overline}</p>
+    <h2 id="estimate-heading">{heading}</h2>
+    <p>
+      네 가지만 고르면 공개 가격표 기준으로 바로 계산됩니다. 번호를 남기지 않아도 결과를 볼 수 있습니다.
+    </p>
+  </div>
+
+  <form
+    class="estimate__form"
+    method="POST"
+    action="/api/consult"
+    data-consult
+    data-estimate
+    data-special-min={estimator.special.min}
+    data-special-max={estimator.special.max}
+    data-special-range={estimator.special.range}
+    data-ladder={estimator.ladder}
+    data-round={estimator.roundTo}
+  >
+    <div class="estimate__inputs">
+      <fieldset class="chips-field">
+        <legend><span>1</span>주거 형태</legend>
+        <div class="chips">
+          {
+            estimator.housing.map((h) => (
+              <label class="chip">
+                <input type="radio" name="housing" value={h.label} data-min={h.min} data-max={h.max ?? ''} />
+                <span>
+                  {h.label}
+                  {h.detail && <small>{h.detail}</small>}
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="chips-field">
+        <legend><span>2</span>짐의 양</legend>
+        <div class="chips">
+          {
+            estimator.volume.map((v) => (
+              <label class="chip">
+                <input type="radio" name="volume" value={v.label} data-from={v.from} data-to={v.to} />
+                <span>
+                  {v.label}
+                  <small>{v.detail}</small>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="chips-field">
+        <legend><span>3</span>층수 · 엘리베이터</legend>
+        <div class="chips">
+          {
+            estimator.access.map((a) => (
+              <label class="chip">
+                <input type="radio" name="access" value={a.label} data-ladder={a.ladder ? '1' : ''} />
+                <span>{a.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="chips-field">
+        <legend><span>4</span>고독사 등 특수청소가 필요한 현장인가요</legend>
+        <div class="chips">
+          {
+            specialOptions.map((o) => (
+              <label class="chip">
+                <input type="radio" name="special" value={o.value} />
+                <span>{o.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="estimate__side">
+      <div class="quote-doc estimate__doc" aria-live="polite">
+        <div class="quote-doc__head">
+          <p class="quote-doc__title">예상 견적</p>
+          <p class="quote-doc__sub">Estimate</p>
+        </div>
+        <ul class="quote-doc__rows">
+          <li>
+            <span>유품 분류 · 반출 · 청소</span>
+            <span class="dots"></span>
+            <span class="val" data-out="base">—</span>
+          </li>
+          <li data-row="special" hidden>
+            <span>특수청소</span>
+            <span class="dots"></span>
+            <span class="val" data-out="special"></span>
+          </li>
+          <li data-row="ladder" hidden>
+            <span>사다리차 (필요 시)</span>
+            <span class="dots"></span>
+            <span class="val" data-out="ladder"></span>
+          </li>
+          <li>
+            <span>견적서 외 추가 항목</span>
+            <span class="dots"></span>
+            <span class="val val--gold">0원</span>
+          </li>
+        </ul>
+        <p class="estimate__total">
+          <span class="estimate__total-label">예상 합계 ({vatLabel})</span>
+          <b data-out="total">주거 형태를 골라 주세요</b>
+          <small class="estimate__total-extra" data-out="extra" hidden></small>
+        </p>
+        <p class="estimate__caveat" data-out="caveat">
+          공개 기준 가격표로 계산한 예상 범위이며 {vatLabel} 금액입니다. 확정 금액은 현장 확인 후 항목별 견적서로 드립니다.
+        </p>
+      </div>
+
+      <input type="hidden" name="estimate" value="" />
+
+      <div class="estimate__cta">
+        <label class="quick-consult__label" for="estimate-phone">이 조건으로 정확한 견적 받기</label>
+        <div class="quick-consult__row">
+          <input
+            id="estimate-phone"
+            name="phone"
+            type="tel"
+            required
+            maxlength="20"
+            inputmode="tel"
+            autocomplete="tel"
+            pattern="01[016789](-| )?[0-9]{3,4}(-| )?[0-9]{4}"
+            placeholder="010-1234-5678"
+          />
+          <button class="button button--primary" type="submit">상담 신청</button>
+        </div>
+        <p class="quick-consult__error" data-phone-error role="alert" hidden></p>
+        <p class="estimate__cta-note">
+          고르신 조건이 함께 전달돼 같은 질문을 다시 드리지 않습니다. 계약 의무 없음 · 광고 문자 없음 ·
+          번호는 {site.privacy.retention} 파기합니다.
+        </p>
+      </div>
+    </div>
+
+    <FormHidden id="estimate" regionHint={regionHint} />
+  </form>
+</section>
+
+<script>
+  const man = (won: number) => `${Math.round(won / 10_000).toLocaleString('ko-KR')}만`;
+  const range = (lo: number, hi: number) => (lo === hi ? `${man(lo)}원` : `${man(lo)} ~ ${man(hi)}원`);
+
+  document.querySelectorAll<HTMLFormElement>('form[data-estimate]').forEach((form) => {
+    const out = (key: string) => form.querySelector<HTMLElement>(`[data-out="${key}"]`)!;
+    const row = (key: string) => form.querySelector<HTMLElement>(`[data-row="${key}"]`)!;
+    const checked = (name: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`);
+    const hidden = form.querySelector<HTMLInputElement>('input[name="estimate"]')!;
+    const d = form.dataset;
+    const round = Number(d.round) || 50_000;
+    const snap = (won: number) => Math.round(won / round) * round;
+    const caveatDefault = out('caveat').textContent ?? '';
+
+    function update() {
+      const housing = checked('housing');
+      if (!housing) return;
+
+      const min = Number(housing.dataset.min);
+      const max = housing.dataset.max ? Number(housing.dataset.max) : null;
+      const volume = checked('volume');
+      const special = checked('special')?.value;
+      const ladder = checked('access')?.dataset.ladder === '1';
+
+      // 기본 정리 — 짐의 양으로 기준 범위 안에서 좁힌다. 안 골랐으면 기준 범위 전체.
+      let lo = min;
+      let hi = max;
+      if (max !== null && volume) {
+        const span = max - min;
+        lo = snap(min + span * Number(volume.dataset.from));
+        hi = snap(min + span * Number(volume.dataset.to));
+      }
+
+      let total: string;
+      let caveat = caveatDefault;
+      if (hi === null) {
+        out('base').textContent = `${man(lo)}원부터`;
+        total = `${man(lo)}원부터`;
+        caveat = '30평 이상은 물량 편차가 커서 방문 확인 후 확정 견적으로 안내드립니다. 부가세 별도이며, 견적서에 없는 금액은 청구하지 않습니다.';
+      } else {
+        out('base').textContent = range(lo, hi);
+        total = range(lo, hi);
+      }
+
+      // 특수청소 — '예'면 합계에 더하고, '잘 모르겠음'이면 필요할 때의 금액만 보여준다
+      const sMin = Number(d.specialMin);
+      const sMax = Number(d.specialMax);
+      row('special').hidden = !special || special === '아니요';
+      if (special === '예') {
+        out('special').textContent = `+ ${range(sMin, sMax)}`;
+        total = hi === null ? `${man(lo + sMin)}원부터` : range(lo + sMin, hi + sMax);
+      } else if (special === '잘 모르겠음') {
+        out('special').textContent = `필요 시 + ${d.specialRange}`;
+      }
+
+      row('ladder').hidden = !ladder;
+      if (ladder) out('ladder').textContent = d.ladder ?? '';
+      out('extra').textContent = ladder ? `+ 사다리차 필요 시 ${d.ladder}` : '';
+      out('extra').hidden = !ladder;
+
+      out('total').textContent = total;
+      out('caveat').textContent = caveat;
+      hidden.value = ladder ? `${total} + 사다리차(필요 시)` : total;
+      form.classList.add('is-calculated');
+    }
+
+    form.addEventListener('change', update);
+    update(); // 뒤로 가기로 돌아와 선택이 남아 있는 경우
+  });
+</script>

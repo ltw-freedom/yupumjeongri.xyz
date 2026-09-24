@@ -7,6 +7,7 @@ import FAQ from '../components/FAQ.astro';
 import PhotoStrip from '../components/PhotoStrip.astro';
 import CaseGallery from '../components/CaseGallery.astro';
 import WhyUs from '../components/WhyUs.astro';
+import EstimateCalc from '../components/EstimateCalc.astro';
 import { site } from '../data/site';
 import { services } from '../data/services';
 import { regions } from '../data/areas';
@@ -22,7 +23,7 @@ import { localBusiness, faqSchema, webSite } from '../data/schema';
 const answerItems = [
   {
     q: '유품정리 비용은 얼마나 드나요?',
-    a: '원룸 40만~90만원, 투룸 90만~160만원, 20평대 아파트 150만~250만원이 기준 범위입니다. 평형이 아니라 물품 양, 반출 동선, 특수청소 포함 여부로 정해지며, 대한유품정리는 산정 단가까지 비용 페이지에 공개합니다.',
+    a: '원룸 40만~90만원, 투룸 90만~160만원, 20평대 아파트 150만~250만원이 기준 범위입니다(부가세 별도). 평형이 아니라 물품 양, 반출 동선, 특수청소 포함 여부로 정해지며, 대한유품정리는 산정 단가까지 비용 페이지에 공개합니다.',
   },
   {
     q: '견적 후에 금액이 늘어나지 않나요?',
@@ -94,8 +95,15 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
     </div>
   </section>
 
+  {/* 예상 비용 계산기 — 가격표를 "우리 집" 금액으로 바꿔 준다. 번호 없이도 결과가 보인다 */}
+  <section class="section section--surface">
+    <div class="container">
+      <EstimateCalc />
+    </div>
+  </section>
+
   {/* 실제 현장 — 사진으로 먼저 보여준다 */}
-  <section class="section" style="padding-top: 0;" aria-label="실제 현장 사진">
+  <section class="section" aria-label="실제 현장 사진">
     <div class="container">
       <PhotoStrip
         photos={fieldPhotos}

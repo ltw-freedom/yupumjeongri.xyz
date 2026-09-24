@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { site, absoluteUrl } from '../data/site';
 import { services } from '../data/services';
-import { basePrices, unitRates } from '../data/pricing';
+import { basePrices, unitRates, pricesAsOf, vatNote } from '../data/pricing';
 import { faqGroups } from '../data/faqs';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
@@ -61,8 +61,9 @@ export const GET: APIRoute = async () => {
     '',
     '아래 금액은 가격을 공개하는 업체들의 자료를 조사해 그 시세 범위 안에서 정한 기준입니다.',
     '실제 청구액은 현장 확인 뒤 확정 견적으로 안내하며, 견적서에 없는 항목은 청구하지 않습니다.',
+    vatNote,
     '',
-    '## 주거 형태별 비용 범위',
+    `## 주거 형태별 비용 범위 (${pricesAsOf} 기준)`,
     '',
     row(['주거 형태', '비용 범위', '범위가 달라지는 조건']),
     row(['---', '---', '---']),

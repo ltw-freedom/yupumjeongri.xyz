@@ -8,6 +8,8 @@
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
+    // 없는 주소에 빈 404 대신 dist/404.html 을 404 상태로 돌려준다
+    "not_found_handling": "404-page",
     // 모든 요청이 Worker 를 먼저 탄다. www → apex 301 은 Worker 안에서만 할 수 있는데
     // (www 는 DNS 레코드가 외부 관리라 커스텀 도메인 대신 라우트 www.yupumjeongri.xyz/* 로 붙였다)
     // run_worker_first 는 경로 패턴만 받고 호스트를 구분하지 못한다. 트래픽이 작아 비용 차이는 없다.

@@ -6,6 +6,8 @@ import FAQ from '../../../../components/FAQ.astro';
 import PriceTable from '../../../../components/PriceTable.astro';
 import CaseGallery from '../../../../components/CaseGallery.astro';
 import WhyUs from '../../../../components/WhyUs.astro';
+import AreaQuick from '../../../../components/AreaQuick.astro';
+import EstimateCalc from '../../../../components/EstimateCalc.astro';
 import { getRegion, cityShortName } from '../../../../data/areas';
 import { districtCities, type DistrictCity } from '../../../../data/districts';
 import { nearbyDistricts } from '../../../../data/adjacency';
@@ -15,6 +17,7 @@ import { services } from '../../../../data/services';
 import { site } from '../../../../data/site';
 import { casesFor } from '../../../../data/cases';
 import { serviceSchema, faqSchema } from '../../../../data/schema';
+import { priceAnswer } from '../../../../data/pricing';
 import { getCollection } from 'astro:content';
 
 /**
@@ -39,6 +42,8 @@ const region = getRegion(dc.region)!;
 const curated = region.cities.find((c) => c.slug === dc.slug);
 const aliases = getAliases(dc.region, dc.slug);
 const short = cityShortName(dc);
+/** 빠른 상담 폼이 Slack 에 함께 넘기는 지역 (예: '서울 마포구') */
+const regionHint = `${region.name} ${dc.name}`;
 
 // 인접 시·군·구 — 실제 지리·생활권 기준(adjacency.ts). 광역이 달라도(노원 ↔ 의정부) 이어 준다.
 const nearby = nearbyDistricts(dc.slug, 4);
@@ -94,6 +99,8 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
       <h1>{dc.name} 유품정리</h1>
       <p class="lead">{curated ? curated.summary : cityLead(dc)}</p>
 
+      <AreaQuick name={dc.name} regionHint={regionHint} />
+
       {
         curated && (
           <>
@@ -108,9 +115,10 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
       }
 
       <h2>{dc.name} 유품정리 비용</h2>
+      {/* 첫 문장은 "○○ 유품정리 비용"에 대한 직답 — 검색·AI 발췌용 (pricing.ts 의 priceAnswer) */}
       <p>
-        지역과 무관하게 같은 기준을 적용합니다. 범위가 달라지는 것은 물품 양, 반출 동선, 특수청소
-        여부뿐입니다.
+        {priceAnswer(`${dc.name} 유품정리 비용`)} 지역과 무관하게 같은 기준을 적용하며, 범위가 달라지는 것은
+        물품 양, 반출 동선, 특수청소 여부뿐입니다.
       </p>
       <PriceTable />
       <p class="note">
@@ -118,6 +126,8 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
         다른 유품정리 업체의 동일 조건 견적서를 갖고 계시면 그보다 낮은 금액으로 진행합니다.
         <a href="/cost/">비용 산정 기준 전체 보기</a>
       </p>
+
+      <EstimateCalc heading={`${short} 우리 집 예상 비용 계산`} regionHint={regionHint} />
 
       {
         curated && (
@@ -233,5 +243,5 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
     </div>
   </section>
 
-  <CTA title={`${dc.name} 유품정리 상담`} body="주거 형태와 짐의 양만 알려주셔도 대략적인 범위와 비용을 안내드립니다." />
+  <CTA title={`${dc.name} 유품정리 상담`} body="주거 형태와 짐의 양만 알려주셔도 대략적인 범위와 비용을 안내드립니다." regionHint={regionHint} />
 </BaseLayout>

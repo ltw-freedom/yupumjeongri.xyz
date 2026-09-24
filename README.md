@@ -130,6 +130,21 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 | `nickname` | O | **실명을 받지 않는다.** 회신 때 부를 호칭이면 된다 |
 | `phone` | O | **휴대폰 번호만.** 이메일·카톡 아이디는 받지 않는다 |
 | `region` / `type` / `message` | | 선택 |
+| `housing` / `volume` / `access` / `special` / `estimate` | | 선택 — 예상 비용 계산기(`EstimateCalc`)에서 고른 조건과 화면에 보여준 금액 |
+| `regionHint` | | 지역 입력 칸이 없는 빠른 상담 폼이 페이지의 지역명을 대신 보낸다 |
+| `page` | | 신청한 페이지 경로. 어느 페이지에서 전환이 나는지 Slack 에서 본다 (개인정보 아님) |
+
+접수 창구는 `/consult/` 한 페이지가 아니라 **같은 엔드포인트로 보내는 폼 네 종류**다.
+버튼 문구는 전부 **'상담 신청'**, 회신 약속은 `site.responsePromise`("최대한 빠르게") 하나로 쓴다.
+"○분 안에", "○시 전에" 같은 구체적인 회신 시각은 적지 않는다 — 밤·주말에 지킬 수 없는 약속이 된다.
+전화번호가 없는 사이트라 "번호 칸"이 전화 버튼 역할을 하므로, 번호 칸을 모바일 첫 화면에 둔다.
+
+- `QuickConsult` — 번호 한 칸 + 버튼. 홈 히어로, 지역 페이지 첫 화면(`AreaQuick`), 모든 페이지 하단 `CTA`
+- `EstimateCalc` — 예상 비용 계산기 + 번호 칸. 홈, `/cost/#estimate`, 지역 페이지.
+  금액은 `pricing.ts` 의 공개 값에서만 계산한다(`estimator` 주석). 새 금액을 만들지 않는다
+- `/consult/` — 번호 칸 바로 아래 보내기 버튼, 선택 항목은 눌러서 고르는 칩
+- 공통 보강 `src/scripts/consult-form.ts` — 번호 자동 하이픈, 전송 전 즉시 검증, 중복 전송 방지,
+  `?error=` 로 돌아오면 입력 복원, 완료 페이지에서 남긴 번호를 가려서 보여 주기
 
 - **파일 업로드는 없다.** 폼에 첨부 필드가 없으므로 "사진을 보내주시면 견적을…" 류의
   카피를 어디에도 쓰지 말 것. 지킬 수 없는 약속이 된다. (우리가 유가족에게 *보내는*
@@ -166,7 +181,10 @@ npx wrangler pages dev dist --compatibility-date=2026-08-10
 
 ### 스팸 방어
 
-허니팟 필드(`company`) + 필수값 검증 + 필드별 길이 제한이 들어가 있다.
+허니팟 필드(`hp_leave_blank`, `FormHidden.astro`) + 필수값 검증 + 필드별 길이 제한이 들어가 있다.
+허니팟 이름·라벨은 자동완성이 알아보는 단어(company·회사명·name·email …)를 쓰지 않는다 — 예전 `company`/'회사명'은
+모바일 자동완성이 채워 실제 신청이 봇으로 버려질 수 있었다. 같은 이유로 **허니팟 값이 있어도 번호가 정상이면
+버리지 않고 '스팸 의심' 표시를 붙여 Slack 으로 보낸다.**
 그래도 `/api/consult` 는 공개 엔드포인트이므로, 유입이 생긴 뒤
 Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 것.
 
@@ -233,8 +251,10 @@ npm run build && npx wrangler deploy
       `PriceSpecification` JSON-LD 까지 붙었다. 표시 문자열(`range`)과 스키마용
       숫자(`minPrice`/`maxPrice`)가 `pricing.ts` 에 나란히 있으니 **항상 같이 고칠 것**.
       `Offer` 는 `PriceTable` 을 실제로 렌더하는 페이지(`/cost/`, 지역 페이지)에서만 붙인다.
-- [ ] **기준 가격의 부가세 별도 여부 명시** — `/cost/` 본문에 없다. 그래서 `PriceSpecification`
-      에 `valueAddedTaxIncluded` 를 넣지 않았다. 견적 분쟁이 가장 잦은 지점이므로 확정할 것.
+- [x] **기준 가격의 부가세 별도 여부 명시** — 2026-09 확정: 표기 금액은 전부 **부가세 별도**.
+      `pricing.ts` 의 `vatIncluded`·`vatLabel`·`vatNote` 한 곳에서 관리하고, 가격표 캡션·계산기·지역 요약·
+      직답 문장·llms.txt·`PriceSpecification.valueAddedTaxIncluded` 가 이 값을 따른다.
+      새로 금액을 적는 곳(칼럼 본문 포함)에도 부가세 별도임을 같이 적을 것.
 - [ ] **`/guarantee/` 최저가 보상제 페이지** — 적용 조건(동일 조건의 정의, 유효 기간,
       제외 항목, 증빙 방법)을 확정해야 작성 가능. 조건 없는 보상 문구는 쓰지 않는다.
 - [ ] **Cloudflare Pages 에 `SLACK_WEBHOOK_URL` Secret 등록** — 이거 없으면 상담 접수가 안 된다.
@@ -248,5 +268,6 @@ npm run build && npx wrangler deploy
 - [ ] `public/images/` 에 실제 현장 사진(WebP) 추가 후 각 페이지에 배치
 - [ ] `.co.kr` / `.kr` 도메인 확보 후 `.xyz` 를 301 리다이렉트로 붙이는 안 검토
       — **보류.** `.xyz` 로 네이버 순위가 잡혔다 (`docs/seo-naver.md`). 순위가 몇 달 안정된 뒤 다시 판단
-- [ ] 각 페이지 첫 문단을 40~60자 직답형으로 정리 (AEO 발췌 최적화)
+- [x] 비용 직답 문장 — `pricing.ts` 의 `priceAnswer()` 가 `/cost/` 첫 문장, 지역·서비스 페이지 비용 섹션 첫 문장, llms.txt 에 같은 문장을 넣는다 (`pricesAsOf` 기준일 포함. 가격을 고치면 기준일도 올릴 것)
+- [ ] 네이버 스마트플레이스 등록 — **보류** (2026-09). 등록하면 문의 링크를 `/consult/` 로 걸고 `localBusiness()` 에 `sameAs` 추가
 - [ ] 2차: 서울 25개 구, 경기 주요 도시 확장

@@ -4,11 +4,13 @@
  * /cost/ 와 지역(시·동) 페이지에서 공유한다 — 가격 공개가 이 사이트의
  * 차별화 축이라, 지역 페이지에도 같은 표를 그대로 노출한다.
  */
-import { basePrices } from '../data/pricing';
+import { basePrices, vatNote } from '../data/pricing';
 ---
 
+{/* price-table: 좁은 화면에서는 행을 카드처럼 쌓는다 — 3열 표가 가로로 잘려 '조건' 열이 안 보이던 문제 */}
 <div class="table-wrap">
-  <table>
+  <table class="price-table">
+    <caption class="price-table__vat">{vatNote}</caption>
     <thead>
       <tr>
         <th scope="col">주거 형태</th>
