@@ -2553,3 +2553,761 @@ tbody th {
     display: none;
   }
 }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ==========================================================================
+   서비스 목록(/service/)
+   ========================================================================== */
+
+/* --- 도입: 소개 + 디지털 명함 --- */
+.svc-intro {
+  padding-top: clamp(1.5rem, 4vw, 3rem);
+}
+
+.svc-intro__inner {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .svc-intro__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 27rem);
+  }
+}
+
+.svc-intro__overline {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.32em;
+  color: var(--color-gold);
+}
+
+.svc-intro__note {
+  margin: 1.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--color-faint);
+}
+
+.svc-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  list-style: none;
+  margin: 1.75rem 0 0;
+  padding: 0;
+  border-top: 2px solid var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .svc-facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.svc-facts li {
+  margin: 0;
+  padding: 0.9rem 0.9rem 0.85rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.svc-facts b {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-gold);
+}
+
+.svc-facts b small {
+  margin-left: 0.1rem;
+  font-size: 0.95rem;
+  color: var(--color-text);
+}
+
+.svc-facts span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+/* --- 디지털 명함 --- */
+.bcard {
+  max-width: 27rem;
+  margin-inline: auto;
+}
+
+.bcard__stage {
+  perspective: 1400px;
+}
+
+.bcard__inner {
+  display: grid;
+  transition: transform 0.7s var(--ease-out);
+  transform-style: preserve-3d;
+}
+
+.bcard.is-flipped .bcard__inner {
+  transform: rotateY(180deg);
+}
+
+.bcard__face {
+  grid-area: 1 / 1;
+  position: relative;
+  border-radius: var(--radius-lg);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: var(--shadow-float);
+}
+
+/* 앞면 — 견적서와 같은 종이 + 이중 괘선 */
+.bcard__face--front {
+  background: var(--color-card);
+  border: 1px solid var(--color-line-strong);
+  padding: 1.6rem 1.6rem 1.3rem;
+}
+
+.bcard__face--front::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.bcard__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--color-text);
+}
+
+.bcard__brand img {
+  flex: none;
+}
+
+.bcard__name {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+}
+
+.bcard__role {
+  margin: 0.1rem 0 0;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.bcard__rows {
+  margin: 0.95rem 0 1rem;
+}
+
+.bcard__rows div {
+  display: grid;
+  grid-template-columns: 4.3rem minmax(0, 1fr);
+  gap: 0.6rem;
+  padding: 0.38rem 0;
+  border-bottom: 1px dotted var(--color-line-strong);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.bcard__rows dt {
+  color: var(--color-faint);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  padding-top: 0.1rem;
+}
+
+.bcard__rows dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.bcard__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.bcard__qr {
+  flex: none;
+  width: 76px;
+  height: 76px;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+}
+
+.bcard__qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.bcard__foot p {
+  flex: 1;
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+/* 뒷면 — 네이비 브랜드면 */
+.bcard__face--back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1.6rem;
+  color: #fff;
+  background:
+    radial-gradient(22rem 14rem at 100% 110%, rgba(200, 137, 42, 0.28), transparent 60%),
+    linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  border: 1px solid var(--color-accent-dark);
+}
+
+.bcard__face--back::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(200, 137, 42, 0.45);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.bcard__back-name {
+  margin: 0.8rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+}
+
+.bcard__back-slogan {
+  margin: 1.1rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  color: var(--color-gold-bright);
+}
+
+.bcard__back-sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.bcard__back-domain {
+  margin: 1.3rem 0 0;
+  font-size: 0.78rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.bcard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.bcard__actions .button {
+  flex: 1 1 auto;
+  min-height: 44px;
+  padding-inline: 1rem;
+  font-size: 0.93rem;
+}
+
+.bcard__status {
+  margin: 0.5rem 0 0;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--color-gold);
+}
+
+@media (min-width: 900px) {
+  .bcard__stage {
+    transform: rotate(-0.8deg);
+  }
+}
+
+/* --- 서비스 3종 행 --- */
+.svc-rows {
+  display: grid;
+  gap: 1.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.svc-row {
+  display: grid;
+  margin: 0;
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+@media (min-width: 900px) {
+  .svc-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .svc-row:nth-child(even) .svc-row__media {
+    order: 2;
+  }
+}
+
+.svc-row__media {
+  display: grid;
+  gap: 3px;
+  background: var(--color-line);
+  align-content: start;
+}
+
+.svc-row__main,
+.svc-row__subs figure {
+  position: relative;
+  margin: 0;
+}
+
+.svc-row__main img,
+.svc-row__subs img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--color-surface);
+}
+
+.svc-row__main figcaption {
+  position: absolute;
+  left: 0.7rem;
+  bottom: 0.7rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(32, 38, 52, 0.78);
+  color: #fff;
+}
+
+.svc-row__subs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.svc-row__subs img {
+  aspect-ratio: 16 / 9;
+}
+
+.svc-row__body {
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.svc-row__body h3 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.35rem, 1.1rem + 0.8vw, 1.7rem);
+}
+
+.svc-row__body h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.svc-row__body h3 a:hover {
+  text-decoration: underline;
+}
+
+.svc-row__summary {
+  color: var(--color-muted);
+}
+
+.svc-row__label {
+  margin: 1.2rem 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--color-gold);
+}
+
+.svc-row__cases {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.svc-row__cases li {
+  position: relative;
+  margin: 0 0 0.3rem;
+  padding-left: 1.4rem;
+  font-size: 0.95rem;
+}
+
+.svc-row__cases li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+.svc-row__flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+
+.svc-row__flow li {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.svc-row__flow li:not(:last-child)::after {
+  content: '→';
+  margin: 0 0.45rem;
+  color: var(--color-line-strong);
+}
+
+.svc-row__more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1.5rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.svc-row__more svg {
+  transition: transform 0.2s var(--ease-out);
+}
+
+.svc-row__more:hover svg {
+  transform: translateX(3px);
+}
+
+/* --- 상황별 추천 --- */
+.svc-fit .answer {
+  font-weight: 400;
+}
+
+.svc-fit__tag {
+  display: inline-block;
+  margin-right: 0.55rem;
+  padding: 0.05rem 0.6rem;
+  border: 1px solid var(--color-accent);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.svc-fit__tag:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* --- 현장 사진 모자이크 --- */
+.mosaic__filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: 0;
+}
+
+.mosaic__filter label {
+  cursor: pointer;
+}
+
+.mosaic__filter input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mosaic__filter span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 40px;
+  padding: 0.35rem 0.95rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 999px;
+  background: var(--color-card);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.mosaic__filter small {
+  font-size: 0.75rem;
+  color: var(--color-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.mosaic__filter label:hover span {
+  border-color: var(--color-accent);
+}
+
+.mosaic__filter input:checked + span {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.mosaic__filter input:checked + span small {
+  color: var(--color-gold-bright);
+}
+
+.mosaic__filter input:focus-visible + span {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.mosaic__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: dense;
+  gap: 0.6rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 900px) {
+  .mosaic__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+}
+
+.mosaic__item {
+  margin: 0;
+}
+
+.mosaic__item--feature {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+.mosaic__item a {
+  position: relative;
+  display: block;
+  height: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-line);
+}
+
+.mosaic__item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
+}
+
+.mosaic__item a:hover img {
+  transform: scale(1.04);
+}
+
+.mosaic__tag {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.55rem;
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(143, 94, 20, 0.92);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.mosaic__cap {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 1.6rem 0.7rem 0.55rem;
+  background: linear-gradient(transparent, rgba(14, 23, 48, 0.78));
+  color: #fff;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+/* 단계 필터 — 선택한 단계만 남기고 크기를 고르게 */
+.mosaic:has(input[value='check']:checked) .mosaic__item:not([data-stage='check']),
+.mosaic:has(input[value='sort']:checked) .mosaic__item:not([data-stage='sort']),
+.mosaic:has(input[value='carry']:checked) .mosaic__item:not([data-stage='carry']),
+.mosaic:has(input[value='clean']:checked) .mosaic__item:not([data-stage='clean']),
+.mosaic:has(input[value='finish']:checked) .mosaic__item:not([data-stage='finish']) {
+  display: none;
+}
+
+.mosaic:has(input:not([value='all']):checked) .mosaic__item--feature {
+  grid-column: auto;
+  grid-row: auto;
+}
+
+@media (min-width: 900px) {
+  .mosaic:has(input:not([value='all']):checked) .mosaic__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* 크게 보기 */
+.mosaic__dialog {
+  width: min(100% - 1.5rem, 64rem);
+  max-height: calc(100dvh - 1.5rem);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-dark);
+  color: #fff;
+  overflow: hidden;
+}
+
+.mosaic__dialog::backdrop {
+  background: rgba(14, 23, 48, 0.82);
+}
+
+.mosaic__dialog figure {
+  margin: 0;
+}
+
+.mosaic__dialog img {
+  display: block;
+  width: 100%;
+  max-height: calc(100dvh - 7rem);
+  object-fit: contain;
+  background: #000;
+}
+
+.mosaic__dialog figcaption {
+  padding: 0.8rem 1rem 0;
+  font-size: 0.92rem;
+}
+
+.mosaic__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0.6rem 0.7rem;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-variant-numeric: tabular-nums;
+}
+
+.mosaic__nav button,
+.mosaic__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.mosaic__nav button:hover,
+.mosaic__close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mosaic__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  background: rgba(14, 23, 48, 0.6);
+}
+
+/* --- 포함 범위 --- */
+.svc-scope {
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 900px) {
+  .svc-scope {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .svc-scope .reasons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.svc-scope__extra {
+  padding: 1.4rem 1.5rem;
+  background: var(--color-card);
+  border: 1px dashed var(--color-line-strong);
+  border-radius: var(--radius-lg);
+}
+
+.svc-scope__extra h3 {
+  margin: 0 0 0.7rem;
+  font-size: 1.05rem;
+}
+
+.svc-scope__extra ul {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+
+.svc-scope__extra li {
+  margin: 0;
+  padding: 0.4rem 0;
+  border-bottom: 1px dotted var(--color-line-strong);
+  font-size: 0.93rem;
+}
+
+.svc-scope__extra p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}

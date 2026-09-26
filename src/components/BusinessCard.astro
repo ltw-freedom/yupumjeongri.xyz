@@ -1,0 +1,123 @@
+---
+import QRCode from 'qrcode';
+import { site, absoluteUrl } from '../data/site';
+import { services } from '../data/services';
+
+/**
+ * 디지털 명함 — 앞면(접수 정보 + 상담 QR) / 뒷면(네이비 브랜드면).
+ * 전화번호·사업자등록번호는 싣지 않는다. 접수 창구는 상담 폼 하나이므로
+ * QR 도 /consult/ 로 보낸다. QR 은 빌드 때 SVG 로 만들어 넣는다(런타임 스크립트 없음).
+ *
+ * JS 가 없으면 앞면만 보이고 뒤집기·공유 버튼은 숨겨진 채로 남는다.
+ */
+const consultUrl = absoluteUrl(site.consultPath);
+const qrSvg = await QRCode.toString(consultUrl, {
+  type: 'svg',
+  margin: 0,
+  errorCorrectionLevel: 'M',
+  color: { dark: '#16233d', light: '#00000000' },
+});
+const shareUrl = absoluteUrl('/service/#card');
+const domain = new URL(site.url).host;
+---
+
+<div class="bcard" id="card" data-bcard>
+  <div class="bcard__stage">
+    <div class="bcard__inner">
+      {/* 앞면 — 접수 정보 */}
+      <div class="bcard__face bcard__face--front" data-face="front">
+        <div class="bcard__brand">
+          <img src="/favicon.svg" alt="" width="34" height="34" />
+          <div>
+            <p class="bcard__name">{site.name}</p>
+            <p class="bcard__role">{services.map((s) => s.name).join(' · ')}</p>
+          </div>
+        </div>
+
+        <dl class="bcard__rows">
+          <div>
+            <dt>상담 접수</dt>
+            <dd><a href={site.consultPath}>온라인 상담 폼</a></dd>
+          </div>
+          <div>
+            <dt>회신</dt>
+            <dd>신청 후 30분 이내</dd>
+          </div>
+          <div>
+            <dt>지역</dt>
+            <dd>{site.areaServed.join(' · ')} 전 지역</dd>
+          </div>
+          <div>
+            <dt>원칙</dt>
+            <dd>{site.promises.map((p) => p.label).join(' · ')}</dd>
+          </div>
+          <div>
+            <dt>사업장</dt>
+            <dd>{site.address.full}</dd>
+          </div>
+        </dl>
+
+        <div class="bcard__foot">
+          <div class="bcard__qr" set:html={qrSvg} role="img" aria-label="상담 신청 페이지로 연결되는 QR 코드" />
+          <p>휴대폰 카메라로 비추면<br />상담 신청 화면이 열립니다.</p>
+          <span class="seal" aria-hidden="true">정찰</span>
+        </div>
+      </div>
+
+      {/* 뒷면 — 브랜드면 */}
+      <div class="bcard__face bcard__face--back" data-face="back" aria-hidden="true">
+        <img src="/favicon.svg" alt="" width="46" height="46" />
+        <p class="bcard__back-name">{site.name}</p>
+        <p class="bcard__back-slogan">{site.slogan}</p>
+        <p class="bcard__back-sub">{site.sloganSub}</p>
+        <p class="bcard__back-domain">{domain}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bcard__actions">
+    <a class="button button--primary" href={site.consultPath}>상담 신청</a>
+    <button type="button" class="button button--ghost" data-bcard-share hidden>명함 공유</button>
+    <button type="button" class="button button--ghost" data-bcard-flip aria-pressed="false" hidden>뒷면 보기</button>
+  </div>
+  <p class="bcard__status" data-bcard-status role="status" aria-live="polite"></p>
+</div>
+
+<script is:inline define:vars={{ shareUrl, brand: site.name }}>
+  (function () {
+    var root = document.querySelector('[data-bcard]');
+    if (!root) return;
+    var flip = root.querySelector('[data-bcard-flip]');
+    var share = root.querySelector('[data-bcard-share]');
+    var status = root.querySelector('[data-bcard-status]');
+    var front = root.querySelector('[data-face="front"]');
+    var back = root.querySelector('[data-face="back"]');
+
+    flip.hidden = false;
+    flip.addEventListener('click', function () {
+      var flipped = root.classList.toggle('is-flipped');
+      flip.setAttribute('aria-pressed', String(flipped));
+      flip.textContent = flipped ? '앞면 보기' : '뒷면 보기';
+      front.setAttribute('aria-hidden', String(flipped));
+      back.setAttribute('aria-hidden', String(!flipped));
+    });
+
+    if (navigator.share || (navigator.clipboard && navigator.clipboard.writeText)) {
+      share.hidden = false;
+      share.addEventListener('click', function () {
+        if (navigator.share) {
+          navigator.share({ title: brand + ' 명함', url: shareUrl }).catch(function () {});
+          return;
+        }
+        navigator.clipboard.writeText(shareUrl).then(
+          function () {
+            status.textContent = '명함 링크를 복사했습니다.';
+          },
+          function () {
+            status.textContent = '복사하지 못했습니다. 주소창의 링크를 전달해 주세요.';
+          },
+        );
+      });
+    }
+  })();
+</script>

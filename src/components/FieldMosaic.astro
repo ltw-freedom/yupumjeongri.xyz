@@ -1,0 +1,151 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { fieldShots, fieldStageLabels, type FieldStage } from '../data/cases';
+
+/**
+ * 작업 단계별 현장 사진 모자이크.
+ * - 단계 필터는 라디오 + CSS :has() 로 동작한다 (JS 없이도 걸러진다).
+ * - 사진을 누르면 <dialog> 로 크게 본다. JS 가 없으면 원본 링크로 열린다.
+ */
+interface Props {
+  overline?: string;
+  heading?: string;
+  lead?: string;
+}
+
+const { overline, heading, lead } = Astro.props;
+
+const stages = Object.keys(fieldStageLabels) as FieldStage[];
+const shots = await Promise.all(
+  fieldShots.map(async (shot) => ({
+    ...shot,
+    full: (await getImage({ src: shot.src, width: 1600, format: 'webp' })).src,
+  })),
+);
+const countOf = (stage: FieldStage) => shots.filter((s) => s.stage === stage).length;
+---
+
+<div class="mosaic" data-mosaic>
+  {
+    heading && (
+      <div class="section-head">
+        {overline && <p class="overline">{overline}</p>}
+        <h2>{heading}</h2>
+        {lead && <p class="lead">{lead}</p>}
+      </div>
+    )
+  }
+
+  <fieldset class="mosaic__filter">
+    <legend class="sr-only">작업 단계로 사진 거르기</legend>
+    <label>
+      <input type="radio" name="mosaic-stage" value="all" checked />
+      <span>전체 <small>{shots.length}</small></span>
+    </label>
+    {
+      stages.map((stage) => (
+        <label>
+          <input type="radio" name="mosaic-stage" value={stage} />
+          <span>
+            {fieldStageLabels[stage]} <small>{countOf(stage)}</small>
+          </span>
+        </label>
+      ))
+    }
+  </fieldset>
+
+  <ul class="mosaic__grid">
+    {
+      shots.map((shot, i) => (
+        <li class:list={['mosaic__item', { 'mosaic__item--feature': shot.feature }]} data-stage={shot.stage}>
+          <a href={shot.full} data-mosaic-open={i} data-caption={shot.caption} data-alt={shot.alt}>
+            <Image
+              src={shot.src}
+              alt={shot.alt}
+              widths={shot.feature ? [640, 1000] : [400, 640]}
+              sizes={shot.feature ? '(min-width: 900px) 46vw, 92vw' : '(min-width: 900px) 23vw, 46vw'}
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="mosaic__tag">{fieldStageLabels[shot.stage]}</span>
+            {shot.caption && <span class="mosaic__cap">{shot.caption}</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <dialog class="mosaic__dialog" data-mosaic-dialog aria-label="현장 사진 크게 보기">
+    <figure>
+      <img src="" alt="" data-mosaic-img />
+      <figcaption data-mosaic-cap></figcaption>
+    </figure>
+    <div class="mosaic__nav">
+      <button type="button" data-mosaic-prev aria-label="이전 사진">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+      </button>
+      <span data-mosaic-count></span>
+      <button type="button" data-mosaic-next aria-label="다음 사진">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+      </button>
+    </div>
+    <button type="button" class="mosaic__close" data-mosaic-close aria-label="닫기">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    </button>
+  </dialog>
+</div>
+
+<script is:inline>
+  (function () {
+    var root = document.querySelector('[data-mosaic]');
+    var dialog = root && root.querySelector('[data-mosaic-dialog]');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+    var img = dialog.querySelector('[data-mosaic-img]');
+    var cap = dialog.querySelector('[data-mosaic-cap]');
+    var count = dialog.querySelector('[data-mosaic-count]');
+    var links = Array.prototype.slice.call(root.querySelectorAll('[data-mosaic-open]'));
+    var list = links;
+    var at = 0;
+
+    // 필터가 걸려 있으면 보이는 사진 안에서만 넘긴다
+    function visible() {
+      return links.filter(function (a) {
+        return a.parentElement.offsetParent !== null;
+      });
+    }
+    function show(i) {
+      at = (i + list.length) % list.length;
+      var a = list[at];
+      img.src = a.getAttribute('href');
+      img.alt = a.getAttribute('data-alt') || '';
+      cap.textContent = a.getAttribute('data-caption') || '';
+      count.textContent = at + 1 + ' / ' + list.length;
+    }
+
+    links.forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        list = visible();
+        show(list.indexOf(a));
+        dialog.showModal();
+      });
+    });
+    dialog.querySelector('[data-mosaic-prev]').addEventListener('click', function () {
+      show(at - 1);
+    });
+    dialog.querySelector('[data-mosaic-next]').addEventListener('click', function () {
+      show(at + 1);
+    });
+    dialog.querySelector('[data-mosaic-close]').addEventListener('click', function () {
+      dialog.close();
+    });
+    // 배경(사진 바깥)을 누르면 닫는다
+    dialog.addEventListener('click', function (e) {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') show(at - 1);
+      if (e.key === 'ArrowRight') show(at + 1);
+    });
+  })();
+</script>

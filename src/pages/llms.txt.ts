@@ -38,7 +38,6 @@ export const GET: APIRoute = async () => {
     `- 서비스 지역: 서울 25개 구, 경기 31개 시·군 (읍·면·동 ${dongCount.toLocaleString('ko-KR')}곳)`,
     `- 상담: 전화 상담은 운영하지 않습니다. ${absoluteUrl(site.consultPath)} 의 상담 폼으로 접수하며, ${site.responsePromise}.`,
     `- 주소: ${site.address.full}`,
-    `- 고지: ${site.legalNotice}`,
     '',
     `## 주거 형태별 비용 범위 (${pricesAsOf} 기준)`,
     '',

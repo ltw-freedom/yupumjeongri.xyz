@@ -83,8 +83,8 @@ export const photos = {
   },
   bagsVolume: {
     src: bagsVolume,
-    alt: '방 안 가득 모아 둔 반출 대기 마대',
-    caption: '반출 대기 · 동작구 흑석동',
+    alt: '욕조와 세면대가 남아 있는 빈집 욕실',
+    caption: '욕실 상태 확인 · 동작구 흑석동',
   },
   livingBefore: {
     src: livingBefore,
@@ -107,6 +107,69 @@ export const photos = {
     caption: '청소 마무리 · 광진구 아파트',
   },
 } satisfies Record<string, Photo>;
+
+/** 서비스별 대표 현장 사진 — 서비스 목록·상세 페이지가 같이 쓴다. 해당 서비스의 실제 장면만 고른다 */
+export const servicePhotos: Record<string, Photo[]> = {
+  yupumjeongri: [photos.sortedBagsGuitar, photos.teamLoadingTruck, photos.roomBeforeBed],
+  'godoksa-yupumjeongri': [photos.ppeHallway, photos.teamCrate, photos.kitchenAfter],
+  'binjip-jeongri': [photos.heroLadderTruck, photos.loadingBagsSunny, photos.bagsVolume],
+};
+
+export type FieldStage = 'check' | 'sort' | 'carry' | 'clean' | 'finish';
+
+export const fieldStageLabels: Record<FieldStage, string> = {
+  check: '현장 확인',
+  sort: '분류 · 선별',
+  carry: '반출',
+  clean: '청소 · 소독',
+  finish: '마무리',
+};
+
+/**
+ * 작업 단계별 현장 사진 — /service/ 의 사진 모자이크.
+ * 같은 현장을 안(방·주방)과 밖(골목·동 앞·발코니)에서 찍은 컷을 섞어 작업 전 과정을 보여준다.
+ * feature 는 모자이크에서 크게(2×2) 놓는 컷. 단계마다 하나 이하로 둔다.
+ * 4열 그리드에 빈칸이 안 생기게 feature×4 + 일반 컷 수가 4의 배수가 되도록 맞출 것 (지금 4×4 + 12).
+ */
+export const fieldShots: (Photo & { stage: FieldStage; feature?: boolean })[] = [
+  { ...photos.heroLadderTruck, stage: 'carry', feature: true },
+  { ...photos.livingBefore, stage: 'check' },
+  { ...photos.roomBeforeBed, stage: 'check' },
+  {
+    src: gangdongKitchenBefore,
+    alt: '정리 전 주방. 그릇과 식재료, 소형 가전이 남아 있다',
+    caption: '정리 전 주방 · 강동구 명일동',
+    stage: 'check',
+  },
+  { ...photos.sortedBagsGuitar, stage: 'sort', feature: true },
+  { ...photos.teamCrate, stage: 'sort' },
+  { ...photos.teamLoadingTruck, stage: 'carry' },
+  { ...photos.balconyHighrise, stage: 'carry' },
+  { ...photos.ppeHallway, stage: 'clean', feature: true },
+  {
+    src: gwangjinSinkBefore,
+    alt: '작업자가 싱크대 상판의 굳은 오염을 약품으로 불려 닦아내는 모습',
+    caption: '약품 세척 · 광진구 아파트',
+    stage: 'clean',
+  },
+  { ...photos.loadingBagsSunny, stage: 'carry' },
+  { ...photos.curtainRail, stage: 'finish' },
+  {
+    src: songpaLivingAfter,
+    alt: '가구와 가전을 모두 반출하고 비운 아파트 거실',
+    caption: '반출 후 거실 · 송파구 아파트',
+    stage: 'finish',
+    feature: true,
+  },
+  { ...photos.kitchenAfter, stage: 'clean' },
+  { ...photos.bagsVolume, stage: 'check' },
+  {
+    src: jungnangRoomAfter,
+    alt: '짐을 반출하고 벽면과 바닥을 정돈한 방',
+    caption: '정돈 마친 방 · 중랑구 면목동',
+    stage: 'finish',
+  },
+];
 
 export type CaseStudy = {
   slug: string;

@@ -7,7 +7,7 @@ import PhotoStrip from '../../components/PhotoStrip.astro';
 import CaseGallery from '../../components/CaseGallery.astro';
 import { services, type Service } from '../../data/services';
 import { regions } from '../../data/areas';
-import { photos, casesByService, type Photo } from '../../data/cases';
+import { servicePhotos, casesByService } from '../../data/cases';
 import { serviceSchema, faqSchema } from '../../data/schema';
 import { priceAnswer } from '../../data/pricing';
 
@@ -25,12 +25,6 @@ interface Props {
 const { service } = Astro.props;
 const others = services.filter((item) => item.slug !== service.slug);
 
-/** 서비스별 현장 사진 — 해당 서비스의 실제 장면만 고른다 */
-const servicePhotos: Record<string, Photo[]> = {
-  yupumjeongri: [photos.sortedBagsGuitar, photos.teamLoadingTruck, photos.roomBeforeBed],
-  'godoksa-yupumjeongri': [photos.ppeHallway, photos.teamCrate, photos.kitchenAfter],
-  'binjip-jeongri': [photos.bagsVolume, photos.heroLadderTruck, photos.loadingBagsSunny],
-};
 const gallery = servicePhotos[service.slug] ?? [];
 const serviceKey = service.slug as Parameters<typeof casesByService>[0];
 const related = casesByService(serviceKey, 2);

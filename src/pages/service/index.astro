@@ -1,47 +1,273 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
-import ServiceCard from '../../components/ServiceCard.astro';
+import BusinessCard from '../../components/BusinessCard.astro';
+import FieldMosaic from '../../components/FieldMosaic.astro';
+import CaseGallery from '../../components/CaseGallery.astro';
+import FAQ from '../../components/FAQ.astro';
 import CTA from '../../components/CTA.astro';
 import { services } from '../../data/services';
+import { cases, servicePhotos } from '../../data/cases';
+import { districtCities } from '../../data/districts';
 import { site } from '../../data/site';
-import { localBusiness } from '../../data/schema';
+import { localBusiness, faqSchema } from '../../data/schema';
+
+/** 상황 → 서비스. 어느 서비스에 해당하는지 모르는 방문자가 가장 많다 */
+const fits = [
+  {
+    worry: '장례를 마치고 부모님 댁을 정리해야 합니다',
+    slug: 'yupumjeongri',
+    answer: '보관할 물건과 정리할 물건을 함께 나누고, 반출 후 청소까지 마칩니다.',
+  },
+  {
+    worry: '멀리 살아서 현장에 여러 번 갈 수 없습니다',
+    slug: 'yupumjeongri',
+    answer: '확인이 필요한 서류·물품은 사진으로 보내드리고, 보관품은 택배로 보내드립니다.',
+  },
+  {
+    worry: '발견이 늦어 냄새가 나고 이웃 민원이 들어옵니다',
+    slug: 'godoksa-yupumjeongri',
+    answer: '냄새 확산을 막는 조치와 소독이 먼저이고, 유품 분류는 그다음입니다.',
+  },
+  {
+    worry: '임대인인데 원상복구를 하고 다시 세를 놓아야 합니다',
+    slug: 'godoksa-yupumjeongri',
+    answer: '오염 자재 철거 범위까지 항목별 견적서로 드려 정산 자료로 쓰실 수 있습니다.',
+  },
+  {
+    worry: '몇 년 비어 있던 집을 팔거나 철거하려고 합니다',
+    slug: 'binjip-jeongri',
+    answer: '폐가전·폐가구·잔여물을 종류별로 반출하고 다음 절차를 밟을 수 있게 비웁니다.',
+  },
+  {
+    worry: '생활 쓰레기가 방과 주방에 쌓여 있습니다',
+    slug: 'binjip-jeongri',
+    answer: '쌓인 폐기물을 먼저 빼고, 수납장 안과 바닥까지 닦아 마무리합니다.',
+  },
+];
+const nameOf = (slug: string) => services.find((s) => s.slug === slug)?.name ?? '';
+
+/** 서비스마다 하나씩 — 유품정리 · 특수청소 · 쓰레기집 정리 */
+const featuredCases = ['gangdong-myeongil-kitchen', 'gwangjin-sink', 'gwangju-room']
+  .map((slug) => cases.find((c) => c.slug === slug))
+  .filter((c) => c !== undefined);
+
+const included = [
+  { title: '현장 확인 · 항목별 견적', body: '물품 양과 반출 동선을 보고 항목별로 적은 견적서를 드립니다.' },
+  { title: '서류 · 기록물 분류', body: '통장·계약서·사진 등은 따로 모아 유가족께 전달합니다.' },
+  { title: '폐기물 분리 반출', body: '가전·가구·생활 폐기물을 종류별로 나눠 규정대로 처리합니다.' },
+  { title: '작업 전후 사진', body: '같은 자리에서 찍은 전후 사진을 보내드립니다. 원거리 유가족은 필수입니다.' },
+  { title: '반출 후 청소', body: '짐을 뺀 자리를 닦아 반환·매매·임대를 바로 진행할 수 있게 합니다.' },
+  { title: '입회 · 시간대 조율', body: '원하시면 유가족 입회하에 분류하고, 반출 시간대도 협의해 정합니다.' },
+];
+
+const extras = ['특수청소 · 소독 · 탈취', '오염 자재 철거 (바닥재 · 벽지)', '도배 · 장판 등 마감', '사다리차 · 소형 차량 추가'];
+
+const faqs = [
+  {
+    q: '어떤 서비스를 신청해야 할지 모르겠어요.',
+    a: '서비스를 고르지 않고 상담을 신청하셔도 됩니다. 주거 형태와 현장 상황을 적어 주시면 어느 서비스에 해당하는지, 어떤 항목이 필요한지 판단해 안내드립니다.',
+  },
+  {
+    q: '유품정리와 특수청소를 한 번에 맡길 수 있나요?',
+    a: '가능합니다. 한 현장에서 필요한 작업을 모두 한 견적서에 항목별로 나눠 적어 드리고, 같은 팀이 순서대로 진행합니다.',
+  },
+  {
+    q: '방문 견적에 비용이 드나요?',
+    a: '서울·경기 지역은 방문 견적 비용이 발생하지 않습니다. 견적을 받아보신 뒤 진행 여부를 결정하셔도 됩니다.',
+  },
+  {
+    q: '작업 결과는 어떻게 확인하나요?',
+    a: '작업 전과 후를 같은 자리에서 찍어 보내드립니다. 현장에 오지 못하시는 유가족께는 분류 중 확인이 필요한 물품도 사진으로 공유해 확인받은 뒤 진행합니다.',
+  },
+];
 ---
 
 <BaseLayout
   title={`서비스 안내 | ${site.name}`}
-  description="유품정리, 고독사 유품정리, 빈집 정리 서비스를 안내합니다. 현장 조건에 따라 진행 순서와 포함 범위가 달라집니다."
-  jsonLd={[localBusiness()]}
+  description="유품정리, 고독사 유품정리, 빈집 정리 서비스를 안내합니다. 상황별로 맞는 서비스, 현장 사진, 공통 포함 항목을 한 페이지에 정리했습니다."
+  jsonLd={[localBusiness(), faqSchema(faqs)]}
 >
   <Breadcrumb items={[{ label: '서비스' }]} />
 
-  <section class="section">
+  {/* 도입 — 소개 + 디지털 명함 */}
+  <section class="section svc-intro">
+    <div class="container svc-intro__inner">
+      <div class="svc-intro__copy">
+        <p class="svc-intro__overline">SERVICE</p>
+        <h1>서비스 안내</h1>
+        <p class="lead">
+          현장 조건에 따라 필요한 작업이 다릅니다. 어떤 서비스에 해당하는지 애매하다면 상담 시 현장 상황을
+          적어주시면 판단해 안내드립니다.
+        </p>
+        <ul class="svc-facts">
+          <li><b>{services.length}<small>가지</small></b><span>서비스</span></li>
+          <li><b>{districtCities.length}<small>곳</small></b><span>서울·경기 시·군·구</span></li>
+          <li><b>30<small>분</small></b><span>안에 회신</span></li>
+          <li><b>0<small>원</small></b><span>견적서 외 추가금</span></li>
+        </ul>
+        <p class="svc-intro__note">
+          명함은 링크로 가족에게 전달하셔도 됩니다. 명함의 QR 을 휴대폰 카메라로 비추면 상담 신청 화면이 열립니다.
+        </p>
+      </div>
+      <div class="svc-intro__card">
+        <BusinessCard />
+      </div>
+    </div>
+  </section>
+
+  {/* 서비스 3종 — 사진과 함께 */}
+  <section class="section section--surface">
     <div class="container">
-      <h1>서비스 안내</h1>
-      <p class="lead">
-        현장 조건에 따라 필요한 작업이 다릅니다. 어떤 서비스에 해당하는지 애매하다면 상담 시 현장 상황을
-        적어주시면 판단해 안내드립니다.
-      </p>
-      <ul class="grid">
-        {services.map((service) => <ServiceCard service={service} />)}
+      <div class="section-head">
+        <p class="overline">01 — 서비스</p>
+        <h2>세 가지 서비스, 현장마다 순서가 다릅니다</h2>
+      </div>
+      <ul class="svc-rows">
+        {
+          services.map((service, index) => {
+            const [main, ...subs] = servicePhotos[service.slug] ?? [];
+            return (
+              <li class="svc-row">
+                {main && (
+                  <div class="svc-row__media">
+                    <figure class="svc-row__main">
+                      <Image
+                        src={main.src}
+                        alt={main.alt}
+                        widths={[640, 1000]}
+                        sizes="(min-width: 900px) 34vw, 92vw"
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                        decoding="async"
+                      />
+                      {main.caption && <figcaption>{main.caption}</figcaption>}
+                    </figure>
+                    <div class="svc-row__subs">
+                      {subs.map((photo) => (
+                        <figure>
+                          <Image src={photo.src} alt={photo.alt} widths={[320, 480]} sizes="(min-width: 900px) 17vw, 46vw" loading="lazy" decoding="async" />
+                        </figure>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div class="svc-row__body">
+                  <span class="service-card__index">{String(index + 1).padStart(2, '0')}</span>
+                  <h3>
+                    <a href={`/service/${service.slug}/`}>{service.name}</a>
+                  </h3>
+                  <p class="svc-row__summary">{service.summary}</p>
+                  <p class="svc-row__label">이런 경우에 필요합니다</p>
+                  <ul class="svc-row__cases">
+                    {service.cases.slice(0, 3).map((item) => (
+                      <li>{item}</li>
+                    ))}
+                  </ul>
+                  <p class="svc-row__label">진행 순서</p>
+                  <ol class="svc-row__flow">
+                    {service.steps.map((step) => (
+                      <li>{step.title}</li>
+                    ))}
+                  </ol>
+                  <a class="svc-row__more" href={`/service/${service.slug}/`}>
+                    {service.name} 자세히 보기
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </a>
+                </div>
+              </li>
+            );
+          })
+        }
       </ul>
     </div>
   </section>
 
+  {/* 상황별 추천 */}
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <p class="overline">02 — 상황별 안내</p>
+        <h2>어떤 서비스가 맞는지 모르겠다면</h2>
+        <p class="lead">가장 많이 받는 상황을 정리했습니다. 여기에 없는 경우도 상담 시 적어주시면 안내드립니다.</p>
+      </div>
+      <ul class="compare svc-fit">
+        {
+          fits.map((fit) => (
+            <li>
+              <span class="worry">{fit.worry}</span>
+              <span class="answer">
+                <a class="svc-fit__tag" href={`/service/${fit.slug}/`}>{nameOf(fit.slug)}</a>
+                {fit.answer}
+              </span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {/* 현장 사진 — 단계별, 안팎 여러 각도 */}
   <section class="section section--surface">
     <div class="container">
-      <h2>공통으로 포함되는 것</h2>
-      <ul>
-        <li>현장 확인 및 항목별 견적 안내</li>
-        <li>서류·기록물 분류 후 유가족 전달</li>
-        <li>폐기물 종류별 분리 반출</li>
-        <li>작업 전후 사진 공유 (원거리 유가족의 경우 필수로 진행)</li>
-        <li>반출 후 공간 청소</li>
-      </ul>
-      <p class="note">
-        특수청소·소독, 자재 철거, 도배·장판 등 마감 작업은 현장에 따라 별도 항목으로 안내드립니다.
-        자세한 내용은 <a href="/cost/">비용 안내</a>를 확인해 주세요.
-      </p>
+      <FieldMosaic
+        overline="03 — 현장 기록"
+        heading="현장 확인부터 마무리까지, 직접 찍었습니다"
+        lead="방 안, 복도, 동 앞, 발코니에서 찍은 실제 작업 장면입니다. 단계를 눌러 거르고, 사진을 누르면 크게 볼 수 있습니다."
+      />
+    </div>
+  </section>
+
+  {/* 정리 전·후 */}
+  <section class="section">
+    <div class="container">
+      <CaseGallery
+        items={featuredCases}
+        overline="04 — 정리 전 · 후"
+        heading="같은 자리에서 찍은 전과 후"
+        lead="유품정리, 특수청소, 쓰레기집 정리 현장을 하나씩 골랐습니다."
+        moreLink
+      />
+    </div>
+  </section>
+
+  {/* 공통 포함 / 별도 항목 */}
+  <section class="section section--surface">
+    <div class="container">
+      <div class="section-head">
+        <p class="overline">05 — 포함 범위</p>
+        <h2>어느 서비스든 기본으로 포함됩니다</h2>
+      </div>
+      <div class="svc-scope">
+        <ol class="reasons">
+          {
+            included.map((item) => (
+              <li>
+                <b>{item.title}</b>
+                <p>{item.body}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <aside class="svc-scope__extra">
+          <h3>현장에 따라 별도 항목</h3>
+          <ul>
+            {extras.map((item) => <li>{item}</li>)}
+          </ul>
+          <p>
+            필요한 경우에만 견적서에 따로 적어 안내드립니다. 견적서에 없는 항목은 청구하지 않습니다.
+            단가는 <a href="/cost/">비용 안내</a>에 공개해 두었습니다.
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <FAQ items={faqs} />
     </div>
   </section>
 
