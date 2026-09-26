@@ -1891,6 +1891,11 @@ tbody th {
 .quick-consult__row input {
   flex: 1;
   min-width: 0;
+  /*
+   * width 를 퍼센트로 줘야 입력칸의 고유 너비(기본 20자)가 부모의 최소 너비로 번지지 않는다.
+   * 없으면 세로 배치(520px 이하) + 휴대폰 글자 크게 설정에서 카드·그리드가 화면보다 넓어진다.
+   */
+  width: 100%;
   min-height: 54px;
   padding: 0.6rem 0.9rem;
   /* 16px 미만이면 iOS 가 입력 시 화면을 확대한다 */
@@ -2152,6 +2157,7 @@ tbody th {
 
 .estimate__form {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
 }
 
@@ -2250,6 +2256,7 @@ tbody th {
 /* --- 지역 페이지 첫 화면 — AreaQuick.astro --- */
 .area-quick {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   margin: 1.25rem 0 0.5rem;
 }
@@ -2577,6 +2584,7 @@ tbody th {
 
 .svc-intro__inner {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
 }
@@ -2658,6 +2666,7 @@ tbody th {
 
 .bcard__inner {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   transition: transform 0.7s var(--ease-out);
   transform-style: preserve-3d;
 }
@@ -2768,6 +2777,7 @@ tbody th {
 
 .bcard__foot p {
   flex: 1;
+  min-width: 0;
   margin: 0;
   font-size: 0.8rem;
   line-height: 1.5;
@@ -2806,6 +2816,7 @@ tbody th {
   font-weight: 700;
   letter-spacing: 0.35em;
   text-indent: 0.35em;
+  overflow-wrap: anywhere;
 }
 
 .bcard__back-slogan {
