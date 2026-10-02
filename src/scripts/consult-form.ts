@@ -13,6 +13,8 @@
  * 판정 규칙은 functions/api/consult.js 의 normalizePhone() 과 같게 유지할 것.
  */
 
+import { track } from './funnel';
+
 const DRAFT_KEY = 'consult-draft';
 const PHONE_RE = /^01[016789]\d{7,8}$/;
 /** 되살리지 않는 필드 — 허니팟과 페이지마다 달라지는 값 */
@@ -115,13 +117,16 @@ function enhance(form: HTMLFormElement) {
     if (!value) {
       event.preventDefault();
       showPhoneError(form, '연락받으실 휴대폰 번호를 입력해 주세요.');
+      track('invalid');
       return;
     }
     if (!PHONE_RE.test(value)) {
       event.preventDefault();
       showPhoneError(form, '휴대폰 번호를 다시 확인해 주세요. 예: 010-1234-5678');
+      track('invalid');
       return;
     }
+    track('submit');
     if (phone) phone.value = formatPhone(phone.value);
     saveDraft(form);
 

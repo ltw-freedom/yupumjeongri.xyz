@@ -149,6 +149,8 @@ export async function onRequestPost(context) {
     return redirect('/consult/?error=send', origin);
   }
 
+  // 깔때기 기록 (worker/funnel.js) — Worker 가 넘겨줄 때만
+  context.onConsult?.(page);
   return redirect('/consult/done/', origin);
 }
 

@@ -14,5 +14,18 @@
     // (www 는 DNS 레코드가 외부 관리라 커스텀 도메인 대신 라우트 www.yupumjeongri.xyz/* 로 붙였다)
     // run_worker_first 는 경로 패턴만 받고 호스트를 구분하지 못한다. 트래픽이 작아 비용 차이는 없다.
     "run_worker_first": true
+  },
+  // 방문·상담 깔때기 기록 (worker/funnel.js). 스키마는 migrations/ — 바꾸면
+  // npx wrangler d1 migrations apply yupumjeongri-funnel --remote
+  "d1_databases": [
+    {
+      "binding": "FUNNEL_DB",
+      "database_name": "yupumjeongri-funnel",
+      "database_id": "6e9fd8d1-4803-4ccd-9b72-5bf0765909c0"
+    }
+  ],
+  // 매일 09:00 KST(00:00 UTC) 전날 깔때기 요약을 Slack 상담 채널로 보낸다
+  "triggers": {
+    "crons": ["0 0 * * *"]
   }
 }
