@@ -29,3 +29,6 @@ scripts/og-image.svg
 
 # 네이버 SERP 저장본 (키워드 리서치용 로컬 파일)
 web_*.html
+
+# 쇼릴 빌드 캐시 (폰트 원본·확인용 스틸)
+docs/showreel/.cache/

@@ -1,0 +1,1077 @@
+<title>대한유품정리 Showreel</title>
+<style>
+/* Fonts are subset to the glyphs in this file and inlined by build.py */
+@font-face { font-family: 'Pretendard Reel'; src: url(__FONT_SANS__) format('woff2'); font-weight: 100 900; font-display: block; }
+@font-face { font-family: 'Noto Serif KR Reel'; src: url(__FONT_SERIF__) format('woff2'); font-weight: 700; font-display: block; }
+@font-face { font-family: 'Plex Mono Reel'; src: url(__FONT_MONO4__) format('woff2'); font-weight: 400; font-display: block; }
+@font-face { font-family: 'Plex Mono Reel'; src: url(__FONT_MONO5__) format('woff2'); font-weight: 500; font-display: block; }
+
+/* Layout: a fixed 1920×1080 stage scaled into a 16:9 player; chapter list and controls sit under it */
+:root {
+  /* Stage palette: fixed, copied from src/styles/global.css ("정직한 견적서") */
+  --paper: #faf9f6;
+  --surface: #f2efe8;
+  --card: #fffefb;
+  --line: #e2ddd2;
+  --line-strong: #c9c2b2;
+  --ink: #202634;
+  --muted: #5d6472;
+  --faint: #8a8f9b;
+  --navy: #16233d;
+  --navy-deep: #0e1730;
+  --navy-soft: #e8ebf1;
+  --gold: #8f5e14;
+  --gold-bright: #c8892a;
+
+  --serif: 'Noto Serif KR Reel', 'Noto Serif KR', 'Apple SD Gothic Neo', serif;
+  --sans: 'Pretendard Reel', 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --mono: 'Plex Mono Reel', 'IBM Plex Mono', ui-monospace, 'Pretendard Reel', monospace;
+
+  /* Page shell: follows the viewer's theme */
+  --shell-bg: #ece8de;
+  --shell-fg: #202634;
+  --shell-muted: #5d6472;
+  --shell-line: #d5cebf;
+  --shell-raise: #f6f4ee;
+  --shell-accent: #16233d;
+  --shell-on-accent: #fffefb;
+  --shell-mark: #8f5e14;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --shell-bg: #0b1222;
+    --shell-fg: #e9e6df;
+    --shell-muted: #9ca3b2;
+    --shell-line: #263252;
+    --shell-raise: #111a2f;
+    --shell-accent: #e9e6df;
+    --shell-on-accent: #0b1222;
+    --shell-mark: #d9a04a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --shell-bg: #0b1222;
+  --shell-fg: #e9e6df;
+  --shell-muted: #9ca3b2;
+  --shell-line: #263252;
+  --shell-raise: #111a2f;
+  --shell-accent: #e9e6df;
+  --shell-on-accent: #0b1222;
+  --shell-mark: #d9a04a;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+
+body {
+  background: var(--shell-bg);
+  color: var(--shell-fg);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  word-break: keep-all;
+  padding-inline: 16px;
+}
+
+.page { max-width: 1240px; margin: 0 auto; padding-block: 40px 56px; }
+.intro { max-width: 46rem; margin-bottom: 28px; }
+.kicker { font: 500 12px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--shell-mark); margin: 0 0 10px; }
+.intro h1 { font: 700 clamp(1.7rem, 1.2rem + 2vw, 2.5rem)/1.25 var(--serif); letter-spacing: -0.015em; margin: 0 0 12px; text-wrap: balance; }
+.lede { margin: 0; color: var(--shell-muted); font-size: 1.02rem; max-width: 65ch; }
+
+.player { display: grid; gap: 14px; }
+.viewport {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--navy-deep);
+  box-shadow: 0 1px 0 var(--shell-line), 0 24px 60px -28px rgba(8, 14, 30, 0.45);
+}
+
+.controls { display: flex; align-items: center; gap: 14px; }
+.btn-play {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: var(--shell-accent);
+  color: var(--shell-on-accent);
+  cursor: pointer;
+}
+.btn-play svg { width: 18px; height: 18px; fill: currentColor; }
+.btn-play:focus-visible, .scrub:focus-visible, .ch button:focus-visible { outline: 2px solid var(--shell-mark); outline-offset: 3px; }
+.track { position: relative; flex: 1; min-width: 0; height: 44px; display: flex; align-items: center; }
+.scrub {
+  --pct: 0%;
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 4px; margin: 0;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--shell-accent) var(--pct), var(--shell-line) var(--pct));
+  cursor: pointer;
+}
+.scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--shell-accent); border: 3px solid var(--shell-bg); box-shadow: 0 0 0 1px var(--shell-accent); }
+.scrub::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: var(--shell-accent); border: 3px solid var(--shell-bg); }
+.marks { position: absolute; inset: 0; pointer-events: none; }
+.marks span { position: absolute; top: 50%; width: 2px; height: 12px; margin-top: -6px; background: var(--shell-mark); border-radius: 1px; }
+.tc { flex: none; font: 500 13px/1 var(--mono); color: var(--shell-muted); font-variant-numeric: tabular-nums; min-width: 9.5ch; text-align: right; }
+
+.chapters { list-style: none; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--shell-line); }
+.ch { border-bottom: 1px solid var(--shell-line); min-width: 0; }
+.ch:not(:nth-child(3n + 1)) { border-left: 1px solid var(--shell-line); }
+.ch button {
+  width: 100%; height: 100%;
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-content: start;
+  padding: 14px 16px 16px;
+  text-align: left; font: inherit; color: inherit;
+  background: transparent; border: 0; cursor: pointer;
+}
+.ch button:hover { background: var(--shell-raise); }
+.ch-t { font: 500 12px/1.6 var(--mono); color: var(--shell-muted); font-variant-numeric: tabular-nums; }
+.ch-n { font: 700 16px/1.5 var(--serif); }
+.ch-n em { font: 500 11px/1 var(--mono); font-style: normal; letter-spacing: 0.12em; text-transform: uppercase; color: var(--shell-muted); margin-left: 6px; }
+.ch-d { grid-column: 2; font-size: 14px; line-height: 1.55; color: var(--shell-muted); }
+.ch.is-on .ch-t { color: var(--shell-mark); }
+.ch.is-on button { background: var(--shell-raise); box-shadow: inset 0 2px 0 var(--shell-mark); }
+.keys { margin: 14px 0 0; font: 400 12px/1.5 var(--mono); color: var(--shell-muted); }
+
+@media (max-width: 760px) {
+  .chapters { grid-template-columns: minmax(0, 1fr); }
+  .ch:not(:nth-child(3n + 1)) { border-left: 0; }
+  .page { padding-block: 24px 40px; }
+}
+
+/* Capture mode (render.mjs): the stage fills a 1920×1080 window at scale 1 */
+.capture body { padding: 0; overflow: hidden; }
+.capture .viewport { position: fixed; left: 0; top: 0; width: 1920px; height: 1080px; aspect-ratio: auto; border-radius: 0; z-index: 9; box-shadow: none; }
+
+/* ---------------------------------------------------------------- stage */
+.stage {
+  position: absolute; left: 0; top: 0;
+  width: 1920px; height: 1080px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: radial-gradient(110% 90% at 50% 42%, #1c2b4b 0%, var(--navy) 46%, var(--navy-deep) 100%);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+  letter-spacing: 0;
+  word-break: keep-all;
+}
+.stage *, .stage *::before, .stage *::after { box-sizing: border-box; }
+.stage p { margin: 0; }
+.scene { position: absolute; inset: 0; }
+.a { position: absolute; }
+.serif { font-family: var(--serif); font-weight: 700; }
+.mono { font-family: var(--mono); }
+.num { font-variant-numeric: tabular-nums; }
+.ch-span { display: inline-block; will-change: transform; }
+
+/* S1 mark */
+#fl1 { position: absolute; left: 700px; top: 260px; width: 520px; height: 520px; overflow: visible; }
+#s1Word { left: 0; right: 0; top: 522px; text-align: center; font-size: 112px; line-height: 1.2; color: #fff; letter-spacing: 0.02em; }
+#s1Sub { left: 0; right: 0; top: 694px; text-align: center; font-size: 20px; font-weight: 500; color: var(--gold-bright); white-space: nowrap; }
+
+/* paper sheet */
+#sheet { position: absolute; inset: 0; background: var(--paper); }
+#rules { position: absolute; inset: 0; }
+.rule-h { position: absolute; left: 0; right: 0; height: 1.5px; background: var(--line); transform-origin: 0 50%; }
+.rule-v { position: absolute; top: 112px; bottom: 80px; width: 1.5px; background: var(--line-strong); transform-origin: 50% 0; }
+
+/* S2 promise */
+#s2Head { left: 260px; top: 222px; }
+.hl { display: block; overflow: hidden; height: 196px; padding-top: 4px; font-size: 150px; line-height: 1.22; letter-spacing: -0.015em; color: var(--ink); white-space: pre; }
+.hl .gold { color: var(--gold); }
+#s2Under { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; pointer-events: none; }
+#s2Under path { fill: none; stroke: var(--gold-bright); stroke-width: 7; stroke-linecap: round; stroke-dasharray: 1; }
+#s2Prom { left: 260px; top: 716px; display: flex; gap: 64px; }
+.prom { width: 430px; position: relative; padding-top: 26px; }
+.prom-line { position: absolute; left: 0; top: 0; right: 0; height: 2.5px; background: var(--ink); transform-origin: 0 50%; }
+.prom-k { font-size: 40px; line-height: 1.3; color: var(--navy); }
+.prom-k b { color: var(--gold); font-weight: 700; }
+.prom-d { margin-top: 8px; font-size: 22px; line-height: 1.55; color: var(--muted); }
+#s2Spec { left: 1356px; top: 252px; font-size: 17px; line-height: 1.75; color: var(--muted); border-left: 2px solid var(--gold-bright); padding-left: 18px; }
+#s2Spec b { color: var(--gold); font-weight: 500; }
+
+/* shared card: 견적서 in S3, 예상 비용 in S4 */
+#card {
+  position: absolute;
+  background: var(--card);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: 0 3px 6px rgba(22, 35, 61, 0.06), 0 44px 90px -34px rgba(22, 35, 61, 0.34);
+  overflow: hidden;
+  transform-origin: 50% 50%;
+}
+#cardBorder { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+#cardBorder rect { fill: none; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 1; }
+.layer { position: absolute; left: 0; top: 0; }
+
+#c3 { width: 600px; height: 700px; }
+#docTitle { left: 0; width: 600px; top: 58px; text-align: center; font-size: 46px; line-height: 1.3; }
+#docSub { left: 0; width: 600px; top: 128px; text-align: center; font-size: 15px; letter-spacing: 0.3em; text-indent: 0.3em; color: var(--faint); }
+#docRule { left: 56px; top: 170px; width: 488px; height: 2.5px; background: var(--ink); }
+.row { position: absolute; left: 56px; width: 488px; display: flex; align-items: baseline; gap: 12px; font-size: 24px; line-height: 1.5; }
+.row .lbl { white-space: nowrap; }
+.row .dots { flex: 1; min-width: 0; height: 1px; border-bottom: 2px dotted var(--line-strong); transform: translateY(-7px); }
+.row .val { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.row .val.gold { color: var(--gold); }
+#zero { display: inline-block; transform-origin: 100% 60%; }
+#docFootLine { left: 56px; top: 522px; width: 488px; height: 1.5px; background: var(--line); transform-origin: 0 50%; }
+#docFoot { left: 56px; top: 548px; width: 330px; font-size: 20px; line-height: 1.6; color: var(--muted); }
+#seal, #ink { left: 428px; top: 538px; width: 116px; height: 116px; border-radius: 50%; }
+#seal { border: 3px solid var(--gold-bright); display: grid; place-items: center; color: var(--gold); font-size: 32px; letter-spacing: 0.04em; background: rgba(255, 254, 251, 0.6); }
+#seal::before { content: ''; position: absolute; inset: 7px; border-radius: 50%; border: 1.5px solid var(--gold-bright); }
+#ink { border: 2px solid var(--gold-bright); }
+
+/* S3 callouts */
+#coSvg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; pointer-events: none; }
+#coSvg path { fill: none; stroke: var(--gold-bright); stroke-width: 1.75; stroke-dasharray: 1; }
+#coSvg circle { fill: var(--paper); stroke: var(--gold-bright); stroke-width: 2.5; }
+.co { width: 420px; }
+.co.left { text-align: right; }
+.co-t { font-size: 21px; font-weight: 700; line-height: 1.3; color: var(--ink); }
+.co-d { margin-top: 6px; font-size: 15.5px; line-height: 1.5; color: var(--muted); }
+.co-d b { color: var(--gold); font-weight: 500; }
+#s3Say { left: 180px; top: 724px; font-size: 46px; line-height: 1.4; letter-spacing: -0.015em; color: var(--ink); }
+#s3Say .gold { color: var(--gold); }
+
+/* S4 estimator */
+#s4L { left: 180px; top: 154px; width: 940px; }
+.s4-over { font: 500 18px/1 var(--mono); color: var(--gold); letter-spacing: 0.14em; }
+.s4-h { font-size: 62px; line-height: 1.25; letter-spacing: -0.015em; margin: 18px 0 40px; }
+.grp { margin-bottom: 26px; }
+.lg { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 22px; line-height: 1.2; margin-bottom: 14px; }
+.lg i { font-style: normal; flex: none; width: 34px; height: 34px; border: 1.5px solid var(--gold-bright); border-radius: 50%; display: grid; place-items: center; font: 700 17px/1 var(--serif); color: var(--gold); }
+.chips { display: flex; gap: 12px; }
+.chip { height: 56px; padding: 0 24px; display: flex; align-items: center; border: 1.5px solid var(--line-strong); border-radius: 6px; background: var(--card); font-size: 20px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.chip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+#s4F { left: 180px; top: 872px; font-size: 19px; line-height: 1.75; color: var(--muted); }
+#s4F b { color: var(--gold); font-weight: 500; }
+#s4F i { font-style: normal; color: var(--navy); font-weight: 500; }
+#cursor { left: 0; top: 0; width: 38px; height: 46px; overflow: visible; transform-origin: 0 0; }
+#cursor path { fill: var(--navy); stroke: #fff; stroke-width: 1.6; stroke-linejoin: round; }
+#ripple { left: 0; top: 0; width: 80px; height: 80px; margin: -40px 0 0 -40px; border-radius: 50%; border: 2.5px solid var(--navy); }
+
+#c4 { width: 600px; height: 750px; }
+#c4Over { left: 56px; top: 56px; font: 500 15px/1 var(--mono); letter-spacing: 0.16em; color: var(--faint); }
+#c4Title { left: 56px; top: 82px; font-size: 42px; line-height: 1.3; }
+#c4Rule { left: 56px; top: 156px; width: 488px; height: 2.5px; background: var(--ink); }
+#c4Track { left: 56px; top: 262px; width: 488px; height: 1.5px; background: var(--line-strong); }
+.tick { position: absolute; top: 262px; width: 1.5px; height: 11px; background: var(--line-strong); }
+.tick-l { position: absolute; top: 282px; font: 400 14px/1 var(--mono); color: var(--faint); transform: translateX(-50%); white-space: nowrap; }
+#segBase, #segGold { top: 252px; height: 21px; border-radius: 3px; }
+#segBase { background: var(--navy-soft); border: 1.5px solid var(--navy); }
+#segGold { background: var(--gold-bright); }
+.endl { top: 214px; font: 500 17px/1 var(--mono); transform: translateX(-50%); white-space: nowrap; font-variant-numeric: tabular-nums; }
+#c4Big { left: 56px; top: 326px; font-size: 60px; line-height: 1.3; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#c4Vat { left: 56px; top: 414px; font-size: 18px; color: var(--muted); }
+#c4Foot { left: 56px; top: 690px; font-size: 16px; color: var(--muted); }
+.row.r4 { font-size: 21px; }
+
+/* S5 responsive */
+#frame { position: absolute; background: var(--paper); border: 1.5px solid var(--line-strong); overflow: hidden; box-shadow: 0 3px 6px rgba(22, 35, 61, 0.06), 0 50px 100px -40px rgba(22, 35, 61, 0.38); }
+#urlbar { position: absolute; left: 0; right: 0; top: 0; height: 56px; background: var(--surface); border-bottom: 1.5px solid var(--line); }
+#urlpill { position: absolute; top: 12px; height: 32px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); display: grid; place-items: center; font: 400 15px/1 var(--mono); color: var(--muted); white-space: nowrap; }
+#fc { position: absolute; left: 0; right: 0; top: 56px; bottom: 0; overflow: hidden; }
+#fcHline { position: absolute; left: 0; right: 0; height: 1.5px; background: var(--line); }
+#s5logo { display: flex; align-items: center; gap: 10px; transform-origin: 0 50%; white-space: nowrap; }
+#s5logo svg { width: 34px; height: 34px; }
+#s5logo span { font: 700 22px/1 var(--serif); color: var(--ink); }
+#s5nav { top: 18px; display: flex; align-items: center; gap: 28px; font-size: 17px; font-weight: 500; color: var(--ink); white-space: nowrap; }
+.s5btn { height: 42px; padding: 0 20px; display: grid; place-items: center; border-radius: 6px; background: var(--navy); color: #fff; font-weight: 600; font-size: 16px; white-space: nowrap; }
+#s5burger { top: 20px; width: 30px; height: 22px; display: flex; flex-direction: column; justify-content: space-between; }
+#s5burger i { display: block; height: 2.5px; border-radius: 2px; background: var(--ink); }
+#s5h1 { font-family: var(--serif); font-weight: 700; letter-spacing: -0.015em; white-space: nowrap; line-height: 1.3; color: var(--ink); }
+#s5h1 em { font-style: normal; color: var(--gold); }
+#s5lead { color: var(--muted); white-space: nowrap; }
+#s5input { border: 1.5px solid var(--line-strong); border-radius: 6px; background: var(--card); }
+#s5input .ph { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--faint); white-space: nowrap; }
+#s5input .s5btn { position: absolute; right: 6px; top: 6px; bottom: 6px; height: auto; }
+#s5alt { color: var(--navy); font-weight: 600; white-space: nowrap; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+#s5photo { border-radius: 8px; overflow: hidden; background: var(--surface); }
+#s5photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+#s5doc { width: 300px; height: 252px; transform-origin: 0 0; background: var(--card); border: 1.5px solid var(--line-strong); border-radius: 6px; box-shadow: 0 30px 50px -24px rgba(22, 35, 61, 0.4); }
+#s5doc::before { content: ''; position: absolute; inset: 6px; border: 1px solid var(--line); border-radius: 2px; }
+.md-t { position: absolute; left: 0; right: 0; top: 18px; text-align: center; font: 700 17px/1.3 var(--serif); letter-spacing: 0.55em; text-indent: 0.55em; }
+.md-r { position: absolute; left: 22px; right: 22px; top: 52px; height: 2px; background: var(--ink); }
+.md-row { position: absolute; left: 22px; right: 22px; display: flex; align-items: baseline; gap: 6px; font-size: 13px; }
+.md-row .dots { flex: 1; border-bottom: 1.5px dotted var(--line-strong); transform: translateY(-4px); }
+.md-row b { font-variant-numeric: tabular-nums; }
+.md-row b.gold { color: var(--gold); }
+.md-seal { position: absolute; right: 22px; bottom: 16px; width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--gold-bright); display: grid; place-items: center; font: 700 14px/1 var(--serif); color: var(--gold); transform: rotate(-8deg); }
+.md-foot { position: absolute; left: 22px; bottom: 22px; width: 170px; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+#s5cta { left: 0; right: 0; height: 80px; background: rgba(250, 249, 246, 0.96); border-top: 1.5px solid var(--line); }
+#s5cta .b { position: absolute; top: 14px; height: 52px; border-radius: 6px; display: grid; place-items: center; font-size: 17px; font-weight: 600; white-space: nowrap; }
+#ctaGhost { left: 16px; border: 1.5px solid var(--navy); color: var(--navy); background: var(--card); }
+#ctaMain { background: var(--navy); color: #fff; }
+#tap { left: 0; top: 0; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 3px solid var(--navy); }
+
+#ruler { left: 0; top: 112px; height: 1.5px; background: var(--gold-bright); }
+#ruler::before, #ruler::after { content: ''; position: absolute; top: -9px; width: 1.5px; height: 20px; background: var(--gold-bright); }
+#ruler::before { left: 0; }
+#ruler::after { right: 0; }
+#rulerL { top: 66px; font: 500 24px/1 var(--mono); color: var(--gold); transform: translateX(-50%); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bp { top: 96px; height: 880px; width: 0; border-left: 1.5px dashed var(--line-strong); }
+.bp-l { top: 988px; font: 400 15px/1.3 var(--mono); color: var(--muted); white-space: nowrap; }
+.bp-l b { color: var(--gold); font-weight: 500; }
+
+#s5Cap { left: 180px; top: 330px; width: 500px; }
+#s5Cap .s4-over { display: block; }
+#s5Cap h2 { margin: 20px 0 22px; font-size: 56px; line-height: 1.3; letter-spacing: -0.015em; font-weight: 700; }
+#s5Cap p { font-size: 21px; line-height: 1.65; color: var(--muted); }
+#s5Cap p b { color: var(--ink); font-weight: 600; }
+#s5Tok { left: 1244px; top: 300px; width: 500px; }
+.tok { display: flex; align-items: center; gap: 20px; height: 82px; border-bottom: 1.5px solid var(--line); }
+.tok:first-child { border-top: 1.5px solid var(--line); }
+.sw { flex: none; width: 54px; height: 54px; border-radius: 6px; border: 1.5px solid var(--line-strong); }
+.tok-n { flex: 1; font-size: 21px; font-weight: 600; }
+.tok-n small { display: block; font-size: 15px; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.tok-h { font: 400 17px/1 var(--mono); color: var(--muted); }
+.tok-type { margin-top: 22px; display: flex; align-items: baseline; gap: 18px; color: var(--muted); font-size: 16px; }
+.tok-type .serif { font-size: 40px; color: var(--ink); }
+.tok-type .sansx { font-size: 34px; color: var(--ink); font-weight: 600; }
+
+/* S6 end card */
+#s6 { background: radial-gradient(110% 90% at 50% 42%, #1c2b4b 0%, var(--navy) 46%, var(--navy-deep) 100%); }
+#fl6 { position: absolute; left: 885px; top: 255px; width: 150px; height: 150px; overflow: visible; }
+#s6Word { left: 0; right: 0; top: 436px; text-align: center; font-size: 104px; line-height: 1.2; color: #fff; letter-spacing: 0.02em; }
+#s6Tag { left: 0; right: 0; top: 584px; text-align: center; font-size: 32px; font-weight: 500; color: rgba(255, 255, 255, 0.82); }
+#s6Tag em { font-style: normal; color: var(--gold-bright); }
+#s6Rule { left: 900px; top: 662px; width: 120px; height: 1.5px; background: rgba(255, 255, 255, 0.22); }
+#s6Url { left: 0; right: 0; top: 692px; text-align: center; font: 500 24px/1 var(--mono); letter-spacing: 0.12em; color: var(--gold-bright); }
+#s6Stack { left: 0; right: 0; top: 748px; text-align: center; font: 400 17px/1 var(--mono); letter-spacing: 0.04em; color: rgba(255, 255, 255, 0.5); }
+
+/* HUD */
+.hud { top: 44px; font: 500 15px/1 var(--mono); letter-spacing: 0.1em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#hudL { left: 64px; }
+#hudR { right: 64px; }
+.hud b { font-weight: 500; letter-spacing: 0.02em; font-family: var(--sans); font-size: 16px; }
+</style>
+
+<main class="page">
+  <header class="intro">
+    <p class="kicker">Design engineering reel · 15 s · 1920 × 1080 · 60 fps</p>
+    <h1>대한유품정리 Showreel</h1>
+    <p class="lede">대한유품정리 (yupumjeongri.xyz) is an estate-cleanup service for Seoul and Gyeonggi that publishes its prices before anyone asks. Its design system, 정직한 견적서 (the honest ledger), borrows the look of a paper estimate: ruled lines, dotted leaders, a gold seal. Every frame of this reel is computed from a single time value, so you can scrub it frame by frame.</p>
+  </header>
+
+  <section class="player" aria-label="Showreel player">
+    <div class="viewport" id="viewport">
+      <div class="stage" id="stage" aria-hidden="true">
+
+        <!-- S1 표지 -->
+        <div class="scene" id="s1">
+          <svg id="fl1" viewBox="-16 -16 32 32"></svg>
+          <div class="a serif" id="s1Word">대한유품정리</div>
+          <div class="a mono" id="s1Sub">DESIGN ENGINEERING REEL · 2026</div>
+        </div>
+
+        <!-- paper sheet: S2–S5 -->
+        <div id="sheet">
+          <div id="rules"></div>
+
+          <!-- S2 약속 -->
+          <div class="scene" id="s2">
+            <div class="a serif" id="s2Head">
+              <span class="hl" data-split>유품정리,</span>
+              <span class="hl" data-split><span class="gold">값부터</span> 공개합니다</span>
+            </div>
+            <svg id="s2Under" viewBox="0 0 1920 1080"><path id="s2UnderPath" pathLength="1" d="M0 0"></path></svg>
+            <div class="a" id="s2Prom">
+              <div class="prom"><i class="prom-line"></i><p class="prom-k serif">정찰제</p><p class="prom-d">공개된 비용 범위 안에서 견적을 냅니다.</p></div>
+              <div class="prom"><i class="prom-line"></i><p class="prom-k serif">추가금 <b>0원</b></p><p class="prom-d">견적서에 없는 항목은 청구하지 않습니다.</p></div>
+              <div class="prom"><i class="prom-line"></i><p class="prom-k serif">최저가 보상</p><p class="prom-d">동일 조건 타사 견적서보다 낮게 진행합니다.</p></div>
+            </div>
+            <div class="a mono" id="s2Spec">h1 · Noto Serif KR 700<br>150px · tracking −0.015em<br>&lt;em&gt;값부터&lt;/em&gt; → <b>--color-gold</b></div>
+          </div>
+
+          <!-- S3 견적서 callouts -->
+          <div class="scene" id="s3">
+            <svg id="coSvg" viewBox="0 0 1920 1080"></svg>
+            <div class="a co left" id="coA"><p class="co-t">문서 괘선</p><p class="co-d mono">inset 12px · 1px <b>--color-line</b></p></div>
+            <div class="a co left" id="coB"><p class="co-t">견적 항목</p><p class="co-d mono">점선 리더 flex: 1 · tabular-nums</p></div>
+            <div class="a co" id="coC"><p class="co-t">추가금 0원</p><p class="co-d mono"><b>--color-gold #8F5E14</b><br>종이 위 대비 5.5:1 · AA</p></div>
+            <div class="a co" id="coD"><p class="co-t">정찰 인장</p><p class="co-d mono">stamp · ease(.16, 1, .3, 1)</p></div>
+            <p class="a serif" id="s3Say">견적서에 없는 금액은<br><span class="gold">청구하지 않습니다.</span></p>
+          </div>
+
+          <!-- S4 계산기 (left column) -->
+          <div class="scene" id="s4">
+            <div class="a" id="s4L">
+              <p class="s4-over" id="s4Over">30초 예상 비용</p>
+              <h2 class="s4-h serif" id="s4H">우리 집은 얼마쯤 나올까요</h2>
+              <div class="grp"><p class="lg"><i>1</i>주거 형태</p><div class="chips"><span class="chip">원룸 · 오피스텔</span><span class="chip" id="k1">투룸</span><span class="chip">아파트 · 주택 20평대</span><span class="chip">30평 이상</span></div></div>
+              <div class="grp"><p class="lg"><i>2</i>짐의 양</p><div class="chips"><span class="chip">적은 편</span><span class="chip" id="k2">보통</span><span class="chip">많은 편</span></div></div>
+              <div class="grp"><p class="lg"><i>3</i>층수 · 엘리베이터</p><div class="chips"><span class="chip" id="k3">엘리베이터 있음</span><span class="chip">없음 · 2층 이하</span><span class="chip">없음 · 3층 이상</span></div></div>
+              <div class="grp"><p class="lg"><i>4</i>고독사 등 특수청소가 필요한 현장인가요</p><div class="chips"><span class="chip" id="k4">아니요</span><span class="chip">예 (고독사·오염 현장)</span><span class="chip">잘 모르겠어요</span></div></div>
+            </div>
+            <p class="a mono" id="s4F"><i>lo</i> = snap(90만 + 70만 × 0.25) = <b>110만</b><br><i>hi</i> = snap(90만 + 70만 × 0.75) = <b>145만</b>   · 5만원 단위</p>
+          </div>
+
+          <!-- shared card -->
+          <div id="card">
+            <svg id="cardBorder"><rect id="cardBorderRect" x="12" y="12" width="576" height="676" rx="2" pathLength="1"></rect></svg>
+            <div class="layer" id="c3">
+              <p class="a serif" id="docTitle">견적서</p>
+              <p class="a mono" id="docSub">ESTIMATE</p>
+              <i class="a" id="docRule"></i>
+              <div class="row" style="top:212px"><span class="lbl">유품 분류 · 포장 · 반출</span><span class="dots"></span><span class="val">공개 범위 내</span></div>
+              <div class="row" style="top:278px"><span class="lbl">폐기물 처리</span><span class="dots"></span><span class="val">항목별 표기</span></div>
+              <div class="row" style="top:344px"><span class="lbl">작업 후 청소</span><span class="dots"></span><span class="val">포함</span></div>
+              <div class="row" style="top:410px"><span class="lbl">견적서 외 추가 항목</span><span class="dots"></span><span class="val gold"><span id="zero">0원</span></span></div>
+              <i class="a" id="docFootLine"></i>
+              <p class="a" id="docFoot">합계는 견적서에 적힌 그대로.<br>현장에서 늘어나지 않습니다.</p>
+              <div class="a" id="ink"></div>
+              <div class="a serif" id="seal">정찰</div>
+            </div>
+            <div class="layer" id="c4">
+              <p class="a" id="c4Over">RESULT · 공개 가격표 기준</p>
+              <p class="a serif" id="c4Title">예상 비용</p>
+              <i class="a" id="c4Rule"></i>
+              <i class="a" id="c4Track"></i>
+              <div id="c4Ticks"></div>
+              <i class="a" id="segBase"></i>
+              <i class="a" id="segGold"></i>
+              <span class="a endl" id="endLo">90만</span>
+              <span class="a endl" id="endHi">160만</span>
+              <p class="a serif" id="c4Big">— ~ —</p>
+              <p class="a" id="c4Vat">부가세 별도 · 5만원 단위 반올림</p>
+              <div class="row r4" style="top:478px"><span class="lbl">주거 형태</span><span class="dots"></span><span class="val" id="v1">투룸</span></div>
+              <div class="row r4" style="top:530px"><span class="lbl">짐의 양</span><span class="dots"></span><span class="val" id="v2">보통</span></div>
+              <div class="row r4" style="top:582px"><span class="lbl">사다리차</span><span class="dots"></span><span class="val" id="v3">해당 없음</span></div>
+              <div class="row r4" style="top:634px"><span class="lbl">특수청소</span><span class="dots"></span><span class="val" id="v4">해당 없음</span></div>
+              <p class="a" id="c4Foot">결과는 언제나 공개 가격표 범위 안에 있습니다.</p>
+            </div>
+          </div>
+
+          <!-- S4 pointer, above the card -->
+          <div class="scene" id="s4Top">
+            <i class="a" id="ripple"></i>
+            <svg class="a" id="cursor" viewBox="0 0 22 27"><path d="M1 1 L1 21.5 L6.4 16.6 L10.2 25.2 L13.9 23.6 L10.2 15.2 L17.4 15.2 Z"></path></svg>
+          </div>
+
+          <!-- S5 반응형 -->
+          <div class="scene" id="s5">
+            <i class="a bp" id="bp860a"></i><i class="a bp" id="bp860b"></i>
+            <i class="a bp" id="bp768a"></i><i class="a bp" id="bp768b"></i>
+            <p class="a bp-l" id="bp860l"><b>860</b> · 햄버거 메뉴</p>
+            <p class="a bp-l" id="bp768l"><b>768</b> · 하단 상담 바</p>
+            <i class="a" id="ruler"></i>
+            <p class="a" id="rulerL">1440 px</p>
+
+            <div class="a" id="s5Cap">
+              <span class="s4-over">반응형 · RESPONSIVE</span>
+              <h2 class="serif">같은 토큰,<br>모든 너비</h2>
+              <p><b>860px</b> 아래에서 메뉴가 햄버거로 접히고, <b>768px</b> 아래에서 하단 고정 상담 바가 올라옵니다.</p>
+            </div>
+            <div class="a" id="s5Tok">
+              <div class="tok"><i class="sw" style="background:#faf9f6"></i><p class="tok-n">종이<small>배경</small></p><span class="tok-h">#FAF9F6</span></div>
+              <div class="tok"><i class="sw" style="background:#e2ddd2"></i><p class="tok-n">괘선<small>문서 선 · 점선 리더</small></p><span class="tok-h">#E2DDD2</span></div>
+              <div class="tok"><i class="sw" style="background:#16233d;border-color:#16233d"></i><p class="tok-n">네이비<small>버튼 · 링크</small></p><span class="tok-h">#16233D</span></div>
+              <div class="tok"><i class="sw" style="background:#8f5e14;border-color:#8f5e14"></i><p class="tok-n">금색<small>숫자 · 인장 전용</small></p><span class="tok-h">#8F5E14</span></div>
+              <div class="tok-type"><span class="serif">가</span>Noto Serif KR<span class="sansx">가</span>Pretendard</div>
+            </div>
+
+            <div id="frame">
+              <div id="urlbar"><div id="urlpill">yupumjeongri.xyz</div></div>
+              <div id="fc">
+                <div class="a" id="s5logo"><svg id="flLogo" viewBox="-16 -16 32 32"></svg><span>대한유품정리</span></div>
+                <div class="a" id="s5nav"><span>서비스</span><span>비용</span><span>진행과정</span><span>지역</span><span>칼럼</span><span>FAQ</span><span class="s5btn">상담 신청</span></div>
+                <div class="a" id="s5burger"><i></i><i></i><i></i></div>
+                <i id="fcHline"></i>
+                <div class="a" id="s5h1">유품정리,<br><em>값부터</em> 공개합니다</div>
+                <p class="a" id="s5lead">정찰제 · 견적서 외 추가금 0원 · 최저가 보상</p>
+                <div class="a" id="s5input"><span class="ph">010-1234-5678</span><span class="s5btn">상담 신청</span></div>
+                <p class="a" id="s5alt">번호 없이 예상 비용부터 계산해 보기 →</p>
+                <div class="a" id="s5photo"><img alt="" src="__PHOTO__"></div>
+                <div class="a" id="s5doc">
+                  <p class="md-t">견적서</p>
+                  <i class="md-r"></i>
+                  <div class="md-row" style="top:66px"><span>유품 분류 · 포장 · 반출</span><i class="dots"></i><b>공개 범위 내</b></div>
+                  <div class="md-row" style="top:92px"><span>폐기물 처리</span><i class="dots"></i><b>항목별 표기</b></div>
+                  <div class="md-row" style="top:118px"><span>작업 후 청소</span><i class="dots"></i><b>포함</b></div>
+                  <div class="md-row" style="top:144px"><span>견적서 외 추가 항목</span><i class="dots"></i><b class="gold">0원</b></div>
+                  <p class="md-foot">합계는 견적서에 적힌 그대로. 현장에서 늘어나지 않습니다.</p>
+                  <span class="md-seal">정찰</span>
+                </div>
+                <div class="a" id="s5cta"><span class="b" id="ctaGhost">예상 비용</span><span class="b" id="ctaMain">상담 신청</span></div>
+                <i class="a" id="tap"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- S6 마무리 -->
+        <div class="scene" id="s6">
+          <svg id="fl6" viewBox="-16 -16 32 32"></svg>
+          <div class="a serif" id="s6Word">대한유품정리</div>
+          <p class="a" id="s6Tag">유품정리, <em>값부터</em> 공개합니다</p>
+          <i class="a" id="s6Rule"></i>
+          <p class="a" id="s6Url">yupumjeongri.xyz</p>
+          <p class="a" id="s6Stack">Astro SSG · Cloudflare Workers · D1 · 디자인 시스템 ‘정직한 견적서’</p>
+        </div>
+
+        <p class="a hud" id="hudL"></p>
+        <p class="a hud" id="hudR"></p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-play" id="play" type="button" aria-label="Pause">
+        <svg viewBox="0 0 20 20" id="icoPause"><rect x="4" y="3" width="4" height="14" rx="1"></rect><rect x="12" y="3" width="4" height="14" rx="1"></rect></svg>
+        <svg viewBox="0 0 20 20" id="icoPlay" hidden><path d="M5 3.2v13.6c0 .8.9 1.3 1.6.9l10.8-6.8c.6-.4.6-1.3 0-1.7L6.6 2.3C5.9 1.9 5 2.4 5 3.2z"></path></svg>
+      </button>
+      <div class="track">
+        <input class="scrub" id="scrub" type="range" min="0" max="899" step="1" value="0" aria-label="Timeline, in frames">
+        <div class="marks" id="marks" aria-hidden="true"></div>
+      </div>
+      <output class="tc" id="tc">00.00 / 15.00</output>
+    </div>
+
+    <ol class="chapters" id="chapters"></ol>
+    <p class="keys">Space plays or pauses · ← → steps one frame · chapters jump to their first frame</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const DUR = 15, FPS = 60;
+  const $ = (id) => document.getElementById(id);
+  const stage = $('stage'), viewport = $('viewport');
+
+  /* ---------------------------------------------------------------- timing helpers */
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const lerp = (a, b, p) => a + (b - a) * p;
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  function bezier(x1, y1, x2, y2) {
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+    const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const fx = (u) => ((ax * u + bx) * u + cx) * u;
+    const fy = (u) => ((ay * u + by) * u + cy) * u;
+    return (x) => {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      let lo = 0, hi = 1, u = x;
+      for (let i = 0; i < 40; i++) { const v = fx(u); if (Math.abs(v - x) < 1e-6) break; if (v < x) lo = u; else hi = u; u = (lo + hi) / 2; }
+      return fy(u);
+    };
+  }
+  const ease = {
+    out: bezier(0.16, 1, 0.3, 1), // --ease-out in global.css
+    inOut: bezier(0.65, 0, 0.35, 1),
+    in: bezier(0.55, 0, 1, 0.45),
+  };
+  const back = (p, s = 1.7) => (p <= 0 ? 0 : p >= 1 ? 1 : 1 + (s + 1) * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2));
+  // display, not visibility: a child set visible would still show through a hidden parent
+  const vis = (el, on) => { el.style.display = on ? '' : 'none'; };
+  const tf = (el, x = 0, y = 0, s = 1, r = 0) => { el.style.transform = `translate(${x}px, ${y}px) rotate(${r}deg) scale(${s})`; };
+  const op = (el, o) => { el.style.opacity = o; };
+  const man = (v) => `${Math.round(v)}만`;
+
+  /* ---------------------------------------------------------------- build */
+  const NS = 'http://www.w3.org/2000/svg';
+  function flower(svg, { bg = false } = {}) {
+    const mk = (tag, attrs) => { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); return n; };
+    if (bg) svg.appendChild(mk('rect', { x: -16, y: -16, width: 32, height: 32, rx: 7, fill: '#16233D' }));
+    const root = mk('g', {});
+    svg.appendChild(root);
+    const outer = [], inner = [];
+    for (let i = 0; i < 10; i++) {
+      const g = mk('g', { transform: `rotate(${i * 36})` });
+      g.appendChild(mk('rect', { x: -1.7, y: -12.4, width: 3.4, height: 7.6, rx: 1.7, fill: '#fff' }));
+      root.appendChild(g); outer.push(g);
+    }
+    for (let i = 0; i < 10; i++) {
+      const g = mk('g', { transform: `rotate(${18 + i * 36})` });
+      g.appendChild(mk('rect', { x: -1.5, y: -9.8, width: 3, height: 5.4, rx: 1.5, fill: '#fff' }));
+      root.appendChild(g); inner.push(g);
+    }
+    const core = mk('circle', { r: 5, fill: '#fff' });
+    const dot = mk('circle', { r: 2.8, fill: '#C8892A' });
+    root.append(core, dot);
+    return { root, outer, inner, core, dot };
+  }
+  function bloom(f, t, t0, speed = 1) {
+    const sp = 0.045 / speed, du = 0.6 / speed;
+    f.outer.forEach((g, i) => { const p = ease.out(seg(t, t0 + i * sp, t0 + i * sp + du)); g.setAttribute('transform', `rotate(${i * 36 - (1 - p) * 60}) scale(${p})`); });
+    f.inner.forEach((g, i) => { const a = t0 + 0.27 / speed + i * sp * 0.9; const p = ease.out(seg(t, a, a + du)); g.setAttribute('transform', `rotate(${18 + i * 36 - (1 - p) * 60}) scale(${p})`); });
+    f.core.setAttribute('transform', `scale(${back(seg(t, t0 - 0.03, t0 + 0.37 / speed), 1.4)})`);
+    f.dot.setAttribute('transform', `scale(${back(seg(t, t0 + 0.73 / speed, t0 + 1.03 / speed), 2.2)})`);
+  }
+  const fl1 = flower($('fl1'));
+  const fl6 = flower($('fl6'));
+  flower($('flLogo'), { bg: true });
+
+  function split(el) {
+    const out = [];
+    const walk = (node) => {
+      [...node.childNodes].forEach((c) => {
+        if (c.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          [...c.textContent].forEach((ch) => { const s = document.createElement('span'); s.className = 'ch-span'; s.textContent = ch; frag.appendChild(s); out.push(s); });
+          node.replaceChild(frag, c);
+        } else walk(c);
+      });
+    };
+    walk(el);
+    return out;
+  }
+  const s1Chars = split($('s1Word'));
+  const s6Chars = split($('s6Word'));
+  const hlLines = [...document.querySelectorAll('[data-split]')].map(split);
+
+  // ledger rules
+  const rulesEl = $('rules');
+  const rulesH = [];
+  for (let i = 0; i < 9; i++) { const r = document.createElement('i'); r.className = 'rule-h'; r.style.top = `${200 + i * 95}px`; rulesEl.appendChild(r); rulesH.push(r); }
+  const rulesV = [196, 203].map((x) => { const r = document.createElement('i'); r.className = 'rule-v'; r.style.left = `${x}px`; rulesEl.appendChild(r); return r; });
+
+  // S4 chart ticks: 0 – 300만, drawn to scale
+  const CX = (v) => 56 + (v / 300) * 488;
+  const ticks = $('c4Ticks');
+  for (let v = 0; v <= 300; v += 50) {
+    const k = document.createElement('i'); k.className = 'tick'; k.style.left = `${CX(v) - 0.75}px`; ticks.appendChild(k);
+    const l = document.createElement('span'); l.className = 'tick-l'; l.style.left = `${CX(v)}px`; l.textContent = v === 300 ? '300만' : String(v); ticks.appendChild(l);
+  }
+
+  /* ---------------------------------------------------------------- layout constants */
+  const R3 = { x: 900, y: 190, w: 600, h: 700, r: -1 };
+  const R4 = { x: 1150, y: 165, w: 600, h: 750, r: 0 };
+  function cardPt(lx, ly) { // card-local point at the S3 rest pose → stage coords
+    const a = (R3.r * Math.PI) / 180, dx = lx - R3.w / 2, dy = ly - R3.h / 2;
+    return { x: R3.x + R3.w / 2 + dx * Math.cos(a) - dy * Math.sin(a), y: R3.y + R3.h / 2 + dx * Math.sin(a) + dy * Math.cos(a) };
+  }
+  const CALLOUTS = [
+    { id: 'coA', side: 'left', at: 5.2, target: () => cardPt(12, 112) },
+    { id: 'coB', side: 'left', at: 5.6, target: () => cardPt(48, 278 + 19) },
+    { id: 'coC', side: 'right', at: 6.5, target: () => cardPt(552, 410 + 19) },
+    { id: 'coD', side: 'right', at: 6.95, target: () => cardPt(552, 538 + 58) },
+  ];
+  CALLOUTS.forEach((c) => {
+    const p = c.target();
+    const el = $(c.id);
+    const ax = c.side === 'left' ? 790 : 1590;
+    el.style.left = `${c.side === 'left' ? ax - 420 : ax}px`;
+    el.style.top = `${p.y - 14}px`;
+    const x0 = c.side === 'left' ? ax + 18 : ax - 18;
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', `M${x0} ${p.y} L${p.x} ${p.y}`);
+    path.setAttribute('pathLength', '1');
+    const dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y); dot.setAttribute('r', 5.5);
+    dot.style.transformOrigin = `${p.x}px ${p.y}px`;
+    $('coSvg').append(path, dot);
+    Object.assign(c, { el, path, dot });
+  });
+
+  const CLICKS = [8.74, 9.17, 9.57, 9.94];
+  const CHIPS = ['k1', 'k2', 'k3', 'k4'].map($);
+  let chipPts = [];
+
+  // S5 frame + layout (content-area coordinates; desktop W 1560, phone W 400)
+  const S5 = { cx: 960, top: 150, h: 790, bar: 56, wD: 1560, wM: 400 };
+  const LAY = {
+    logo: [{ x: 56, y: 21, s: 1 }, { x: 20, y: 14, s: 0.86 }],
+    h1: [{ x: 80, y: 148, fs: 74 }, { x: 22, y: 84, fs: 36 }],
+    lead: [{ x: 80, y: 372, fs: 22 }, { x: 22, y: 196, fs: 15 }],
+    input: [{ x: 80, y: 424, w: 600, h: 68, fs: 20 }, { x: 20, y: 232, w: 360, h: 56, fs: 16 }],
+    alt: [{ x: 80, y: 516, fs: 18 }, { x: 22, y: 302, fs: 14 }],
+    photo: [{ x: 820, y: 104, w: 680, h: 560 }, { x: 20, y: 336, w: 360, h: 250 }],
+    doc: [{ x: 736, y: 404, s: 1 }, { x: 150, y: 470, s: 0.7 }],
+    hline: [76, 62],
+  };
+  const pxOf = (p) => lerp(1440, 375, p);
+  const wFor = (px) => S5.wM + (px - 375) * ((S5.wD - S5.wM) / (1440 - 375));
+  const CTA_C = { x: S5.cx - S5.wM / 2 + (S5.wM / 2 + 6 + S5.wM - 16) / 2, y: S5.top + S5.bar + (S5.h - S5.bar) - 80 + 40 };
+
+  /* ---------------------------------------------------------------- scenes */
+  const E = Object.fromEntries([...stage.querySelectorAll('[id]')].map((n) => [n.id, n]));
+
+  function r1(t) {
+    const on = t < 2.35; vis(E.s1, on); if (!on) return;
+    bloom(fl1, t, 0.05);
+    const mv = ease.inOut(seg(t, 1.0, 1.55));
+    const spin = -24 * (1 - ease.out(seg(t, 0, 1.4)));
+    E.fl1.style.transform = `translateY(${-150 * mv}px) rotate(${spin}deg) scale(${lerp(1, 0.48, mv)})`;
+    s1Chars.forEach((c, j) => { const p = ease.out(seg(t, 1.12 + j * 0.05, 1.72 + j * 0.05)); tf(c, 0, (1 - p) * 70); op(c, p); });
+    const sp = ease.out(seg(t, 1.45, 2.0));
+    op(E.s1Sub, sp); E.s1Sub.style.letterSpacing = `${lerp(0.6, 0.32, sp)}em`;
+    const ex = ease.inOut(seg(t, 1.85, 2.3));
+    E.s1.style.transform = `translateY(${-170 * ex}px)`;
+    op(E.s1, 1 - 0.6 * ex);
+  }
+
+  function rSheet(t) {
+    const on = t >= 1.85 && t < 13.85; vis(E.sheet, on); if (!on) return;
+    const p = ease.inOut(seg(t, 1.85, 2.3));
+    E.sheet.style.transform = `translateY(${(1 - p) * 1080}px)`;
+    E.sheet.style.boxShadow = p < 1 ? `0 -30px 90px rgba(4, 8, 20, ${0.5 * (1 - p)})` : 'none';
+    rulesH.forEach((r, i) => { const a = 2.1 + i * 0.045; r.style.transform = `scaleX(${ease.out(seg(t, a, a + 0.75))})`; });
+    rulesV.forEach((r) => { r.style.transform = `scaleY(${ease.out(seg(t, 2.05, 2.8))})`; });
+    op(E.rules, t < 4.4 ? 1 : t < 4.9 ? lerp(1, 0.4, seg(t, 4.4, 4.9)) : t < 10.8 ? 0.4 : lerp(0.4, 0, seg(t, 10.8, 11.2)));
+  }
+
+  function r2(t) {
+    const on = t >= 1.85 && t < 4.7; vis(E.s2, on); if (!on) return;
+    hlLines.forEach((chars, L) => chars.forEach((c, j) => {
+      const a = 2.3 + L * 0.22 + j * 0.035; const p = ease.out(seg(t, a, a + 0.75));
+      tf(c, 0, (1 - p) * 200);
+    }));
+    E.s2UnderPath.style.strokeDashoffset = 1 - ease.inOut(seg(t, 3.05, 3.5));
+    [...E.s2Prom.children].forEach((pr, i) => {
+      const a = 3.25 + i * 0.12;
+      pr.firstElementChild.style.transform = `scaleX(${ease.out(seg(t, a, a + 0.6))})`;
+      const q = ease.out(seg(t, a + 0.1, a + 0.65));
+      [...pr.children].slice(1).forEach((c) => { tf(c, 0, (1 - q) * 34); op(c, q); });
+    });
+    const sq = ease.out(seg(t, 3.5, 4.0)); op(E.s2Spec, sq); tf(E.s2Spec, (1 - sq) * 24, 0);
+    const ex = ease.in(seg(t, 4.25, 4.6));
+    E.s2.style.transform = `translateY(${-70 * ex}px)`; op(E.s2, 1 - ex);
+  }
+
+  function rCard(t) {
+    const on = t >= 4.4 && t < 11.2; vis(E.card, on); if (!on) return;
+    const enter = ease.out(seg(t, 4.45, 5.1));
+    const m = ease.inOut(seg(t, 7.9, 8.45));
+    let x = lerp(R3.x, R4.x, m), y = lerp(R3.y, R4.y, m), w = lerp(R3.w, R4.w, m), h = lerp(R3.h, R4.h, m), r = lerp(R3.r, R4.r, m);
+    y += (1 - enter) * 120; r += (1 - enter) * -4;
+    const j = seg(t, 6.78, 7.1); y += 8 * Math.sin(Math.PI * j) * (1 - j);
+    const ex = ease.in(seg(t, 10.8, 11.15)); x -= 140 * ex;
+    Object.assign(E.card.style, { left: `${x}px`, top: `${y}px`, width: `${w}px`, height: `${h}px`, transform: `rotate(${r}deg)` });
+    op(E.card, clamp(enter * 1.4) * (1 - ex));
+    E.cardBorderRect.setAttribute('width', w - 24); E.cardBorderRect.setAttribute('height', h - 24);
+    E.cardBorderRect.style.strokeDashoffset = 1 - ease.inOut(seg(t, 4.75, 5.55));
+
+    // 견적서 layer
+    const o3 = 1 - seg(t, 7.85, 8.05);
+    vis(E.c3, o3 > 0); op(E.c3, o3);
+    if (o3 > 0) {
+      const tp = ease.out(seg(t, 4.85, 5.45));
+      op(E.docTitle, tp); E.docTitle.style.letterSpacing = `${lerp(0.05, 0.55, tp)}em`; E.docTitle.style.textIndent = `${lerp(0.05, 0.55, tp)}em`;
+      op(E.docSub, ease.out(seg(t, 5.0, 5.4)));
+      E.docRule.style.transform = `scaleX(${ease.out(seg(t, 5.05, 5.5))})`;
+      [...E.c3.querySelectorAll('.row')].forEach((row, i) => {
+        const b = 5.25 + i * 0.17;
+        const [lbl, dots, val] = row.children;
+        const lp = ease.out(seg(t, b, b + 0.4)); op(lbl, lp); tf(lbl, (1 - lp) * -18, 0);
+        dots.style.clipPath = `inset(-6px ${(1 - ease.out(seg(t, b + 0.08, b + 0.55))) * 100}% -6px 0)`;
+        const vp = ease.out(seg(t, b + 0.22, b + 0.55)); op(val, vp); tf(val, 0, (1 - vp) * 12);
+      });
+      const zp = ease.inOut(seg(t, 5.98, 6.5));
+      const won = Math.round((340000 * (1 - zp)) / 10000) * 10000;
+      E.zero.textContent = `${won.toLocaleString('en-US')}원`;
+      const pulse = Math.sin(Math.PI * seg(t, 6.5, 6.72));
+      E.zero.style.transform = `scale(${1 + 0.2 * pulse})`;
+      const fp = ease.out(seg(t, 6.22, 6.6));
+      E.docFootLine.style.transform = `scaleX(${fp})`; op(E.docFoot, fp); tf(E.docFoot, 0, (1 - fp) * 10);
+      // seal: drop, impact at 6.78, settle
+      const d = seg(t, 6.56, 6.78);
+      const squash = Math.sin(Math.PI * seg(t, 6.78, 6.94));
+      tf(E.seal, 0, 0, lerp(2.5, 1, ease.in(d)) - 0.07 * squash, lerp(-24, -8, d));
+      op(E.seal, clamp(d * 3));
+      const ip = seg(t, 6.78, 7.3);
+      tf(E.ink, 0, 0, lerp(1, 1.75, ease.out(ip))); op(E.ink, ip > 0 && ip < 1 ? 0.55 * (1 - ip) : 0);
+    }
+
+    // 예상 비용 layer
+    const o4 = ease.out(seg(t, 8.22, 8.5));
+    vis(E.c4, o4 > 0); op(E.c4, o4);
+    if (o4 > 0) rEstimate(t);
+  }
+
+  function rEstimate(t) {
+    const [c1, c2, c3, c4] = CLICKS;
+    let lo = null, hi = null, bLo = 0, bHi = 0, gLo = 0, gHi = 0, gold = false;
+    if (t >= c1) {
+      const q = ease.out(seg(t, c1, c1 + 0.42));
+      lo = 90 * q; hi = 160 * q;
+      const g = ease.out(seg(t, c1, c1 + 0.4)); // base segment grows out from its centre
+      bLo = lerp(125, 90, g); bHi = lerp(125, 160, g);
+    }
+    if (t >= c2) {
+      const q = ease.inOut(seg(t, c2, c2 + 0.5));
+      gLo = lerp(90, 107.5, q); gHi = lerp(160, 142.5, q);
+      lo = Math.round(gLo / 5) * 5; hi = Math.round(gHi / 5) * 5; gold = true;
+    }
+    const segBox = (el, a, b) => { el.style.left = `${CX(a)}px`; el.style.width = `${Math.max(0, CX(b) - CX(a))}px`; };
+    vis(E.segBase, t >= c1); segBox(E.segBase, bLo, bHi);
+    vis(E.segGold, gold); if (gold) segBox(E.segGold, gLo, gHi);
+    const showEnds = t >= c1 + 0.12;
+    [E.endLo, E.endHi].forEach((n) => { vis(n, showEnds); n.style.color = gold ? 'var(--gold)' : 'var(--navy)'; });
+    if (showEnds) {
+      const ep = ease.out(seg(t, c1 + 0.12, c1 + 0.45));
+      E.endLo.style.left = `${CX(gold ? gLo : bLo)}px`; E.endHi.style.left = `${CX(gold ? gHi : bHi)}px`;
+      E.endLo.textContent = man(gold ? lo : 90); E.endHi.textContent = man(gold ? hi : 160);
+      op(E.endLo, ep); op(E.endHi, ep);
+    }
+    E.c4Big.textContent = lo == null ? '— ~ —' : `${man(lo)} ~ ${man(hi)}원`;
+    E.c4Big.style.color = lo == null ? 'var(--line-strong)' : gold ? 'var(--gold)' : 'var(--ink)';
+    ['v1', 'v2', 'v3', 'v4'].forEach((id, i) => {
+      const vp = ease.out(seg(t, CLICKS[i], CLICKS[i] + 0.3));
+      const n = E[id];
+      if (!n.dataset.v) n.dataset.v = n.textContent;
+      n.textContent = t >= CLICKS[i] ? n.dataset.v : '—';
+      n.style.color = t >= CLICKS[i] ? 'var(--ink)' : 'var(--line-strong)';
+      tf(n, 0, t >= CLICKS[i] ? (1 - vp) * 10 : 0);
+    });
+  }
+
+  function r4(t) {
+    const on = t >= 8.1 && t < 11.2; vis(E.s4, on); vis(E.s4Top, on); if (!on) return;
+    const ex = ease.in(seg(t, 10.8, 11.15));
+    const lp = ease.out(seg(t, 8.15, 8.7));
+    op(E.s4Over, lp); tf(E.s4Over, 0, (1 - lp) * 24);
+    const hp = ease.out(seg(t, 8.2, 8.75));
+    op(E.s4H, hp); tf(E.s4H, 0, (1 - hp) * 30);
+    [...E.s4L.querySelectorAll('.grp')].forEach((g, i) => { const q = ease.out(seg(t, 8.3 + i * 0.07, 8.85 + i * 0.07)); op(g, q); tf(g, 0, (1 - q) * 30); });
+    CHIPS.forEach((c, i) => {
+      c.classList.toggle('on', t >= CLICKS[i]);
+      const press = seg(t, CLICKS[i] - 0.05, CLICKS[i] + 0.12);
+      c.style.transform = `scale(${1 - 0.05 * Math.sin(Math.PI * press)})`;
+    });
+    const fp = ease.out(seg(t, CLICKS[1] + 0.35, CLICKS[1] + 0.8));
+    op(E.s4F, fp); tf(E.s4F, 0, (1 - fp) * 14);
+    E.s4.style.transform = `translateX(${-140 * ex}px)`; op(E.s4, 1 - ex);
+
+    // pointer
+    const W = [
+      { t: 8.45, x: 1210, y: 1000 },
+      { t: 8.72, ...chipPts[0] }, { t: 8.8, ...chipPts[0] },
+      { t: 9.15, ...chipPts[1] }, { t: 9.23, ...chipPts[1] },
+      { t: 9.55, ...chipPts[2] }, { t: 9.63, ...chipPts[2] },
+      { t: 9.92, ...chipPts[3] }, { t: 10.0, ...chipPts[3] },
+      { t: 10.5, x: 1120, y: 1060 },
+    ];
+    let px = W[0].x, py = W[0].y;
+    for (let i = 0; i < W.length - 1; i++) {
+      if (t >= W[i].t && t <= W[i + 1].t) { const q = ease.inOut(seg(t, W[i].t, W[i + 1].t)); px = lerp(W[i].x, W[i + 1].x, q); py = lerp(W[i].y, W[i + 1].y, q); break; }
+      if (t > W[W.length - 1].t) { px = W[W.length - 1].x; py = W[W.length - 1].y; }
+    }
+    const cOn = t >= 8.45 && t < 10.5;
+    vis(E.cursor, cOn);
+    let press = 0, rip = null;
+    CLICKS.forEach((c) => { press = Math.max(press, Math.sin(Math.PI * seg(t, c - 0.04, c + 0.1))); if (t >= c && t < c + 0.4) rip = seg(t, c, c + 0.4); });
+    tf(E.cursor, px, py, 1 - 0.14 * press);
+    op(E.cursor, seg(t, 8.45, 8.6) * (1 - seg(t, 10.3, 10.5)));
+    vis(E.ripple, rip != null);
+    if (rip != null) { tf(E.ripple, px, py, lerp(0.2, 1, ease.out(rip))); op(E.ripple, 0.6 * (1 - rip)); }
+  }
+
+  function r3(t) {
+    const on = t >= 4.9 && t < 8.1; vis(E.s3, on); if (!on) return;
+    const fade = 1 - seg(t, 7.85, 8.05);
+    CALLOUTS.forEach((c) => {
+      const p = ease.out(seg(t, c.at, c.at + 0.5));
+      c.path.style.strokeDashoffset = 1 - p;
+      c.path.style.opacity = fade;
+      const dp = back(seg(t, c.at + 0.3, c.at + 0.55), 2.4);
+      c.dot.style.transform = `scale(${dp})`; c.dot.style.opacity = fade;
+      const lp = ease.out(seg(t, c.at + 0.05, c.at + 0.5));
+      op(c.el, lp * fade); tf(c.el, (c.side === 'left' ? -1 : 1) * (1 - lp) * 20, 0);
+    });
+    const sp = ease.out(seg(t, 6.95, 7.5));
+    op(E.s3Say, sp * fade); tf(E.s3Say, 0, (1 - sp) * 30);
+  }
+
+  function r5(t) {
+    const on = t >= 11.1 && t < 13.85; vis(E.s5, on); if (!on) return;
+    const enter = ease.out(seg(t, 11.12, 11.65));
+    const p = ease.inOut(seg(t, 11.75, 12.65));
+    const px = pxOf(p), W = wFor(px);
+    const fx = S5.cx - W / 2;
+    Object.assign(E.frame.style, { left: `${fx}px`, top: `${S5.top + (1 - enter) * 140}px`, width: `${W}px`, height: `${S5.h}px`, borderRadius: `${lerp(14, 42, p)}px` });
+    op(E.frame, clamp(enter * 1.3));
+    const pillW = lerp(520, 300, p);
+    Object.assign(E.urlpill.style, { left: `${(W - pillW) / 2}px`, width: `${pillW}px` });
+
+    // vertical rhythm settles first so blocks never stack on each other mid-reflow;
+    // the photo and quote card drift left later, clipped by the narrowing viewport like a real resize
+    const pv = 1 - Math.pow(1 - p, 2.2), ph = Math.pow(p, 1.6);
+    const AX = { y: pv, fs: pv, h: pv, s: pv };
+    const L = (k) => { const [d, m] = LAY[k]; const o = {}; for (const key in d) o[key] = lerp(d[key], m[key], key === 'x' && (k === 'photo' || k === 'doc') ? ph : AX[key] ?? p); return o; };
+    const place = (el, o) => { el.style.left = `${o.x}px`; el.style.top = `${o.y}px`; if (o.w != null) el.style.width = `${o.w}px`; if (o.h != null) el.style.height = `${o.h}px`; if (o.fs != null) el.style.fontSize = `${o.fs}px`; };
+    const lg = L('logo'); place(E.s5logo, lg); E.s5logo.style.transform = `scale(${lg.s})`;
+    place(E.s5h1, L('h1')); place(E.s5lead, L('lead')); place(E.s5input, L('input')); place(E.s5alt, L('alt')); place(E.s5photo, L('photo'));
+    const dc = L('doc'); place(E.s5doc, dc); E.s5doc.style.transform = `rotate(-1deg) scale(${dc.s})`;
+    E.fcHline.style.top = `${lerp(LAY.hline[0], LAY.hline[1], p)}px`;
+    E.s5input.querySelector('.s5btn').style.fontSize = `${lerp(17, 15, p)}px`;
+    // breakpoints: the nav folds below 860px, the sticky consult bar rises below 768px
+    const navQ = clamp((900 - px) / 70);
+    E.s5nav.style.right = '56px'; op(E.s5nav, 1 - navQ); tf(E.s5nav, navQ * 20, 0);
+    E.s5burger.style.left = `${W - 52}px`; op(E.s5burger, navQ);
+    const ctaQ = ease.out(clamp((790 - px) / 70));
+    const contentH = S5.h - S5.bar;
+    E.s5cta.style.top = `${contentH - 80 + (1 - ctaQ) * 96}px`;
+    E.ctaGhost.style.width = `${W / 2 - 22}px`;
+    E.ctaMain.style.left = `${W / 2 + 6}px`; E.ctaMain.style.width = `${W / 2 - 22}px`;
+    const tapP = seg(t, 13.08, 13.45);
+    E.ctaMain.style.transform = `scale(${1 - 0.05 * Math.sin(Math.PI * seg(t, 13.06, 13.24))})`;
+    vis(E.tap, tapP > 0 && tapP < 1);
+    tf(E.tap, (W / 2 + 6 + W - 16) / 2, contentH - 40, lerp(0.15, 1.1, ease.out(tapP))); op(E.tap, 0.7 * (1 - tapP));
+    [...E.fc.children].forEach((c, i) => { if (c.id !== 's5cta' && c.id !== 'tap') op(c, c.id === 's5nav' ? (1 - navQ) * ease.out(seg(t, 11.3 + i * 0.03, 11.7 + i * 0.03)) : c.id === 's5burger' ? navQ : ease.out(seg(t, 11.3 + i * 0.03, 11.7 + i * 0.03))); });
+
+    // ruler + breakpoint guides
+    const rp = ease.out(seg(t, 11.45, 11.75));
+    Object.assign(E.ruler.style, { left: `${fx}px`, width: `${W}px` });
+    op(E.ruler, rp); op(E.rulerL, rp);
+    E.rulerL.style.left = `${S5.cx}px`; E.rulerL.textContent = `${Math.round(px)} px`;
+    const guides = [['bp860', 860], ['bp768', 768]];
+    const gOut = 1 - ease.out(seg(t, 12.45, 12.75));
+    guides.forEach(([id, bp]) => {
+      const half = wFor(bp) / 2;
+      E[id + 'a'].style.left = `${S5.cx - half}px`; E[id + 'b'].style.left = `${S5.cx + half}px`;
+      const hit = px <= bp ? 1 : 0;
+      const g = rp * gOut;
+      [E[id + 'a'], E[id + 'b']].forEach((n) => { op(n, g); n.style.borderLeftColor = hit ? 'var(--gold-bright)' : 'var(--line-strong)'; });
+      // 860 is labelled on the left guide, 768 on the right, so the two never collide
+      const left = bp === 860;
+      E[id + 'l'].style.left = `${left ? S5.cx - half - 14 : S5.cx + half + 14}px`;
+      E[id + 'l'].style.transform = left ? 'translateX(-100%)' : 'none';
+      op(E[id + 'l'], g * (hit ? 1 : 0.55));
+    });
+
+    const cp = ease.out(seg(t, 12.42, 12.95));
+    op(E.s5Cap, cp); tf(E.s5Cap, (1 - cp) * -40, 0);
+    [...E.s5Tok.children].forEach((c, i) => { const q = ease.out(seg(t, 12.5 + i * 0.06, 12.95 + i * 0.06)); op(c, q); tf(c, (1 - q) * 40, 0); });
+  }
+
+  const revR = (t) => ease.inOut(seg(t, 13.25, 13.8)) * 2350;
+  function r6(t) {
+    const on = t >= 13.25; vis(E.s6, on); if (!on) return;
+    E.s6.style.clipPath = t < 13.8 ? `circle(${revR(t)}px at ${CTA_C.x}px ${CTA_C.y}px)` : 'none';
+    const out = 1 - ease.inOut(seg(t, 14.55, 14.95));
+    bloom(fl6, t, 13.5, 1.6);
+    op(E.fl6, out);
+    s6Chars.forEach((c, j) => { const p = ease.out(seg(t, 13.68 + j * 0.04, 14.2 + j * 0.04)); tf(c, 0, (1 - p) * 50); op(c, p); });
+    op(E.s6Word, out);
+    [['s6Tag', 13.86], ['s6Rule', 13.96], ['s6Url', 14.02], ['s6Stack', 14.08]].forEach(([id, a]) => {
+      const q = ease.out(seg(t, a, a + 0.5)); op(E[id], q * out);
+      if (id === 's6Rule') E[id].style.transform = `scaleX(${q})`; else tf(E[id], 0, (1 - q) * 22);
+    });
+  }
+
+  const CH = [
+    { t: 0, ko: '표지', en: 'Mark', d: 'The memorial chrysanthemum from the favicon blooms petal by petal: ten outer, ten inner, offset 18°.' },
+    { t: 2.0, ko: '약속', en: 'Promise', d: 'The h1 rises onto ledger rules. 값부터 takes the gold token, and the three promises follow.' },
+    { t: 4.45, ko: '견적서', en: 'Ledger', d: 'The hero quote card builds itself. Extra charges count down to 0원 before the 정찰 seal lands.' },
+    { t: 8.0, ko: '계산기', en: 'Estimator', d: 'Four choices narrow 투룸 from 90–160만 to 110–145만, using only published prices.' },
+    { t: 11.1, ko: '반응형', en: 'Responsive', d: 'The home hero reflows from 1440 to 375 px and crosses the 860 and 768 breakpoints.' },
+    { t: 13.25, ko: '마무리', en: 'Sign-off', d: 'A tap on 상담 신청 opens the end card. The last frame matches the first, so it loops.' },
+  ];
+  const chapterAt = (t) => { let k = 0; CH.forEach((c, i) => { if (t >= c.t) k = i; }); return k; };
+
+  function hud(t) {
+    const k = chapterAt(t);
+    E.hudL.innerHTML = `${String(k + 1).padStart(2, '0')} / 06 &nbsp;<b>${CH[k].ko}</b> &nbsp;${CH[k].en.toUpperCase()}`;
+    const f = Math.round(t * FPS), s = Math.floor(f / FPS), fr = f % FPS;
+    E.hudR.textContent = `00:00:${String(s).padStart(2, '0')}:${String(fr).padStart(2, '0')}`;
+    const sheetTop = t < 1.85 ? 1080 : (1 - ease.inOut(seg(t, 1.85, 2.3))) * 1080;
+    const navyAt = (x, y) => (t < 13.25 ? sheetTop > y + 10 : t >= 13.8 || Math.hypot(x - CTA_C.x, y - CTA_C.y) < revR(t));
+    E.hudL.style.color = navyAt(160, 52) ? 'rgba(255,255,255,0.6)' : 'var(--muted)';
+    E.hudR.style.color = navyAt(1760, 52) ? 'rgba(255,255,255,0.6)' : 'var(--muted)';
+  }
+
+  function render(t) {
+    t = ((t % DUR) + DUR) % DUR;
+    r1(t); rSheet(t); r2(t); r3(t); rCard(t); r4(t); r5(t); r6(t); hud(t);
+  }
+
+  /* ---------------------------------------------------------------- measure (stage coords) */
+  function rectIn(el) {
+    const s = stage.getBoundingClientRect(), r = el.getBoundingClientRect(), k = s.width / 1920;
+    return { x: (r.left - s.left) / k, y: (r.top - s.top) / k, w: r.width / k, h: r.height / k };
+  }
+  function measure() {
+    render(4.0);
+    const g = rectIn(document.querySelector('.hl .gold'));
+    const y = g.y + g.h - 8;
+    E.s2UnderPath.setAttribute('d', `M${g.x + 4} ${y} Q${g.x + g.w * 0.5} ${y + 16} ${g.x + g.w - 2} ${y - 4}`);
+    render(9.0);
+    chipPts = CHIPS.map((c) => { const r = rectIn(c); return { x: r.x + r.w * 0.62, y: r.y + r.h * 0.6 }; });
+  }
+
+  /* ---------------------------------------------------------------- player */
+  let k = 1;
+  const fit = () => {
+    k = document.documentElement.classList.contains('capture') ? 1 : viewport.clientWidth / 1920;
+    stage.style.transform = `scale(${k})`;
+  };
+  new ResizeObserver(fit).observe(viewport);
+  fit();
+
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let playing = !reduce, t = reduce ? 7.3 : 0, last = null, dirty = true;
+  const scrub = $('scrub'), tc = $('tc'), playBtn = $('play');
+  const chList = $('chapters'), marks = $('marks');
+  CH.forEach((c, i) => {
+    const li = document.createElement('li'); li.className = 'ch';
+    const mm = `0:${String(Math.floor(c.t)).padStart(2, '0')}`;
+    li.innerHTML = `<button type="button"><span class="ch-t">${String(i + 1).padStart(2, '0')} · ${mm}</span><span class="ch-n">${c.ko}<em>${c.en}</em></span><span class="ch-d">${c.d}</span></button>`;
+    li.querySelector('button').addEventListener('click', () => { t = c.t + 0.001; dirty = true; });
+    chList.appendChild(li);
+    if (i > 0) { const m = document.createElement('span'); m.style.left = `calc(${(c.t / DUR) * 100}% - 1px)`; marks.appendChild(m); }
+  });
+  const chItems = [...chList.children];
+
+  function setPlaying(v) {
+    playing = v; last = null;
+    $('icoPause').hidden = !v; $('icoPlay').hidden = v;
+    playBtn.setAttribute('aria-label', v ? 'Pause' : 'Play');
+  }
+  playBtn.addEventListener('click', () => setPlaying(!playing));
+  scrub.addEventListener('input', () => { setPlaying(false); t = Number(scrub.value) / FPS; dirty = true; });
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest && e.target.closest('button, input')) return;
+    if (e.code === 'Space') { e.preventDefault(); setPlaying(!playing); }
+    if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+      e.preventDefault(); setPlaying(false);
+      t = (Math.round(t * FPS) + (e.code === 'ArrowRight' ? 1 : -1) + DUR * FPS) % (DUR * FPS) / FPS; dirty = true;
+    }
+  });
+
+  let shownChapter = -1;
+  function ui() {
+    const f = Math.round(t * FPS) % (DUR * FPS);
+    scrub.value = f; scrub.style.setProperty('--pct', `${(f / (DUR * FPS - 1)) * 100}%`);
+    tc.textContent = `${(f / FPS).toFixed(2).padStart(5, '0')} / 15.00`;
+    const c = chapterAt(t);
+    if (c !== shownChapter) { chItems.forEach((li, i) => li.classList.toggle('is-on', i === c)); shownChapter = c; }
+  }
+
+  let ready = false;
+  function frame(now) {
+    if (ready) {
+      if (playing) { if (last != null) { t = (t + (now - last) / 1000) % DUR; dirty = true; } last = now; }
+      if (dirty) { render(t); ui(); dirty = false; }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  const fontsLoaded = Promise.all([
+    document.fonts.load('700 40px "Noto Serif KR Reel"', '대한유품정리'),
+    document.fonts.load('400 20px "Pretendard Reel"', '유품정리'),
+    document.fonts.load('600 20px "Pretendard Reel"', '유품정리'),
+    document.fonts.load('400 20px "Plex Mono Reel"', 'A0'),
+    document.fonts.load('500 20px "Plex Mono Reel"', 'A0'),
+  ]).catch(() => {}).then(() => document.fonts.ready);
+
+  const whenReady = fontsLoaded.then(() => {
+    measure();
+    setPlaying(playing);
+    render(t); ui();
+    ready = true;
+  });
+  requestAnimationFrame(frame);
+
+  window.reel = {
+    duration: DUR, fps: FPS, ready: whenReady,
+    capture() { document.documentElement.classList.add('capture'); setPlaying(false); fit(); },
+    seek(s) { setPlaying(false); t = s; render(t); ui(); },
+  };
+})();
+</script>
