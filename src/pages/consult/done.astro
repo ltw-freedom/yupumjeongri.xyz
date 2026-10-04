@@ -1,9 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import FormHidden from '../../components/FormHidden.astro';
 import { site } from '../../data/site';
 
 // 접수 완료 페이지는 검색 결과에 뜰 이유가 없다.
 // conversion: 네이버 애널리틱스에 '신청' 전환으로 잡힌다 (BaseLayout).
+//
+// 2026-10-02 첫 실제 접수에서 같은 사람이 2분 사이 두 번 신청했다 — 시 페이지에서 한 번,
+// 읍 페이지로 옮겨 한 번 더. 접수가 됐는지, 지역을 더 자세히 알릴 방법이 있는지 이 화면만으로는
+// 알 수 없었다. 그래서 접수증(시각·번호·지역)을 보여 주고, 다시 신청하는 대신
+// 같은 접수에 내용을 덧붙이는 칸을 둔다. 채우는 쪽은 src/scripts/consult-form.ts.
 ---
 
 <BaseLayout
@@ -20,14 +26,54 @@ import { site } from '../../data/site';
         </p>
         <h1>상담 신청이 접수되었습니다</h1>
         <p class="lead">
-          접수 내용이 담당자에게 바로 전달되었습니다. 최대한 빠르게 연락드리겠습니다.
-        </p>
-        {/* 남긴 번호를 가려서 보여준다 — 번호 오타면 연락이 닿지 않으므로 여기서 확인하게 한다 */}
-        <p class="done__phone" data-phone-echo-wrap hidden>
-          연락드릴 번호 <b data-phone-echo></b>
-          <a href={site.consultPath}>번호가 틀렸다면 다시 신청</a>
+          접수 내용이 담당자에게 바로 전달되었습니다. <b>다시 신청하지 않으셔도 됩니다.</b>
+          최대한 빠르게 연락드리겠습니다.
         </p>
       </div>
+
+      {/* 접수증 — sessionStorage 에 남은 신청 내용으로 채운다. 없으면(JS 꺼짐·사생활 보호 모드) 숨은 채로 둔다 */}
+      <div class="quote-doc done__receipt" data-receipt hidden>
+        <div class="quote-doc__head">
+          <p class="quote-doc__title">접수증</p>
+          <p class="quote-doc__sub">Receipt</p>
+        </div>
+        <ul class="quote-doc__rows">
+          <li><span>접수 시각</span><span class="dots"></span><span class="val" data-receipt-at></span></li>
+          <li><span>연락드릴 번호</span><span class="dots"></span><span class="val" data-receipt-phone></span></li>
+          <li data-receipt-row="region" hidden><span>신청 지역</span><span class="dots"></span><span class="val" data-receipt-region></span></li>
+          <li data-receipt-row="type" hidden><span>서비스</span><span class="dots"></span><span class="val" data-receipt-type></span></li>
+        </ul>
+        <div class="quote-doc__foot">
+          <p>번호가 틀렸다면 <a href={site.consultPath}>다시 신청</a>해 주세요. 맞다면 그대로 기다리시면 됩니다.</p>
+          <span class="seal">접수</span>
+        </div>
+      </div>
+
+      <p class="done__status" data-added role="status" hidden>
+        덧붙이신 내용도 같은 접수에 전달되었습니다.
+      </p>
+      <p class="form-error" data-added-error role="alert" hidden>
+        덧붙인 내용을 보내지 못했습니다. 잠시 후 다시 보내 주세요. 처음 신청은 이미 접수되어 있습니다.
+      </p>
+
+      {/* 다시 신청하는 대신 같은 접수에 내용을 덧붙인다 — 서버는 followup=1 을 보고 '추가 내용'으로 보낸다 */}
+      <form class="form done__more" method="POST" action="/api/consult" data-followup hidden>
+        <div class="field">
+          <label for="followup-message">더 알려주실 내용이 있다면 (선택)</label>
+          <textarea
+            id="followup-message"
+            name="message"
+            maxlength="2000"
+            rows="4"
+            placeholder="예: 통진읍 ○○리, 2층 단독주택(엘리베이터 없음), 이달 말 희망"
+          ></textarea>
+          <p class="hint">동·읍·면, 주거 형태와 평수, 층수, 희망 일정을 적어 주시면 연락드릴 때 바로 범위를 말씀드릴 수 있습니다.</p>
+        </div>
+        <input type="hidden" name="phone" value="" data-followup-phone />
+        <input type="hidden" name="followup" value="1" />
+        <FormHidden id="followup" />
+        <button class="button button--primary" type="submit">같은 접수에 덧붙이기</button>
+      </form>
 
       <h2>연락을 기다리는 동안</h2>
       <ul class="done__tips">

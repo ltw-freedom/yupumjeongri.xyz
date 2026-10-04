@@ -7,7 +7,8 @@
  *  - 번호 형식이 틀리면 서버에 보내기 전에 그 자리에서 알린다 — 왕복 한 번에 입력이 날아가던 문제
  *  - 전송 중에는 버튼을 잠가 두 번 접수되지 않게 한다
  *  - 보내기 직전 입력값을 sessionStorage 에 담아 두고, 서버가 ?error= 로 돌려보내면 되살린다
- *  - 접수 완료 페이지에서 "010-12**-5678 로 연락드립니다"를 보여준다 (번호 오타 확인용)
+ *  - 접수 완료 페이지에 접수증(시각·가린 번호·지역)을 채우고, 같은 접수에 내용을 덧붙이는 칸을 연다
+ *  - 같은 탭에서 이미 접수했다면 다른 페이지의 폼 위에 "이미 접수되었습니다"를 띄운다 (중복 신청 방지)
  *  - 모바일에서 입력 칸에 포커스가 있으면 하단 고정 CTA 를 숨긴다 (키보드 위에 떠서 입력을 가린다)
  *
  * 판정 규칙은 functions/api/consult.js 의 normalizePhone() 과 같게 유지할 것.
@@ -16,6 +17,7 @@
 import { track } from './funnel';
 
 const DRAFT_KEY = 'consult-draft';
+const SENT_KEY = 'consult-sent';
 const PHONE_RE = /^01[016789]\d{7,8}$/;
 /** 되살리지 않는 필드 — 허니팟과 페이지마다 달라지는 값 */
 const SKIP = new Set(['hp_leave_blank', 'page']);
@@ -40,6 +42,36 @@ function readDraft(): Record<string, string> | null {
   } catch {
     return null;
   }
+}
+
+type Sent = { phone: string; region: string; type: string; at: number };
+
+/** 접수 완료 페이지에서 남기는 기록 — 같은 탭에서 다시 폼을 만나면 "이미 접수됨"을 보여 준다 */
+function readSent(): Sent | null {
+  try {
+    const raw = sessionStorage.getItem(SENT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 010-1234-5678 → 010-12**-5678 (번호 오타 확인용으로 앞뒤만 보인다) */
+function maskPhone(phone: string): string {
+  const f = formatPhone(phone).split('-');
+  if (f.length !== 3) return '';
+  return `${f[0]}-${f[1].slice(0, 2)}${'*'.repeat(f[1].length - 2)}-${f[2]}`;
+}
+
+/** 10월 2일 오후 3:39 */
+function formatSentAt(at: number): string {
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'Asia/Seoul',
+  }).format(new Date(at));
 }
 
 function saveDraft(form: HTMLFormElement) {
@@ -160,15 +192,23 @@ if (params.has('error')) {
   if (draft && form) restoreDraft(form, draft);
 }
 
-// 접수 완료 — 남긴 번호를 가려서 보여 주고 임시 저장을 지운다
-const echo = document.querySelector<HTMLElement>('[data-phone-echo]');
-if (echo) {
-  const phone = readDraft()?.phone;
-  if (phone) {
-    const f = formatPhone(phone).split('-');
-    if (f.length === 3) {
-      echo.textContent = `${f[0]}-${f[1].slice(0, 2)}${'*'.repeat(f[1].length - 2)}-${f[2]}`;
-      echo.closest<HTMLElement>('[data-phone-echo-wrap]')?.removeAttribute('hidden');
+// 접수 완료 — 접수증(시각·번호·지역)을 채우고, 같은 접수에 덧붙이는 칸을 연다
+const receipt = document.querySelector<HTMLElement>('[data-receipt]');
+if (receipt) {
+  const draft = readDraft();
+  let sent = readSent();
+  // 방금 보낸 신청이면 접수 기록으로 옮긴다. 새로 고침·덧붙이기 후 돌아왔을 때는 기존 기록을 쓴다.
+  if (draft?.phone) {
+    sent = {
+      phone: draft.phone,
+      region: draft.region || draft.regionHint || '',
+      type: draft.type || '',
+      at: Date.now(),
+    };
+    try {
+      sessionStorage.setItem(SENT_KEY, JSON.stringify(sent));
+    } catch {
+      /* 무시 */
     }
   }
   try {
@@ -176,7 +216,72 @@ if (echo) {
   } catch {
     /* 무시 */
   }
+
+  const fill = (selector: string, text: string) => {
+    const el = receipt.querySelector<HTMLElement>(selector);
+    if (el) el.textContent = text;
+  };
+  if (sent && maskPhone(sent.phone)) {
+    fill('[data-receipt-at]', formatSentAt(sent.at));
+    fill('[data-receipt-phone]', maskPhone(sent.phone));
+    for (const key of ['region', 'type'] as const) {
+      if (!sent[key]) continue;
+      fill(`[data-receipt-${key}]`, sent[key]);
+      receipt.querySelector<HTMLElement>(`[data-receipt-row="${key}"]`)?.removeAttribute('hidden');
+    }
+    receipt.hidden = false;
+
+    const more = document.querySelector<HTMLFormElement>('form[data-followup]');
+    const phoneField = more?.querySelector<HTMLInputElement>('[data-followup-phone]');
+    if (more && phoneField) {
+      phoneField.value = sent.phone;
+      more.querySelector<HTMLInputElement>('input[name="page"]')!.value = location.pathname;
+      more.hidden = false;
+      more.addEventListener('submit', (event) => {
+        const text = more.querySelector<HTMLTextAreaElement>('textarea[name="message"]');
+        if (!text?.value.trim()) {
+          event.preventDefault();
+          text?.focus();
+          return;
+        }
+        const button = more.querySelector<HTMLButtonElement>('button[type="submit"]');
+        if (button) {
+          button.textContent = '보내는 중…';
+          setTimeout(() => (button.disabled = true));
+        }
+      });
+    }
+  }
+
+  const added = params.get('added');
+  if (added === '1') document.querySelector<HTMLElement>('[data-added]')?.removeAttribute('hidden');
+  if (params.get('error') === 'send') document.querySelector<HTMLElement>('[data-added-error]')?.removeAttribute('hidden');
 }
+
+// 이미 접수한 사람이 다른 페이지의 상담 폼을 다시 만나면 접수됐다고 알린다.
+// 2026-10-02 첫 실제 접수가 시 페이지 → 읍 페이지로 옮겨 다시 신청한 경우였다. 폼은 그대로 둔다(번호를 바꿀 수도 있다).
+function markSentForms() {
+  const sent = readSent();
+  if (!sent || !maskPhone(sent.phone)) return;
+  document.querySelectorAll<HTMLFormElement>('form[data-consult]').forEach((form) => {
+    if (form.querySelector('.consult-sent')) return;
+    const note = document.createElement('p');
+    note.className = 'consult-sent';
+    note.setAttribute('role', 'status');
+    const strong = document.createElement('b');
+    strong.textContent = `${formatSentAt(sent.at)} · ${maskPhone(sent.phone)}`;
+    const link = document.createElement('a');
+    link.href = '/consult/done/';
+    link.textContent = '덧붙일 내용 남기기';
+    note.append('이미 접수되었습니다 (', strong, '). 다시 보내지 않으셔도 됩니다. ', link);
+    form.prepend(note);
+  });
+}
+if (!receipt) markSentForms();
+// 뒤로 가기로 폼 페이지에 돌아온 경우(bfcache)에도 알린다
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted && !receipt) markSentForms();
+});
 
 // 모바일 하단 고정 CTA — 입력 중에는 숨긴다
 // 키보드가 올라오는 칸만 — 라디오·체크박스를 누를 때는 숨기지 않는다

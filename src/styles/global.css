@@ -2507,31 +2507,55 @@ tbody th {
   color: var(--color-gold);
 }
 
-.done__phone {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: baseline;
-  gap: 0.3rem 0.8rem;
-  margin: 0 auto 0.5rem;
-  padding: 0.8rem 1rem;
-  background: var(--color-card);
-  border: 1px solid var(--color-line-strong);
-  border-radius: var(--radius);
+/* 접수증 — 견적서 카드(.quote-doc)를 그대로 쓰고 기울기만 뺀다 */
+.done__receipt {
+  margin-block: 0.5rem 1.5rem;
+  transform: none;
 }
 
-.done__phone[hidden] {
+.done__receipt[hidden],
+.done__receipt li[hidden],
+.done__more[hidden],
+.done__status[hidden],
+.consult-sent[hidden] {
   display: none;
 }
 
-.done__phone b {
-  font-size: 1.1rem;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.03em;
+.done__receipt .quote-doc__foot a {
+  color: inherit;
 }
 
-.done__phone a {
-  font-size: 0.88rem;
+.done__status {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--color-gold-bright);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--color-card);
+  font-weight: 600;
+  text-align: center;
+}
+
+.done__more {
+  margin-top: 0;
+}
+
+/* 이미 접수한 사람이 다른 페이지의 상담 폼을 다시 만났을 때 */
+.consult-sent {
+  margin: 0 0 0.75rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--color-gold-bright);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  text-align: left;
+}
+
+.consult-sent b {
+  font-variant-numeric: tabular-nums;
 }
 
 .done__tips {

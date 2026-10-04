@@ -58,6 +58,12 @@ export async function onRequestPost(context) {
   // 번호가 정상이면 버리지 않고 '스팸 의심' 표시만 붙여 넘긴다. 진짜 상담 한 건이 더 비싸다.
   const honeypot = field(form, 'hp_leave_blank', 1) || field(form, 'company', 1);
 
+  // 접수 완료 화면의 '같은 접수에 덧붙이기' — 새 신청이 아니라 앞선 신청의 추가 내용이다.
+  // 깔때기에 접수로 세지 않고, 실패하면 상담 폼이 아니라 완료 화면으로 돌려보낸다.
+  const followup = field(form, 'followup', 1) === '1';
+  const donePath = followup ? '/consult/done/?added=1' : '/consult/done/';
+  const sendFailPath = followup ? '/consult/done/?error=send' : '/consult/?error=send';
+
   const rawPhone = field(form, 'phone', 20);
   // 지역 페이지의 빠른 상담 폼은 지역 입력 칸 없이 페이지의 지역명을 regionHint 로 보낸다
   const region = field(form, 'region', 60);
@@ -75,6 +81,10 @@ export async function onRequestPost(context) {
   const rawPage = field(form, 'page', 200);
   const page = /^\/[\w\-/%.]*$/.test(rawPage) ? rawPage : '';
 
+  if (followup && (!rawPhone || !message)) {
+    return redirect(rawPhone ? '/consult/done/' : sendFailPath, origin);
+  }
+
   if (!rawPhone) {
     return honeypot ? redirect('/consult/done/', origin) : redirect('/consult/?error=required', origin);
   }
@@ -82,6 +92,7 @@ export async function onRequestPost(context) {
   // 브라우저 pattern 검증은 우회될 수 있으므로 서버에서 다시 본다.
   const phone = normalizePhone(rawPhone);
   if (!phone) {
+    if (followup) return redirect(sendFailPath, origin);
     // 봇에게 실패를 알려주면 우회를 시도하므로 성공한 것처럼 돌려보낸다
     return honeypot ? redirect('/consult/done/', origin) : redirect('/consult/?error=phone', origin);
   }
@@ -93,12 +104,17 @@ export async function onRequestPost(context) {
     timeStyle: 'short',
   }).format(new Date());
 
-  const rows = [
-    ['휴대폰', phone],
-    ['지역', region || (regionHint ? `${regionHint} (신청 페이지 기준)` : '—')],
-    ['서비스', type || '—'],
-    ['접수 시각', `${receivedAt} (KST)`],
-  ];
+  const rows = followup
+    ? [
+        ['휴대폰', phone],
+        ['받은 시각', `${receivedAt} (KST)`],
+      ]
+    : [
+        ['휴대폰', phone],
+        ['지역', region || (regionHint ? `${regionHint} (신청 페이지 기준)` : '—')],
+        ['서비스', type || '—'],
+        ['접수 시각', `${receivedAt} (KST)`],
+      ];
 
   // 계산기 조건은 고른 것만 붙인다. Slack section 한 블록의 fields 는 최대 10개.
   const estimateRows = [
@@ -112,22 +128,28 @@ export async function onRequestPost(context) {
   const toFields = (list) =>
     list.map(([label, value]) => ({ type: 'mrkdwn', text: `*${label}*\n${value}` }));
 
+  const title = followup ? '상담 신청 추가 내용' : '새 상담 신청';
   const payload = {
-    text: `새 상담 신청 — ${phone}${honeypot ? ' (스팸 의심)' : ''}`, // 알림 미리보기용
+    text: `${title} — ${phone}${honeypot ? ' (스팸 의심)' : ''}`, // 알림 미리보기용
     blocks: [
       {
         type: 'header',
-        text: { type: 'plain_text', text: honeypot ? '새 상담 신청 (스팸 의심 — 허니팟 값 있음)' : '새 상담 신청', emoji: false },
+        text: { type: 'plain_text', text: honeypot ? `${title} (스팸 의심 — 허니팟 값 있음)` : title, emoji: false },
       },
       { type: 'section', fields: toFields(rows) },
       ...(estimateRows.length ? [{ type: 'section', fields: toFields(estimateRows) }] : []),
       ...(message
-        ? [{ type: 'section', text: { type: 'mrkdwn', text: `*상담 내용*\n${message}` } }]
+        ? [{ type: 'section', text: { type: 'mrkdwn', text: `*${followup ? '덧붙인 내용' : '상담 내용'}*\n${message}` } }]
         : []),
       {
         type: 'context',
         elements: [
-          { type: 'mrkdwn', text: `yupumjeongri.xyz${page ? ` · 신청 페이지 ${page}` : ''} · 상담 종료 후 바로 파기` },
+          {
+            type: 'mrkdwn',
+            text: followup
+              ? 'yupumjeongri.xyz · 같은 번호의 앞선 신청에 덧붙인 내용 (새 신청 아님) · 상담 종료 후 바로 파기'
+              : `yupumjeongri.xyz${page ? ` · 신청 페이지 ${page}` : ''} · 상담 종료 후 바로 파기`,
+          },
         ],
       },
     ],
@@ -142,16 +164,16 @@ export async function onRequestPost(context) {
 
     if (!res.ok) {
       console.error('Slack 전송 실패', res.status, await res.text());
-      return redirect('/consult/?error=send', origin);
+      return redirect(sendFailPath, origin);
     }
   } catch (err) {
     console.error('Slack 전송 중 예외', err);
-    return redirect('/consult/?error=send', origin);
+    return redirect(sendFailPath, origin);
   }
 
-  // 깔때기 기록 (worker/funnel.js) — Worker 가 넘겨줄 때만
-  context.onConsult?.(page);
-  return redirect('/consult/done/', origin);
+  // 깔때기 기록 (worker/funnel.js) — Worker 가 넘겨줄 때만. 덧붙이기는 새 접수가 아니다.
+  if (!followup) context.onConsult?.(page);
+  return redirect(donePath, origin);
 }
 
 /** GET 으로 들어오면 폼으로 되돌린다. */
