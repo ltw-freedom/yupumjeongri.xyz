@@ -1,5 +1,5 @@
 """
-쇼릴 빌드 — showreel.src.html 에 폰트·사진을 인라인해서 한 파일로 만든다.
+소개 영상 빌드 — showreel.src.html 에 폰트·사진을 인라인해서 한 파일로 만든다.
 
   python docs/showreel/build.py            # → docs/showreel/showreel.html (독립 실행용, doctype 포함)
   python docs/showreel/build.py --artifact  # → 위 + .cache/showreel.artifact.html (doctype 없는 본문 버전)
@@ -7,7 +7,7 @@
 폰트는 파일에 실제로 쓰인 글자만 남겨 서브셋한다. 카피를 고치면 다시 빌드할 것.
  - Pretendard Variable: jsdelivr 원본을 받아 fontTools 로 서브셋 (tnum 등 레이아웃 기능 유지)
  - Noto Serif KR 700, IBM Plex Mono 400/500: Google Fonts 의 text= 서브셋을 그대로 받는다
-사진은 src/assets/cases/hero-ladder-truck.jpg 를 1000px 로 줄여 넣는다.
+사진은 __PHOTO:파일명__ 자리에 src/assets/cases/파일명 을 긴 변 960px 로 줄여 넣는다.
 """
 import base64
 import io
@@ -78,18 +78,24 @@ def main() -> None:
     (serif,) = google_subset('Noto Serif KR', '700', text_all)
     mono4, mono5 = google_subset('IBM Plex Mono', '400;500', text_latin)
 
-    img = Image.open(ROOT / 'src/assets/cases/hero-ladder-truck.jpg').convert('RGB')
-    img.thumbnail((1000, 1000))
-    jb = io.BytesIO()
-    img.save(jb, 'JPEG', quality=80, optimize=True, progressive=True)
+    photo_bytes = 0
+
+    def photo(m: re.Match) -> str:
+        nonlocal photo_bytes
+        img = Image.open(ROOT / 'src/assets/cases' / m.group(1)).convert('RGB')
+        img.thumbnail((960, 960))
+        jb = io.BytesIO()
+        img.save(jb, 'JPEG', quality=80, optimize=True, progressive=True)
+        photo_bytes += jb.tell()
+        return data_uri(jb.getvalue(), 'image/jpeg')
 
     out = (
         src.replace('__FONT_SANS__', data_uri(sans, 'font/woff2'))
         .replace('__FONT_SERIF__', data_uri(serif, 'font/woff2'))
         .replace('__FONT_MONO4__', data_uri(mono4, 'font/woff2'))
         .replace('__FONT_MONO5__', data_uri(mono5, 'font/woff2'))
-        .replace('__PHOTO__', data_uri(jb.getvalue(), 'image/jpeg'))
     )
+    out = re.sub(r'__PHOTO:([\w.-]+)__', photo, out)
 
     standalone = (
         '<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
@@ -100,8 +106,10 @@ def main() -> None:
     if '--artifact' in sys.argv:
         (CACHE / 'showreel.artifact.html').write_text(out, encoding='utf-8')
 
-    kb = lambda b: f'{len(b) / 1024:.0f}KB'
-    print(f'sans {kb(sans)} · serif {kb(serif)} · mono {kb(mono4)}+{kb(mono5)} · photo {kb(jb.getvalue())}')
+    def kb(b: bytes) -> str:
+        return f'{len(b) / 1024:.0f}KB'
+
+    print(f'sans {kb(sans)} · serif {kb(serif)} · mono {kb(mono4)}+{kb(mono5)} · photos {photo_bytes / 1024:.0f}KB')
     print(f'showreel.html {len(standalone.encode()) / 1024:.0f}KB · {len(text_all)} glyphs')
 
 

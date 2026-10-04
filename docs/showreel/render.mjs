@@ -1,5 +1,5 @@
 /**
- * 쇼릴 렌더러 — showreel.html 을 프레임 단위로 찍어 ffmpeg 로 MP4 를 만든다.
+ * 소개 영상 렌더러 — showreel.html 을 프레임 단위로 찍어 ffmpeg 로 MP4 를 만든다.
  *
  *   node render.mjs                     # → showreel.mp4 (1920×1080, 60fps, 15초)
  *   node render.mjs --stills 3.2,6.9    # → .cache/still-3.20.png … (특정 시점 확인용)
