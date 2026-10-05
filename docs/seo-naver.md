@@ -71,7 +71,7 @@
 - 시군구 페이지 `title`·`description` 패턴과 `cityShortName()` 변경. 가장 직접적인 순위 요인이다.
   고쳐야 한다면 몇 개 지역에만 먼저 적용하고 순위를 재서 확인한 뒤 넓힐 것.
 - URL 구조·slug 변경, trailing slash 정책 변경.
-- `.xyz` → `.co.kr` 도메인 이전 (README TODO). 쌓인 신호가 초기화될 위험 — 순위가 몇 달 안정된 뒤로 미룬다.
+- `.xyz` → `.co.kr` 도메인 이전. 쌓인 신호가 초기화될 위험 — 2026-10-06 운영자 결정으로 이전하지 않는다.
 - 동 페이지 사이트맵 전량 투입 (`astro.config.mjs` 의 `SITEMAP_DONG_WAVE = 'all'`). 네이버 색인률 12% 상태에서는 저품질 신호가 된다.
 - `BaseLayout` 의 `naver-site-verification` 메타 삭제.
 

@@ -13,10 +13,10 @@ import sitemap from '@astrojs/sitemap';
  *  - 'wave1': 큐레이션 지역의 동 + 신도시 별칭만 사이트맵에 포함 (기본)
  *  - 'all'  : 동 페이지 전부 포함 — 1차 웨이브 색인률이 80%를 넘으면 올린다
  */
-const SITEMAP_DONG_WAVE = 'wave1';
+const SITEMAP_DONG_WAVE = /** @type {'wave1' | 'all'} */ ('wave1');
 const wave1Dongs = new Set(JSON.parse(readFileSync(new URL('./src/data/sitemap-wave1.json', import.meta.url), 'utf-8')));
 /** /area/{region}/{city}/{dong}/ 4단 경로인가 */
-const isDongPath = (pathname) => /^\/area\/[^/]+\/[^/]+\/[^/]+\/$/.test(pathname);
+const isDongPath = (/** @type {string} */ pathname) => /^\/area\/[^/]+\/[^/]+\/[^/]+\/$/.test(pathname);
 
 // https://astro.build/config
 export default defineConfig({

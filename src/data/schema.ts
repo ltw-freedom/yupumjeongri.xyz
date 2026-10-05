@@ -19,13 +19,7 @@ export function localBusiness(areaServed: string[] = [...site.areaServed]) {
     image: absoluteUrl('/og-image.png'),
     logo: absoluteUrl('/favicon.svg'),
     areaServed,
-    address: {
-      '@type': 'PostalAddress',
-      addressCountry: 'KR',
-      addressRegion: site.address.region,
-      addressLocality: site.address.locality,
-      streetAddress: site.address.street,
-    },
+    // 주소는 공개하지 않으므로 address 를 넣지 않는다 (방문형 서비스 — 영업 범위는 areaServed).
     // 전화 상담을 운영하지 않으므로 telephone 은 넣지 않는다.
     // 대신 접수 창구를 명시해 둔다.
     contactPoint: {

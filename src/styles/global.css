@@ -1667,24 +1667,12 @@ tbody th {
 }
 
 /* ==========================================================================
-   회신 약속 · 사업장 표시
+   회신 약속
    ========================================================================== */
 .cta__reassure {
   margin: 1rem 0 0;
   font-size: 0.9rem;
   color: var(--color-muted);
-}
-
-.site-footer__address {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem 1.25rem;
-  margin: 2rem 0 0.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  font-style: normal;
-  font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .site-footer__promise {

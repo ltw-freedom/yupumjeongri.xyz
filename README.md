@@ -244,31 +244,29 @@ npm run build && npx wrangler deploy
 
 ## 남은 작업 (TODO)
 
-배포 전 필수:
-
-- [x] **`/cost/` 에 서비스별 비용 범위(최소~최대) 공개** — 이 사이트의 핵심 자산.
-      `localBusiness()` 에 `priceRange`, 가격표에 `AggregateOffer` / `Offer` /
-      `PriceSpecification` JSON-LD 까지 붙었다. 표시 문자열(`range`)과 스키마용
-      숫자(`minPrice`/`maxPrice`)가 `pricing.ts` 에 나란히 있으니 **항상 같이 고칠 것**.
-      `Offer` 는 `PriceTable` 을 실제로 렌더하는 페이지(`/cost/`, 지역 페이지)에서만 붙인다.
-- [x] **기준 가격의 부가세 별도 여부 명시** — 2026-09 확정: 표기 금액은 전부 **부가세 별도**.
-      `pricing.ts` 의 `vatIncluded`·`vatLabel`·`vatNote` 한 곳에서 관리하고, 가격표 캡션·계산기·지역 요약·
-      직답 문장·llms.txt·`PriceSpecification.valueAddedTaxIncluded` 가 이 값을 따른다.
-      새로 금액을 적는 곳(칼럼 본문 포함)에도 부가세 별도임을 같이 적을 것.
-- [ ] **`/guarantee/` 최저가 보상제 페이지** — 적용 조건(동일 조건의 정의, 유효 기간,
-      제외 항목, 증빙 방법)을 확정해야 작성 가능. 조건 없는 보상 문구는 쓰지 않는다.
-- [x] **`SLACK_WEBHOOK_URL` Secret 등록** — Worker(`yupumjeongri-xyz`)에 등록됨. 9/13·10/2 실제 접수 경로로 Slack 도착 확인.
-- [ ] 사업자 정보(상호/대표/주소/사업자등록번호) 푸터에 추가 — **보류 (2026-09-13 운영자 결정: 표기하지 않음)**.
-      전자상거래법 제10조는 사이버몰 운영자에게 전화번호 표시를 요구하므로,
-      정책이 바뀌면 대표 연락처를 어떻게 표기할지 함께 정할 것.
-- [ ] "대한유품정리" 상표·상호 중복 확인 (KIPRIS)
-
-이후:
-
-- [x] 실제 현장 사진 배치 — `src/assets/cases/` 가공본 + `src/data/cases.ts` (Astro 이미지 파이프라인이 WebP 로 변환)
-- [ ] `.co.kr` / `.kr` 도메인 확보 후 `.xyz` 를 301 리다이렉트로 붙이는 안 검토
-      — **보류.** `.xyz` 로 네이버 순위가 잡혔다 (`docs/seo-naver.md`). 순위가 몇 달 안정된 뒤 다시 판단
-- [x] 비용 직답 문장 — `pricing.ts` 의 `priceAnswer()` 가 `/cost/` 첫 문장, 지역·서비스 페이지 비용 섹션 첫 문장, llms.txt 에 같은 문장을 넣는다 (`pricesAsOf` 기준일 포함. 가격을 고치면 기준일도 올릴 것)
-- [ ] 네이버 스마트플레이스 등록 — **보류** (2026-09). 등록하면 문의 링크를 `/consult/` 로 걸고 `localBusiness()` 에 `sameAs` 추가
-- [x] 2차: 서울 25개 구, 경기 31개 시·군, 동·읍·면 1090쪽 (`src/data/districts.ts`)
 - [ ] 후기 섹션 — 실제 의뢰인 코멘트를 받은 사례만 싣는다 (지어낸 후기 금지). 첫 실제 접수부터 작업 후 한 줄 요청
+- [ ] `/api/consult` Rate limiting rule — 유입이 늘면 Cloudflare 대시보드에서 건다 ([스팸 방어](#스팸-방어))
+
+### 하지 않기로 한 것 (2026-10-06 운영자 결정)
+
+다시 제안하지 말 것. 정책이 바뀌면 이 목록부터 고친다.
+
+- **사업자 정보·주소 표기 안 함** — 푸터·명함·JSON-LD(`LocalBusiness.address` 없음)·llms.txt·칼럼 어디에도 넣지 않는다.
+  `site.ts` 에 주소 필드도 두지 않는다.
+- **`/guarantee/` 최저가 보상제 페이지 안 만듦** — 따로 정한 조건이 없다. "최저가 보상"은
+  `site.guaranteeShort`(동일 조건 타사 견적서 대비) 문장으로만 쓴다.
+- **상표 출원 안 함** — 2026-10-06 KIPRIS 확인 시 '대한유품정리' 동일·유사 출원/등록은 없었다.
+- **도메인 이전 안 함** — `.xyz` 유지. 네이버 순위가 이 도메인에 잡혀 있다 (`docs/seo-naver.md`).
+- **네이버 스마트플레이스 등록 안 함**
+
+### 완료 — 유지할 때 알아둘 것
+
+- `/cost/` 비용 범위 공개 + `priceRange` / `AggregateOffer` / `Offer` / `PriceSpecification` JSON-LD.
+  표시 문자열(`range`)과 스키마용 숫자(`minPrice`/`maxPrice`)가 `pricing.ts` 에 나란히 있으니 **항상 같이 고칠 것**.
+  `Offer` 는 `PriceTable` 을 실제로 렌더하는 페이지(`/cost/`, 지역 페이지)에서만 붙인다.
+- 표기 금액은 전부 **부가세 별도** — `pricing.ts` 의 `vatIncluded`·`vatLabel`·`vatNote` 한 곳에서 관리한다.
+  새로 금액을 적는 곳(칼럼 본문 포함)에도 부가세 별도임을 같이 적을 것.
+- 비용 직답 문장 `priceAnswer()` — `/cost/`·지역·서비스 페이지·llms.txt 가 같은 문장을 쓴다. 가격을 고치면 `pricesAsOf` 기준일도 올릴 것.
+- `SLACK_WEBHOOK_URL` Secret — Worker 에 등록됨. 9/13·10/2 실제 접수 경로로 Slack 도착 확인.
+- 실제 현장 사진 — `src/assets/cases/` 가공본 + `src/data/cases.ts`
+- 서울 25개 구, 경기 31개 시·군, 동·읍·면 1090쪽 (`src/data/districts.ts`)
