@@ -154,21 +154,65 @@ export function cityLead(city: DistrictCity): string {
   return pick(variants, `citylead:${city.slug}`);
 }
 
-/** 큐레이션이 없는 시·군·구 페이지의 FAQ */
-export function cityFaqs(city: DistrictCity): { q: string; a: string }[] {
+/** 받침 유무에 맞는 조사 — josa('가평군', '은', '는') → '가평군은' */
+function josa(word: string, withFinal: string, withoutFinal: string): string {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  const hasFinal = code >= 0 && code <= 11171 && code % 28 !== 0;
+  return word + (hasFinal ? withFinal : withoutFinal);
+}
+
+/**
+ * 큐레이션이 없는 시·군·구 페이지의 FAQ.
+ *
+ * 예전엔 56개 시군구가 같은 세 문답을 지역명만 바꿔 썼다 — 유사문서로 묶이는 원인 중 하나.
+ * 지금은 그 지역에만 있는 **사실**(법정동 이름, 일반구, 인접 시군구, 신도시 별칭)로 질문과 답을 만든다.
+ * 지어낸 지역 정보(작업 건수, "이 동네는 ○○가 많다" 류)는 넣지 않는다.
+ */
+export function cityFaqs(
+  city: DistrictCity,
+  ctx: { nearby: DistrictCity[]; aliases: DongAlias[] },
+): { q: string; a: string }[] {
   const short = city.name.replace(/[구시군]$/, '');
-  return [
-    {
-      q: `${city.name} 전 지역 모두 가능한가요?`,
-      a: `네, ${city.name}의 모든 법정동에서 진행합니다. 아래 법정동 목록에서 해당 지역 안내 페이지를 확인하실 수 있습니다.`,
-    },
-    {
-      q: `${short} 지역 유품정리 비용은 얼마인가요?`,
-      a: `원룸 40만~90만원, 20평대 아파트 150만~250만원 범위(부가세 별도)이며, 전 지역 동일한 기준을 적용합니다. 자세한 기준은 비용 안내 페이지에 공개되어 있습니다.`,
-    },
-    {
-      q: `방문 견적은 어떻게 진행되나요?`,
-      a: `상담 회신 때 주거 형태와 짐의 양을 여쭤보고 방문 전에 예상 범위도 안내드립니다. 방문 후 항목별 견적서를 드리고, 견적서에 없는 금액은 청구하지 않습니다.`,
-    },
-  ];
+  const names = city.dongs.map((dong) => dong.name);
+  const gus = [...new Set(city.dongs.map((dong) => dong.gu).filter(Boolean))] as string[];
+  const faqs: { q: string; a: string }[] = [];
+
+  // 1. 동 이름으로 묻는다 — 목록 앞·뒤에서 하나씩 골라 "우리 동네도 되나" 질문에 답한다
+  const ask = [names[hash(`fq1:${city.slug}`) % names.length], names[names.length - 1]].filter(
+    (name, i, arr) => arr.indexOf(name) === i,
+  );
+  faqs.push({
+    q: `${ask.length > 1 ? `${josa(ask[0], '이나', '나')} ${ask[1]}` : ask[0]} 같은 ${city.name} 동네도 오시나요?`,
+    a: `네. ${city.name} 법정동 ${names.length}곳(${names.slice(0, 6).join('·')}${names.length > 6 ? ' 등' : ''}) 어디든 같은 조건으로 방문 견적을 드립니다. 아래 목록에서 동별 안내를 볼 수 있습니다.`,
+  });
+
+  // 2. 일반구가 있는 시는 구별 차이를, 없으면 비용 직답을
+  if (gus.length > 1) {
+    faqs.push({
+      q: `${gus.join('·')} 중 어느 구냐에 따라 비용이 다른가요?`,
+      a: `다르지 않습니다. ${josa(city.name, '은', '는')} ${gus.length}개 구 모두 같은 공개 기준(원룸 40만~90만원, 20평대 150만~250만원, 부가세 별도)을 씁니다. 금액을 움직이는 건 구가 아니라 짐의 양과 반출 동선입니다.`,
+    });
+  } else {
+    faqs.push({
+      q: `${short} 유품정리 비용은 얼마인가요?`,
+      a: `${city.name}도 공개 기준 그대로입니다. 원룸·오피스텔 40만~90만원, 투룸 90만~160만원, 20평대 150만~250만원(부가세 별도). 지역 할증은 없습니다.`,
+    });
+  }
+
+  // 3. 신도시 별칭이 있으면 그 생활권을, 없으면 인접 시군구를
+  const alias = ctx.aliases[0];
+  if (alias) {
+    faqs.push({
+      q: `${alias.name}도 ${city.name} 페이지에서 신청하면 되나요?`,
+      a: `네. ${josa(alias.name, '은', '는')} 법정동으로는 ${alias.legalDongs.join('·')}에 걸쳐 있어, 따로 나눠 신청하실 필요 없이 같은 상담 폼으로 접수하시면 됩니다.`,
+    });
+  } else if (ctx.nearby.length > 0) {
+    const near = ctx.nearby.slice(0, 3).map((c) => c.name);
+    faqs.push({
+      q: `${city.name} 집과 ${near[0]} 집을 한 번에 정리할 수도 있나요?`,
+      a: `가능합니다. ${near.join('·')}처럼 붙어 있는 지역은 같은 주에 일정을 묶어 잡을 수 있습니다. 두 집 모두 공개 기준으로 따로 견적서를 드립니다.`,
+    });
+  }
+
+  return faqs;
 }

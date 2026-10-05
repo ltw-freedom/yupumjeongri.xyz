@@ -184,6 +184,19 @@ const specialOptions = [
     </div>
 
     <FormHidden id="estimate" regionHint={regionHint} />
+
+    {/*
+      모바일 결과 바 — 계산기가 화면 두 장 길이라, 칩을 고르는 동안엔 결과와 번호 칸이 한참 아래에 있다.
+      2026-10-02~06 계산기를 만진 방문자 4명 중 번호 칸까지 간 사람이 0명이었다.
+      고르는 즉시 합계를 화면 아래에 띄우고, 누르면 번호 칸으로 바로 데려간다. 데스크톱은 결과가 옆에 있어 쓰지 않는다.
+    */}
+    <div class="estimate-bar" data-estimate-bar hidden>
+      <p class="estimate-bar__total">
+        <span>예상 합계 ({vatLabel})</span>
+        <b data-out="bar">—</b>
+      </p>
+      <button class="button estimate-bar__go" type="button" data-estimate-go>이 조건으로 견적 받기</button>
+    </div>
   </form>
 </section>
 
@@ -248,6 +261,7 @@ const specialOptions = [
       out('extra').hidden = !ladder;
 
       out('total').textContent = total;
+      out('bar').textContent = ladder ? `${total} + 사다리차` : total;
       out('caveat').textContent = caveat;
       hidden.value = ladder ? `${total} + 사다리차(필요 시)` : total;
       form.classList.add('is-calculated');
@@ -255,5 +269,33 @@ const specialOptions = [
 
     form.addEventListener('change', update);
     update(); // 뒤로 가기로 돌아와 선택이 남아 있는 경우
+
+    // 모바일 결과 바 — 계산을 시작했고, 칩 영역은 보이는데 번호 칸은 아직 안 보일 때만 띄운다
+    const bar = form.querySelector<HTMLElement>('[data-estimate-bar]')!;
+    const phone = form.querySelector<HTMLInputElement>('input[name="phone"]')!;
+    let inputsVisible = false;
+    let ctaVisible = false;
+    const sync = () => {
+      const show = form.classList.contains('is-calculated') && inputsVisible && !ctaVisible;
+      bar.hidden = !show;
+      document.body.classList.toggle('has-estimate-bar', show);
+    };
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        inputsVisible = entries[0].isIntersecting;
+        sync();
+      }).observe(form.querySelector('.estimate__inputs')!);
+      new IntersectionObserver((entries) => {
+        ctaVisible = entries[0].isIntersecting;
+        sync();
+      }, { rootMargin: '0px 0px -80px 0px' }).observe(form.querySelector('.estimate__cta')!);
+    }
+    form.addEventListener('change', sync);
+    bar.querySelector('[data-estimate-go]')!.addEventListener('click', () => {
+      // 탭 동작 안에서 바로 focus 해야 iOS 가 키보드를 연다. focus 가 번호 칸을 화면 안으로 데려오고,
+      // 그다음 가운데로 맞춘다 (부드러운 스크롤이 끊겨도 번호 칸은 이미 보이는 상태).
+      phone.focus();
+      phone.scrollIntoView({ block: 'center' });
+    });
   });
 </script>

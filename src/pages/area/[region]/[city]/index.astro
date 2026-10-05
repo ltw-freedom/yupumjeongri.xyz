@@ -5,7 +5,6 @@ import CTA from '../../../../components/CTA.astro';
 import FAQ from '../../../../components/FAQ.astro';
 import PriceTable from '../../../../components/PriceTable.astro';
 import CaseGallery from '../../../../components/CaseGallery.astro';
-import WhyUs from '../../../../components/WhyUs.astro';
 import AreaQuick from '../../../../components/AreaQuick.astro';
 import EstimateCalc from '../../../../components/EstimateCalc.astro';
 import { getRegion, cityShortName } from '../../../../data/areas';
@@ -54,7 +53,7 @@ const relatedColumns = columns
   .filter((entry) => entry.data.relatedAreas.includes(dc.slug) || entry.data.relatedAreas.includes(dc.region))
   .slice(0, 3);
 
-const faqs = curated?.faqs ?? cityFaqs(dc);
+const faqs = curated?.faqs ?? cityFaqs(dc, { nearby, aliases });
 
 // 같은 시·군·구 사례가 있으면 앞에, 없으면 같은 광역 사례로 채운다
 const localCases = casesFor(dc.region, dc.slug, 2);
@@ -121,11 +120,7 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
         물품 양, 반출 동선, 특수청소 여부뿐입니다.
       </p>
       <PriceTable />
-      <p class="note">
-        확정 금액은 현장 확인 후 항목별 견적서로 드리며, 견적서에 없는 금액은 청구하지 않습니다.
-        다른 유품정리 업체의 동일 조건 견적서를 갖고 계시면 그보다 낮은 금액으로 진행합니다.
-        <a href="/cost/">비용 산정 기준 전체 보기</a>
-      </p>
+      <p class="note"><a href="/cost/">비용 산정 기준 전체 보기</a></p>
 
       <EstimateCalc heading={`${short} 우리 집 예상 비용 계산`} regionHint={regionHint} />
 
@@ -177,37 +172,30 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
         )
       }
 
+      {/*
+        서비스·진행 과정·'왜 대한유품정리인가'는 56개 시군구에 똑같이 들어가는 글이라 링크로만 둔다.
+        2026-10-06 네이버에서 시군구 페이지 상당수가 제목 검색으로도 안 나왔다 — 본문의 65~88%가
+        페이지끼리 같아 유사문서로 묶인 것으로 판단 (docs/seo-naver.md 4-2). 공통 블록을 본문에 다시 늘리지 말 것.
+      */}
       <h2>{dc.name}에서 제공하는 서비스</h2>
-      <ul class="grid">
+      <ul class="link-list">
         {
           services.map((service) => (
-            <li class="card">
-              <h3>
-                <a href={`/service/${service.slug}/`}>{service.name}</a>
-              </h3>
-              <p>{service.summary}</p>
+            <li>
+              <a href={`/service/${service.slug}/`}>{service.name}</a>
             </li>
           ))
         }
       </ul>
-
-      <h2>진행 과정</h2>
-      <ol class="steps">
-        <li><strong>현장 확인</strong>물품 양과 반출 동선을 확인하고 항목별 견적을 안내드립니다.</li>
-        <li><strong>유품 분류</strong>서류·기록물과 일반 물품을 나눠 분류합니다.</li>
-        <li><strong>보관품 선별</strong>전달해 드릴 물건을 따로 포장합니다.</li>
-        <li><strong>폐기 · 반출</strong>폐기물을 종류별로 분리해 처리합니다.</li>
-        <li><strong>공간 정돈</strong>반출 후 청소까지 마무리합니다.</li>
-      </ol>
-      <p><a href="/process/">진행 과정 자세히 보기</a></p>
+      <p>
+        <a href="/process/">진행 과정 5단계</a> · <a href="/#whyus-heading">다른 업체와 무엇이 다른가</a>
+      </p>
 
       <CaseGallery
         items={localCases}
         heading={hasLocalCase ? `${dc.name} 진행 사례` : `${region.name} 인근 진행 사례`}
         moreLink
       />
-
-      <WhyUs variant="compact" areaName={dc.name} />
 
       <FAQ title={`${dc.name} 유품정리 자주 묻는 질문`} items={faqs} />
 
