@@ -5,7 +5,7 @@
  * 네이버 애널리틱스는 대시보드를 열어야 보이고 폼 단계는 잡지 못한다. 그래서 직접 센다.
  *
  * 받는 것: 이벤트 종류·페이지 경로·유입 출처 호스트·검색어(리퍼러에 실려 올 때만)·탭마다 새로 만드는 임의 id.
- * 번호·IP·쿠키는 쓰지 않는다. 서버는 worker/funnel.js, 요약은 매일 09:00 Slack 상담 채널.
+ * 번호·IP·쿠키는 쓰지 않는다. 서버는 worker/funnel.js, 숫자는 D1 에서 직접 조회한다.
  */
 
 export type FunnelEvent = 'view' | 'focus' | 'invalid' | 'submit' | 'calc' | 'cta';

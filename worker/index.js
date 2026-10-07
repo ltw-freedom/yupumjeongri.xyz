@@ -9,7 +9,7 @@
  * 배포: npx wrangler deploy  (설정은 루트 wrangler.jsonc)
  */
 import { onRequestPost, onRequestGet } from '../functions/api/consult.js';
-import { handleEvent, recordConsult, sendDigest } from './funnel.js';
+import { handleEvent, recordConsult } from './funnel.js';
 
 export default {
   async fetch(request, env, ctx) {
@@ -44,10 +44,5 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
-  },
-
-  // wrangler.jsonc triggers.crons — 매일 09:00 KST 전날 방문·상담 깔때기 요약
-  async scheduled(event, env, ctx) {
-    ctx.waitUntil(sendDigest(env));
   },
 };
