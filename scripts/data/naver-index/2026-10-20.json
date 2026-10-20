@@ -1,0 +1,1824 @@
+{
+ "date": "2026-10-20",
+ "withTitle": false,
+ "rows": [
+  {
+   "path": "/",
+   "group": "홈",
+   "found": true,
+   "others": 19
+  },
+  {
+   "path": "/area/",
+   "group": "지역 허브",
+   "found": true,
+   "others": 19
+  },
+  {
+   "path": "/area/gyeonggi/",
+   "group": "광역",
+   "found": true,
+   "others": 19
+  },
+  {
+   "path": "/area/gyeonggi/ansan/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/anseong/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/anyang/",
+   "group": "시군구",
+   "found": true,
+   "others": 1
+  },
+  {
+   "path": "/area/gyeonggi/anyang/pyeongchon/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/bucheon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/dongducheon/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/gapyeong/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/gimpo/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/",
+   "group": "시군구",
+   "found": false,
+   "others": 2
+  },
+  {
+   "path": "/area/gyeonggi/goyang/baekseok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/beopgot/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/bukhan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/byeokje/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/daehwa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/daeja/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/daejang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/deogeun/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/deogi/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/donae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/dongsan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/gajwa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/gangmae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/goyang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/gusan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/gwansan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/haengjunae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/haengjuoe/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/haengsin/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/hwajeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/hwajeong/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/hyangdong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/hyeoncheon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/hyoja/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/ilsan/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/janghang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/jeongbalsan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/jichuk/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/jiyeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/jugyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/jungsan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/juyeop/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/madu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/munbong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/naegok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/naeyu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/ogeum/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/pung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/samsong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/sanhwang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/sarihyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/seolmun/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/seongsa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/seongseok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/seonyu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/siksa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/sinpyeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/sinwon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/tanhyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/todang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/wondang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/wonheung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/goyang/yongdu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/gunpo/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/guri/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/gwacheon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/gwangju/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/gwangmyeong/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/hanam/",
+   "group": "시군구",
+   "found": false,
+   "others": 1
+  },
+  {
+   "path": "/area/gyeonggi/hanam/wirye/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/hwaseong/",
+   "group": "시군구",
+   "found": false,
+   "others": 1
+  },
+  {
+   "path": "/area/gyeonggi/hwaseong/dongtan/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/icheon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/namyangju/",
+   "group": "시군구",
+   "found": false,
+   "others": 1
+  },
+  {
+   "path": "/area/gyeonggi/namyangju/dasan/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/osan/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/paju/",
+   "group": "시군구",
+   "found": true,
+   "others": 1
+  },
+  {
+   "path": "/area/gyeonggi/paju/unjeong/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/pocheon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/pyeongtaek/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/",
+   "group": "시군구",
+   "found": false,
+   "others": 4
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/baekhyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/bokjeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/bundang/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/changgok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/daejang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/dandae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/dochon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/dongwon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/dunjeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/eunhaeng/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/galhyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/geumgok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/geumgwang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/geumto/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/godeung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/gumi/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/gungnae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/hadaewon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/hasanun/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/imae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/jeongja/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/jungang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/oya/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/pangyo/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sampyeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sangdaewon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sangjeok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sanseong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sasong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/seogun/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/seohyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/seongnam/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/siheung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/simgok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sinchon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sinheung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sujin/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/sunae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/taepyeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/unjung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/wirye/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/yangji/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/yatap/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/yeosu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/seongnam/yul/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/siheung/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/",
+   "group": "시군구",
+   "found": true,
+   "others": 3
+  },
+  {
+   "path": "/area/gyeonggi/suwon/buksu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/cheoncheon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/daehwanggyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/dangsu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/geumgok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/godeung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/gokbanjeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/gosaek/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/gucheon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/guun/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/gwanggyo/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/gwonseon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/gyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/ha/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/hagwanggyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/homaesil/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/hwaseo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/imok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/ingye/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/ipbuk/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/iui/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/jangan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/jangji/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/jeongja/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/ji/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/jowon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/jung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/maegyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/maehyang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/maetan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/mangpo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/namchang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/namsu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/omokcheon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/pajang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/pyeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/pyeongni/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/sanggwanggyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/seodun/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/seryu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/sin/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/sinpung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/songjuk/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/tap/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/uman/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/woncheon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/yeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/yeonghwa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/yeongtong/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/yeonmu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/suwon/yuljeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/uijeongbu/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/uiwang/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/yangju/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/yangpyeong/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/yeoju/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/yeoncheon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/gyeonggi/yongin/",
+   "group": "시군구",
+   "found": false,
+   "others": 1
+  },
+  {
+   "path": "/area/gyeonggi/yongin/suji/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/",
+   "group": "광역",
+   "found": true,
+   "others": 19
+  },
+  {
+   "path": "/area/seoul/dobong/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/dongdaemun/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/dongjak/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/eunpyeong/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangbuk/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangdong/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/",
+   "group": "시군구",
+   "found": false,
+   "others": 3
+  },
+  {
+   "path": "/area/seoul/gangnam/apgujeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/cheongdam/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/daechi/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/dogok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/gaepo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/irwon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/jagok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/nonhyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/samseong/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/segok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/sinsa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/suseo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/yeoksam/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangnam/yulhyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gangseo/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/geumcheon/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/guro/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gwanak/",
+   "group": "시군구",
+   "found": true,
+   "others": 3
+  },
+  {
+   "path": "/area/seoul/gwanak/bongcheon/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gwanak/namhyeon/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gwanak/sillim/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/gwangjin/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/jongno/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/jung/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/jungnang/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/",
+   "group": "시군구",
+   "found": false,
+   "others": 3
+  },
+  {
+   "path": "/area/seoul/mapo/ahyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/changjeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/daeheung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/dangin/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/dohwa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/donggyo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/gongdeok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/gusu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/hajung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/hapjeong/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/hyeonseok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/jung/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/mangwon/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/mapo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/nogosan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/sangam/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/sangsu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/seogyo/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/seongsan/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/singongdeok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/sinjeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/sinsu/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/tojeong/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/yeomni/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/yeonnam/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/mapo/yonggang/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/nowon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/",
+   "group": "시군구",
+   "found": true,
+   "others": 2
+  },
+  {
+   "path": "/area/seoul/seocho/bangbae/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/banpo/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/jamwon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/naegok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/seocho/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/sinwon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/umyeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/wonji/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/yangjae/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seocho/yeomgok/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seodaemun/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seongbuk/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/seongdong/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/",
+   "group": "시군구",
+   "found": true,
+   "others": 4
+  },
+  {
+   "path": "/area/seoul/songpa/bangi/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/garak/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/geoyeo/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/jamsil/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/jangji/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/macheon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/munjeong/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/ogeum/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/pungnap/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/samjeon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/seokchon/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/sincheon/",
+   "group": "동",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/songpa/songpa/",
+   "group": "동",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/yangcheon/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/yeongdeungpo/",
+   "group": "시군구",
+   "found": false,
+   "others": 0
+  },
+  {
+   "path": "/area/seoul/yongsan/",
+   "group": "시군구",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/",
+   "group": "칼럼 목록",
+   "found": true,
+   "others": 13
+  },
+  {
+   "path": "/column/bieoteo-jip-gyeonjeok/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/godoksa-hyeonjang-choigi-daeeung/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/godoksa-yupumjeongri-biyong/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/goyang-ilsan-deogyang-yupumjeongri/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/gyeonjeokseo-chugageum-hwagin/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/imdaecha-bojeunggeum-jeongsan/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/paju-yupumjeongri-pyeonghyeong/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/pyegi-jeon-chajaya-hal-yupum/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/sangsok-pogi-yupumjeongri/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/seongnam-yupumjeongri-gyedan-banchul/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/songpa-apateu-yupumjeongri/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/yupumjeongri-junbi/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/column/yupumjeongri-sigi-49jae/",
+   "group": "칼럼",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/consult/",
+   "group": "정면",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/cost/",
+   "group": "정면",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/faq/",
+   "group": "정면",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/process/",
+   "group": "정면",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/service/",
+   "group": "서비스",
+   "found": true,
+   "others": 3
+  },
+  {
+   "path": "/service/binjip-jeongri/",
+   "group": "서비스",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/service/godoksa-yupumjeongri/",
+   "group": "서비스",
+   "found": true,
+   "others": 0
+  },
+  {
+   "path": "/service/yupumjeongri/",
+   "group": "서비스",
+   "found": true,
+   "others": 0
+  }
+ ]
+}

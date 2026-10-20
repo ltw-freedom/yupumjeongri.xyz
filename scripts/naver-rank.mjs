@@ -47,15 +47,23 @@ export function queryFor(city) {
 }
 
 /**
+ * 결과 블록 안에 있지만 결과 문서가 아닌 네이버 기능 링크.
+ * 2026-10-20 부터 블록마다 맨 앞에 '저장' 버튼(m.keep.naver.com)이 붙어 전 지역 1위가 이 주소로 찍혔다.
+ */
+const NON_RESULT_HOSTS = /^https?:\/\/(m\.)?keep\.naver\.com\//;
+
+/**
  * 모바일 SERP HTML 에서 웹 영역 결과를 순서대로 뽑는다.
- * 네이버 마크업이 바뀌면 여기가 먼저 깨진다 — 결과가 0건이면 이 함수부터 볼 것.
+ * 네이버 마크업이 바뀌면 여기가 먼저 깨진다 — 결과가 0건이거나 1위가 전부 같은 주소면 이 함수부터 볼 것.
  */
 export function parseWebSection(html) {
   return html
     .split('fds-web-doc-root')
     .slice(1)
     .map((block) => {
-      const href = block.slice(0, 8000).match(/href="(https?:\/\/[^"]+)"/)?.[1];
+      const href = [...block.slice(0, 8000).matchAll(/href="(https?:\/\/[^"]+)"/g)]
+        .map((m) => m[1])
+        .find((h) => !NON_RESULT_HOSTS.test(h));
       try {
         const url = new URL(href.replace(/&amp;/g, '&'));
         return `${url.hostname}${decodeURIComponent(url.pathname)}`;
