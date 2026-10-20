@@ -208,6 +208,9 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
   **이 패턴은 바꾸지 말 것.** 고쳐야 하면 일부 지역에 먼저 적용하고 순위를 재서 확인한다.
 - URL·slug 변경, `.xyz` → `.co.kr` 도메인 이전, 동 페이지 사이트맵 전량 투입은 순위 리셋 위험이 있다.
 - 순위 재측정: `node scripts/naver-rank.mjs` (정기 실행은 보류 중, 필요할 때 수동)
+- 시군구 페이지끼리 본문 유사도(유사문서 제외 원인, `docs/seo-naver.md` 4-2·4-5):
+  `npm run build && node scripts/area-similarity.mjs`. 시군구 템플릿에 공통 문구를 더하면 이걸로 평균이 오르지 않는지 볼 것.
+  지역마다 다른 본문은 `src/data/cityStats.ts`·`cityDongHousing.ts`(2025 인구주택총조사, KOSIS)에서 만든다 — 출처 없는 지역 정보는 넣지 않는다.
 
 ### AI 크롤러 / LLM 인용 (AEO)
 

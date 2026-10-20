@@ -1,0 +1,121 @@
+---
+/**
+ * 시·군·구 페이지의 '주택·가구 통계' 블록 — 2025 인구주택총조사 숫자와 그 숫자가 비용에 닿는 지점.
+ * 지역마다 실제로 다른 본문을 만드는 자리다 (docs/seo-naver.md 4-5). 문구는 cityStatsContent.ts 에서 만든다.
+ * 여기에 56쪽 공통 문구를 늘리지 말 것 — 표 머리글·출처 한 줄이 공통분의 전부다.
+ */
+import type { DistrictCity } from '../data/districts';
+import { cityStatsBlock } from '../data/cityStatsContent';
+
+interface Props {
+  dc: DistrictCity;
+}
+
+const { dc } = Astro.props;
+const block = cityStatsBlock(dc);
+---
+
+{
+  block && (
+    <section class="city-stats" aria-labelledby="city-stats-heading">
+      <h2 id="city-stats-heading">{block.heading}</h2>
+      {block.paragraphs.map((text) => (
+        <p>{text}</p>
+      ))}
+      <div class="city-stats__tables">
+        <div class="table-wrap">
+          <table>
+            <caption>{block.housingCaption}</caption>
+            <thead>
+              <tr>
+                <th scope="col">종류</th>
+                <th scope="col">수</th>
+                <th scope="col">비중</th>
+              </tr>
+            </thead>
+            <tbody>
+              {block.housingRows.map((row) => (
+                <tr>
+                  <th scope="row">{row.label}</th>
+                  <td>{row.count}</td>
+                  <td>{row.share}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <caption>{block.householdCaption}</caption>
+            <tbody>
+              {block.householdRows.map((row) => (
+                <tr>
+                  <th scope="row">{row.label}</th>
+                  <td>{row.count}</td>
+                  <td>{row.share}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {block.dongRows.length > 0 && (
+        <details class="city-stats__dongs">
+          <summary>{dc.name} 행정동 {block.dongRows.length}곳 주택 구성 보기</summary>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">행정동</th>
+                  <th scope="col">주택</th>
+                  <th scope="col">아파트</th>
+                  <th scope="col">연립·다세대</th>
+                  <th scope="col">단독</th>
+                </tr>
+              </thead>
+              <tbody>
+                {block.dongRows.map((row) => (
+                  <tr>
+                    <th scope="row">{row.dong}</th>
+                    <td>{row.total}</td>
+                    <td>{row.apt}</td>
+                    <td>{row.low}</td>
+                    <td>{row.det}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="note">행정동 기준이라 아래 법정동 목록과 이름이 다를 수 있습니다. ·는 비공개(소수) 또는 해당 없음.</p>
+        </details>
+      )}
+      <p class="note">
+        출처: KOSIS · <a href={block.source.url} rel="noopener" target="_blank">{block.source.label}</a>
+      </p>
+    </section>
+  )
+}
+
+<style>
+  .city-stats__tables {
+    display: grid;
+    gap: 1rem;
+    margin: 1.25rem 0 0.5rem;
+  }
+  @media (min-width: 760px) {
+    .city-stats__tables {
+      grid-template-columns: 3fr 2fr;
+      align-items: start;
+    }
+  }
+  .city-stats caption {
+    caption-side: top;
+    text-align: left;
+    padding-bottom: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+  .city-stats td {
+    white-space: nowrap;
+  }
+</style>

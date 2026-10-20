@@ -23,7 +23,7 @@ function hash(seed: string): number {
 }
 
 /** 슬러그 해시로 배열에서 하나를 결정적으로 고른다 */
-function pick<T>(items: T[], seed: string): T {
+export function pick<T>(items: T[], seed: string): T {
   return items[hash(seed) % items.length];
 }
 
@@ -155,7 +155,7 @@ export function cityLead(city: DistrictCity): string {
 }
 
 /** 받침 유무에 맞는 조사 — josa('가평군', '은', '는') → '가평군은' */
-function josa(word: string, withFinal: string, withoutFinal: string): string {
+export function josa(word: string, withFinal: string, withoutFinal: string): string {
   const code = word.charCodeAt(word.length - 1) - 0xac00;
   const hasFinal = code >= 0 && code <= 11171 && code % 28 !== 0;
   return word + (hasFinal ? withFinal : withoutFinal);
