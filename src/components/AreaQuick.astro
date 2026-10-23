@@ -16,9 +16,11 @@ interface Props {
   name: string;
   /** Slack 에 넘길 지역 (예: '서울 마포구') */
   regionHint: string;
+  /** 계산기로 가는 링크 — 페이지에 계산기가 없으면(시군구) /cost/#estimate 를 넘긴다 */
+  calcHref?: string;
 }
 
-const { name, regionHint } = Astro.props;
+const { name, regionHint, calcHref = '#estimate' } = Astro.props;
 
 const rows = [
   { label: '원룸 · 오피스텔', value: priceRow('oneroom').range },
@@ -47,7 +49,7 @@ const rows = [
       약속 체크 목록(추가금 0원 등)은 뺐다 — 바로 아래 번호 칸의 '계약 의무 없음…'과 겹치고,
       모바일에서 그 높이만큼 번호 칸을 첫 화면 밖으로 밀었다 (2026-10-06, 방문자 번호 칸 누름 0건).
     */}
-    <a class="area-quick__calc" href="#estimate">우리 집 조건으로 계산해 보기 →</a>
+    <a class="area-quick__calc" href={calcHref}>우리 집 조건으로 계산해 보기 →</a>
   </div>
 
   <QuickConsult id="area" regionHint={regionHint} label={`${name} 유품정리, 번호만 남기시면 최대한 빠르게 연락드립니다`} />

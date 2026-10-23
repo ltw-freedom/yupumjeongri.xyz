@@ -1,6 +1,6 @@
 # yupumjeongri.xyz
 
-**대한유품정리** 웹사이트. **Astro (SSG) + Cloudflare Pages** 정적 사이트.
+**대한유품정리** 웹사이트. **Astro (SSG)** 정적 사이트를 **Cloudflare Worker** 로 서빙한다([배포](#cloudflare-workers-배포)).
 
 상담 접수·CRM 등 실제 업무 처리는 기존 비워도(Django) 쪽에서 담당하고,
 이 저장소는 정적 HTML만 생성한다.
@@ -24,8 +24,7 @@
 > 전국 가격 조사 증빙이 필요해 사실상 실증이 불가능하다. 조건이 명시된
 > **"최저가 보상"**(동일 조건 타사 견적서 대비)으로만 쓴다.
 >
-> 상호에 "대한"이 들어가므로 공공기관 오인을 막는 고지(`site.legalNotice`)를
-> 푸터에 상시 노출한다. 로고에 태극·무궁화 등 정부 상징 유사 요소를 넣지 않는다.
+> 로고에 태극·무궁화 등 정부 상징 유사 요소를 넣지 않는다. (푸터의 공공기관 오인 방지 고지는 2026-09-26 운영자 지시로 삭제했다.)
 
 ## 개발
 
@@ -140,7 +139,8 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 전화번호가 없는 사이트라 "번호 칸"이 전화 버튼 역할을 하므로, 번호 칸을 모바일 첫 화면에 둔다.
 
 - `QuickConsult` — 번호 한 칸 + 버튼. 홈 히어로, 지역 페이지 첫 화면(`AreaQuick`), 모든 페이지 하단 `CTA`
-- `EstimateCalc` — 예상 비용 계산기 + 번호 칸. 홈, `/cost/#estimate`, 지역 페이지.
+- `EstimateCalc` — 예상 비용 계산기 + 번호 칸. 홈, `/cost/#estimate`, 동 페이지. **시군구 페이지에서는 2026-10-23 뺐다**
+  (21일간 10세션이 썼지만 접수 0, 56쪽 공통 문구라 유사도만 올림 → `/cost/#estimate` 링크로).
   금액은 `pricing.ts` 의 공개 값에서만 계산한다(`estimator` 주석). 새 금액을 만들지 않는다
 - `/consult/` — 번호 칸 바로 아래 보내기 버튼, 선택 항목은 눌러서 고르는 칩
 - 공통 보강 `src/scripts/consult-form.ts` — 번호 자동 하이픈, 전송 전 즉시 검증, 중복 전송 방지,
@@ -194,8 +194,11 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
 - H1 은 페이지당 하나
 - `sitemap-index.xml` 은 `@astrojs/sitemap` 이 빌드 시 자동 생성
 - `robots.txt` 는 `public/robots.txt`
-- JSON-LD: 홈/지역 `LocalBusiness`, 서비스/지역 `Service`, FAQ 있는 페이지 `FAQPage`,
-  칼럼 `Article`, 전 페이지 `BreadcrumbList`
+- JSON-LD: 홈·지역 허브 `Organization`(`/#business`), 서비스·지역 `Service`(지역은 `AdministrativeArea`/`City` 객체 +
+  상위 행정구역), FAQ 있는 페이지 `FAQPage`, 칼럼 `Article`, 전 페이지 `BreadcrumbList`. 빌더는 `src/data/schema.ts`.
+  `LocalBusiness` 를 쓰지 않는 이유: 구글이 address 를 필수로 요구하는데 주소는 공개하지 않는다(2026-10-23 전환).
+- 아이콘: `public/favicon.svg` 하나가 원본. `npm run icons` 가 `favicon.ico`·`apple-touch-icon.png`·`icon-192/512.png` 를 굽는다.
+- 사이트맵 lastmod 는 칼럼에만(frontmatter 날짜). 빌드 날짜를 전 페이지에 찍지 않는다.
 - URL 은 trailing slash 로 통일 (`astro.config.mjs` 의 `trailingSlash: 'always'`)
 
 ### 네이버 순위 — 건드리기 전에 읽을 것
@@ -207,7 +210,8 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
   ("송파구유품정리 · 송파 유품정리 …")·`description`("송파유품정리 업체 — …")과 `cityShortName()`.
   **이 패턴은 바꾸지 말 것.** 고쳐야 하면 일부 지역에 먼저 적용하고 순위를 재서 확인한다.
 - URL·slug 변경, `.xyz` → `.co.kr` 도메인 이전, 동 페이지 사이트맵 전량 투입은 순위 리셋 위험이 있다.
-- 순위 재측정: `node scripts/naver-rank.mjs` (정기 실행은 보류 중, 필요할 때 수동)
+- 순위·색인 측정: **`naver-rank.mjs`·`naver-index.mjs` 는 쓰지 않는다** — 2026-10-13·10-21 운영자 결정(네이버 검색 화면
+  자동 조회 전면 중단). 서치어드바이저·Search Console·Bing Webmaster 와 사람이 직접 보는 소수 표본으로만 잰다(`docs/seo-naver.md` 5장).
 - 시군구 페이지끼리 본문 유사도(유사문서 제외 원인, `docs/seo-naver.md` 4-2·4-5):
   `npm run build && node scripts/area-similarity.mjs`. 시군구 템플릿에 공통 문구를 더하면 이걸로 평균이 오르지 않는지 볼 것.
   지역마다 다른 본문은 `src/data/cityStats.ts`·`cityDongHousing.ts`(2025 인구주택총조사, KOSIS)에서 만든다 — 출처 없는 지역 정보는 넣지 않는다.
@@ -256,7 +260,7 @@ npm run build && npx wrangler deploy
 
 다시 제안하지 말 것. 정책이 바뀌면 이 목록부터 고친다.
 
-- **사업자 정보·주소 표기 안 함** — 푸터·명함·JSON-LD(`LocalBusiness.address` 없음)·llms.txt·칼럼 어디에도 넣지 않는다.
+- **사업자 정보·주소 표기 안 함** — 푸터·명함·JSON-LD(주소가 필요한 `LocalBusiness` 대신 `Organization`)·llms.txt·칼럼 어디에도 넣지 않는다.
   `site.ts` 에 주소 필드도 두지 않는다.
 - **`/guarantee/` 최저가 보상제 페이지 안 만듦** — 따로 정한 조건이 없다. "최저가 보상"은
   `site.guaranteeShort`(동일 조건 타사 견적서 대비) 문장으로만 쓴다.

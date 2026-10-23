@@ -14,9 +14,10 @@ import { dongDisplayName, dongShortName, dongLead, dongCostNote, dongFaqs } from
 import { services } from '../../../../data/services';
 import { site } from '../../../../data/site';
 import { photos } from '../../../../data/cases';
-import { serviceSchema, faqSchema } from '../../../../data/schema';
+import { serviceSchema, faqSchema, place } from '../../../../data/schema';
 import { priceAnswer } from '../../../../data/pricing';
 import { getCollection } from 'astro:content';
+import { relatedColumnsFor } from '../../../../data/columnLinks';
 
 /**
  * 법정동 페이지 — 지역 키워드 노출의 최전선.
@@ -61,11 +62,11 @@ const legalLinks = alias
 const nearby = dong ? nearbyDongs(dc, dong.slug, 8) : dc.dongs.slice(0, 8);
 
 const columns = await getCollection('columns', ({ data }) => !data.draft);
-const relatedColumns = columns
-  .filter((entry) => entry.data.relatedAreas.includes(dc.slug) || entry.data.relatedAreas.includes(dc.region))
-  .slice(0, 3);
+const relatedColumns = relatedColumnsFor(columns, dc.slug, dc.region);
 
 const faqs = dongFaqs(dc, unit);
+/** 구조화 데이터용 상위 행정구역 (성남시 > 분당구 > 정자동처럼 일반구가 있으면 중간에 넣는다) */
+const cityPlace = { name: dc.name, city: dc.name.endsWith('시'), parent: { name: region.name } };
 
 // 지역명을 3중으로 쌓지 않는다 ("송파구 잠실동 유품정리 · 잠실 유품정리 …" ×) —
 // 클릭률이 떨어진다. 짧은 지역명 변형("잠실유품정리")은 description 이 받는다.
@@ -82,7 +83,12 @@ const description = `${short}유품정리 업체 — ${display} 유품정리·�
       name: `${display} 유품정리`,
       description: `${display} 유품정리 · 고독사 특수청소 · 빈집 정리. 방문 견적 진행.`,
       path: `/area/${dc.region}/${dc.slug}/${unit.slug}/`,
-      areaServed: [display],
+      areaServed: [
+        place({
+          name: unit.name,
+          parent: unit.gu ? { name: unit.gu, parent: cityPlace } : cityPlace,
+        }),
+      ],
       // 아래 본문에 PriceTable 을 그대로 싣는다 — 표에 있는 금액이므로 Offer 로 내보낸다
       withPrices: true,
     }),
@@ -110,8 +116,7 @@ const description = `${short}유품정리 업체 — ${display} 유품정리·�
       <p>{priceAnswer(`${display} 유품정리 비용`)} {dongCostNote(dc, unit)}</p>
       <PriceTable />
       <p class="note">
-        확정 금액은 현장 확인 후 항목별 견적서로 드립니다. 다른 유품정리 업체의 동일 조건
-        견적서를 갖고 계시면 그보다 낮은 금액으로 진행합니다.
+        확정 금액은 현장 확인 후 항목별 견적서로 드립니다. {site.guaranteeShort}
         <a href="/cost/">비용 산정 기준과 단가 전체 보기</a>
       </p>
 

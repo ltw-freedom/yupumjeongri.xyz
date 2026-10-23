@@ -5,7 +5,7 @@ import CTA from '../../components/CTA.astro';
 import { regions } from '../../data/areas';
 import { districtCities } from '../../data/districts';
 import { site } from '../../data/site';
-import { localBusiness } from '../../data/schema';
+import { organization } from '../../data/schema';
 
 const citiesByRegion = (slug: string) => districtCities.filter((city) => city.region === slug);
 ---
@@ -13,7 +13,7 @@ const citiesByRegion = (slug: string) => districtCities.filter((city) => city.re
 <BaseLayout
   title={`서비스 지역 | 서울 · 경기 유품정리 - ${site.name}`}
   description="서울과 경기 주요 지역의 유품정리 서비스 안내입니다. 지역별 현장 특성과 비용에 영향을 주는 요소를 정리했습니다."
-  jsonLd={[localBusiness()]}
+  jsonLd={[organization()]}
 >
   <Breadcrumb items={[{ label: '지역' }]} />
 

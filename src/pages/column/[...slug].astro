@@ -7,7 +7,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import { getRegion } from '../../data/areas';
 import { districtCities } from '../../data/districts';
 import { site, absoluteUrl } from '../../data/site';
-import { faqSchema } from '../../data/schema';
+import { faqSchema, provider } from '../../data/schema';
 
 export async function getStaticPaths() {
   const columns = await getCollection('columns', ({ data }) => !data.draft);
@@ -36,15 +36,9 @@ const linkedAreas = entry.data.relatedAreas.flatMap((slug) => {
 
 const pageUrl = absoluteUrl(`/column/${entry.id}/`);
 
-// author 를 @id 참조만으로 두면 이 페이지 안에서 노드가 풀리지 않아 빈 값으로
-// 읽힌다. name·url 을 인라인해 단독으로도 유효하게 만들고 @id 로 홈과도 잇는다.
-const business = {
-  // 홈의 /#business 노드와 타입을 맞춘다 (Organization 으로 두면 같은 @id 에 타입이 둘이 된다)
-  '@type': 'LocalBusiness',
-  '@id': absoluteUrl('/#business'),
-  name: site.name,
-  url: site.url,
-};
+// author·publisher 는 홈의 /#business 노드와 같은 Organization (schema.ts provider()).
+// @id 참조만 두면 이 페이지 안에서 노드가 풀리지 않으므로 name·url 을 인라인한 provider() 를 쓴다.
+const business = provider();
 
 const articleSchema = {
   '@context': 'https://schema.org',

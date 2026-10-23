@@ -111,16 +111,6 @@ export const basePrices: PriceRow[] = [
  */
 export const offerablePrices: PriceRow[] = basePrices.filter((row) => !row.additive);
 
-/**
- * 사이트 전체 가격 하한·상한 (원). LocalBusiness.priceRange 와 AggregateOffer 에 쓴다.
- * '250만원부터' 처럼 상한이 없는 행은 하한을 상한 후보로 본다 —
- * 없는 상한을 지어내는 것보다 낮게 잡는 쪽이 안전하다.
- */
-export const priceBounds = {
-  low: Math.min(...offerablePrices.map((row) => row.minPrice)),
-  high: Math.max(...offerablePrices.map((row) => row.maxPrice ?? row.minPrice)),
-};
-
 /** 견적서를 구성하는 단가 — 견적 근거를 그대로 공개한다 */
 export const unitRates: UnitRate[] = [
   {
@@ -171,8 +161,11 @@ export const marketComparison: MarketRow[] = [
   { type: '아파트 · 주택 20평대', market: '180만 ~ 250만원', ours: '150만 ~ 250만원' },
 ];
 
+/** 시장 가격 조사 시점 — 이 파일 머리 주석의 조사. 다시 조사하면 이 값과 marketComparison 을 같이 고칠 것 */
+export const marketSurveyedAt = '2026년 8월';
+
 export const marketComparisonNote =
-  '2026년 8월, 평형별 가격을 홈페이지에 공개한 유품정리 업체들의 자료를 조사한 범위입니다. 가격을 공개하지 않는 업체는 비교에서 뺐습니다. 조사 시점 이후 바뀐 값이 있을 수 있습니다. 대한유품정리 금액은 부가세 별도이며, 다른 업체 자료의 부가세 포함 여부는 업체마다 다릅니다.';
+  `${marketSurveyedAt}, 평형별 가격을 홈페이지에 공개한 유품정리 업체들의 자료를 조사한 범위입니다. 가격을 공개하지 않는 업체는 비교에서 뺐습니다. 조사 시점 이후 바뀐 값이 있을 수 있습니다. 대한유품정리 금액은 부가세 별도이며, 다른 업체 자료의 부가세 포함 여부는 업체마다 다릅니다.`;
 
 /**
  * 예상 비용 계산기(EstimateCalc) 설정.

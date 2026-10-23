@@ -11,7 +11,7 @@ import { services } from '../../data/services';
 import { cases, servicePhotos } from '../../data/cases';
 import { districtCities } from '../../data/districts';
 import { site } from '../../data/site';
-import { localBusiness, faqSchema } from '../../data/schema';
+import { organization, faqSchema } from '../../data/schema';
 
 /** 상황 → 서비스. 어느 서비스에 해당하는지 모르는 방문자가 가장 많다 */
 const fits = [
@@ -87,7 +87,7 @@ const faqs = [
 <BaseLayout
   title={`서비스 안내 | ${site.name}`}
   description="유품정리, 고독사 유품정리, 빈집 정리 서비스를 안내합니다. 상황별로 맞는 서비스, 현장 사진, 공통 포함 항목을 한 페이지에 정리했습니다."
-  jsonLd={[localBusiness(), faqSchema(faqs)]}
+  jsonLd={[organization(), faqSchema(faqs)]}
 >
   <Breadcrumb items={[{ label: '서비스' }]} />
 

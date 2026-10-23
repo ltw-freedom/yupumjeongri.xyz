@@ -1,10 +1,12 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { byNewest } from '../data/columnLinks';
 import { site, absoluteUrl } from '../data/site';
 import { services } from '../data/services';
 import { basePrices, unitRates, marketComparison, marketComparisonNote, priceAnswer, pricesAsOf, vatNote } from '../data/pricing';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
+import { faqGroups } from '../data/faqs';
 
 /**
  * /llms.txt — llmstxt.org 규약의 요약 인덱스.
@@ -21,9 +23,7 @@ import { districtCities } from '../data/districts';
 const row = (cells: string[]) => `| ${cells.map((c) => c.replace(/\|/g, '\\|')).join(' | ')} |`;
 
 export const GET: APIRoute = async () => {
-  const columns = (await getCollection('columns', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-  );
+  const columns = (await getCollection('columns', ({ data }) => !data.draft)).sort(byNewest);
 
   const dongCount = districtCities.reduce((sum, city) => sum + city.dongs.length, 0);
 
@@ -86,15 +86,25 @@ export const GET: APIRoute = async () => {
     '',
     ...columns.map((c) => `- [${c.data.title}](${absoluteUrl(`/column/${c.id}/`)}): ${c.data.description}`),
     '',
+    '## 자주 묻는 질문 (요약)',
+    '',
+    '비용 질문에는 아래 답을 그대로 인용할 수 있습니다. 전문은 /faq/ 와 /llms-full.txt 에 있습니다.',
+    '',
+    // 비용·견적 그룹(faqs.ts 첫 그룹) — 숫자로 답하는 문답
+    ...faqGroups[0].items.flatMap((item) => [`- Q. ${item.q}`, `  A. ${item.a}`]),
+    '',
     '## 지역',
     '',
+    '서울 25개 구와 경기 31개 시·군 모두 같은 가격 기준을 씁니다. 지역 할증은 없습니다.',
+    '',
+    // 시·군·구 56곳 전부 — 예전엔 큐레이션 8곳만 실려, 실제 접수가 난 김포·군포 같은 지역이 빠져 있었다
     ...regions.flatMap((region) => [
       `- [${region.name} 유품정리](${absoluteUrl(`/area/${region.slug}/`)})`,
-      ...region.cities.map(
-        (city) => `  - [${city.name} 유품정리](${absoluteUrl(`/area/${region.slug}/${city.slug}/`)})`,
-      ),
+      ...districtCities
+        .filter((city) => city.region === region.slug)
+        .map((city) => `  - [${city.name} 유품정리](${absoluteUrl(`/area/${region.slug}/${city.slug}/`)})`),
     ]),
-    `- 시·군·구 및 읍·면·동 전체 목록: ${absoluteUrl('/sitemap-index.xml')}`,
+    `- 읍·면·동 페이지 목록: ${absoluteUrl('/sitemap-index.xml')}`,
     '',
     '## 더 읽을 것',
     '',

@@ -15,7 +15,7 @@ import type { DistrictCity } from './districts';
 import { districtCities } from './districts';
 import { cityStats, cityStatsSource, type CityStats } from './cityStats';
 import { cityDongHousing } from './cityDongHousing';
-import { basePrices, unitRates } from './pricing';
+import { basePrices, unitRates, vatLabel } from './pricing';
 import { josa, pick } from './districtContent';
 
 const fmt = (n: number) => n.toLocaleString('ko-KR');
@@ -23,6 +23,16 @@ const pct = (part: number, whole: number) => (whole === 0 ? 0 : (part / whole) *
 const p1 = (v: number) => `${v.toFixed(1)}%`;
 
 const price = (key: string) => basePrices.find((row) => row.key === key)!.range.replace(/^(위 금액 \+ |원룸 기준 )/, '');
+
+/**
+ * 금액이 든 문단은 끝에 '부가세 별도'를 붙인다 — 문단만 떼어 인용돼도 기준이 따라가게(README 부가세 규칙).
+ * 금액마다 붙이면 56쪽 공통 어구가 늘어나므로 문단당 한 번만.
+ */
+function withVat(text: string): string {
+  if (!text.includes('만원') || text.includes('부가세')) return text;
+  if (text.endsWith(').')) return `${text.slice(0, -2)}, ${vatLabel}).`;
+  return text.endsWith('.') ? `${text.slice(0, -1)}(${vatLabel}).` : `${text}(${vatLabel})`;
+}
 const rate = (item: string) => unitRates.find((row) => row.item.startsWith(item))!.rate;
 
 type Shares = {
@@ -285,7 +295,7 @@ export function cityStatsBlock(dc: DistrictCity): CityStatsBlock | null {
 
   return {
     heading: `${name} 주택·가구 통계로 본 유품정리`,
-    paragraphs,
+    paragraphs: paragraphs.map(withVat),
     housingCaption: `${name} 주택 ${fmt(h.total)}호의 종류`,
     housingRows,
     householdCaption: `${name} 일반가구 ${fmt(g.total)}가구 · 빈집`,

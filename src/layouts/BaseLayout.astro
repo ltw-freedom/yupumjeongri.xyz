@@ -51,7 +51,10 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
     <meta name="theme-color" content="#16233D" />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
+    {/* /favicon.ico 는 관례로 찾는 크롤러·브라우저용(16·32·48px), SVG 는 지원하는 브라우저용. scripts/build-icons.mjs 가 굽는다 */}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="application/rss+xml" title={`${site.name} 칼럼`} href="/rss.xml" />
 
@@ -113,7 +116,8 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
         <div class="mobile-cta">
           {/* 페이지에 계산기가 있으면 스크립트가 href 를 #estimate 로 바꾼다 */}
           <a class="button button--ghost" href="/cost/#estimate" data-estimate-link>예상 비용</a>
-          <a class="button button--primary" href={site.consultPath}>상담 신청</a>
+          {/* 페이지 위쪽에 번호 칸이 있으면 스크립트가 다른 페이지로 보내는 대신 그 칸으로 데려간다 */}
+          <a class="button button--primary" href={site.consultPath} data-consult-link>상담 신청</a>
         </div>
       )
     }

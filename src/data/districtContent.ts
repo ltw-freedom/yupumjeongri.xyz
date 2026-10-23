@@ -15,6 +15,7 @@
 
 import type { DistrictCity, DistrictDong } from './districts';
 import type { DongAlias } from './dongAliases';
+import { site } from './site';
 
 function hash(seed: string): number {
   let h = 0;
@@ -51,7 +52,7 @@ export function dongLead(city: DistrictCity, dong: DistrictDong | DongAlias): st
     // 0 비용·견적
     `${display} 유품정리 비용을 먼저 공개합니다. 원룸 40만원대(부가세 별도)부터 주거 형태별 기준 범위 안에서 견적을 내고, 견적서에 없는 금액은 청구하지 않습니다.`,
     // 1 절차·일정
-    `${display} 유품정리는 현장 확인부터 공간 정돈까지 5단계로 진행합니다. 접수 후 보통 1~3일 안에 방문하며, 일정이 정해져 있다면 그에 맞춰 조율합니다.`,
+    `${display} 유품정리는 현장 확인, 유품 분류, 보관품 선별, 반출, 청소 순서로 진행합니다. 방문 일정은 상담 때 맞춰 잡고, 이주 기한처럼 정해진 날짜가 있으면 그 날짜를 기준으로 조율합니다.`,
     // 2 유가족·보관품
     `${display}에서 유품정리를 진행할 때는 버리는 일보다 남기는 일을 먼저 합니다. 서류·사진·기록물은 따로 분류해 전달드리고, 나머지를 공개된 비용 기준으로 정리합니다.`,
     // 3 특수청소·소독
@@ -85,8 +86,8 @@ export function dongFaqs(city: DistrictCity, dong: DistrictDong | DongAlias): { 
       a: `원룸 기준 40만~90만원, 20평대 아파트 기준 150만~250만원 범위입니다(부가세 별도). ${short} 지역이라고 달라지는 금액은 없고, 물품 양과 반출 동선에 따라 범위 안에서 정해집니다.`,
     },
     {
-      q: `${display}은 접수 후 얼마나 빨리 진행되나요?`,
-      a: `보통 접수 후 1~3일 안에 현장 확인 일정을 잡고, 확인 당일 항목별 견적서를 드립니다. 이주 기한처럼 정해진 날짜가 있다면 상담 시 먼저 알려주세요.`,
+      q: `${display}은 접수 후 어떤 순서로 진행되나요?`,
+      a: `상담 회신 때 현장 확인 날짜를 정하고, 현장 확인 뒤 항목별 견적서를 드립니다. 작업일은 견적서에 동의하신 뒤 잡습니다. 이주 기한처럼 정해진 날짜가 있다면 상담 시 먼저 알려주세요.`,
     },
     {
       q: `${display} 현장에서 남겨야 할 서류가 나오면 어떻게 하나요?`,
@@ -126,7 +127,7 @@ export function dongFaqs(city: DistrictCity, dong: DistrictDong | DongAlias): { 
       },
       {
         q: `다른 업체 견적서가 있으면 더 저렴하게 되나요?`,
-        a: `동일 조건의 타사 견적서를 제시하시면 그보다 낮은 금액으로 진행합니다. 조건이 명시된 최저가 보상 원칙입니다.`,
+        a: `${site.guaranteeShort} 조건이 명시된 최저가 보상 원칙입니다.`,
       },
       {
         q: `작업은 하루 안에 끝나나요?`,

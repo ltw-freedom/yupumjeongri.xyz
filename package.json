@@ -9,13 +9,15 @@
     "preview": "astro preview",
     "check": "astro check",
     "og": "node scripts/build-og.mjs",
+    "icons": "node scripts/build-icons.mjs",
     "indexnow": "node scripts/indexnow.mjs",
     "deploy": "npm run build && wrangler deploy && node scripts/indexnow.mjs --recent"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.6.0",
-    "astro": "^5.16.0"
+    "astro": "^5.16.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

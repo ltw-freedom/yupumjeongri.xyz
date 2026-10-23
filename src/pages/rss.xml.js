@@ -1,6 +1,7 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { site } from '../data/site';
+import { byNewest } from '../data/columnLinks';
 
 /**
  * 칼럼 RSS 피드.
@@ -11,7 +12,7 @@ import { site } from '../data/site';
  */
 export async function GET(context) {
   const columns = await getCollection('columns', ({ data }) => !data.draft);
-  const sorted = columns.sort((a, b) => b.data.publishedAt - a.data.publishedAt);
+  const sorted = columns.sort(byNewest);
 
   return rss({
     title: `${site.name} 칼럼`,

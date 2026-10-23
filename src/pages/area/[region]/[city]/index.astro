@@ -6,7 +6,6 @@ import FAQ from '../../../../components/FAQ.astro';
 import PriceTable from '../../../../components/PriceTable.astro';
 import CaseGallery from '../../../../components/CaseGallery.astro';
 import AreaQuick from '../../../../components/AreaQuick.astro';
-import EstimateCalc from '../../../../components/EstimateCalc.astro';
 import CityStats from '../../../../components/CityStats.astro';
 import { getRegion, cityShortName } from '../../../../data/areas';
 import { districtCities, type DistrictCity } from '../../../../data/districts';
@@ -16,9 +15,10 @@ import { cityLead, cityFaqs } from '../../../../data/districtContent';
 import { services } from '../../../../data/services';
 import { site } from '../../../../data/site';
 import { casesFor } from '../../../../data/cases';
-import { serviceSchema, faqSchema } from '../../../../data/schema';
+import { serviceSchema, faqSchema, place } from '../../../../data/schema';
 import { priceAnswer } from '../../../../data/pricing';
 import { getCollection } from 'astro:content';
+import { relatedColumnsFor } from '../../../../data/columnLinks';
 
 /**
  * 시·군·구 페이지 — 두 티어를 한 라우트에서 처리한다.
@@ -50,9 +50,7 @@ const nearby = nearbyDistricts(dc.slug, 4);
 
 // 이 지역과 연결된 칼럼 (frontmatter 의 relatedAreas 로 연결)
 const columns = await getCollection('columns', ({ data }) => !data.draft);
-const relatedColumns = columns
-  .filter((entry) => entry.data.relatedAreas.includes(dc.slug) || entry.data.relatedAreas.includes(dc.region))
-  .slice(0, 3);
+const relatedColumns = relatedColumnsFor(columns, dc.slug, dc.region);
 
 const faqs = curated?.faqs ?? cityFaqs(dc, { nearby, aliases });
 
@@ -79,7 +77,7 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
       name: `${dc.name} 유품정리`,
       description: summary,
       path: `/area/${dc.region}/${dc.slug}/`,
-      areaServed: [dc.name],
+      areaServed: [place({ name: dc.name, city: dc.name.endsWith('시'), parent: { name: region.name } })],
       // 아래 본문에 PriceTable 을 그대로 싣는다 — 표에 있는 금액이므로 Offer 로 내보낸다
       withPrices: true,
     }),
@@ -99,7 +97,7 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
       <h1>{dc.name} 유품정리</h1>
       <p class="lead">{curated ? curated.summary : cityLead(dc)}</p>
 
-      <AreaQuick name={dc.name} regionHint={regionHint} />
+      <AreaQuick name={dc.name} regionHint={regionHint} calcHref="/cost/#estimate" />
 
       {
         curated && (
@@ -121,9 +119,11 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
         물품 양, 반출 동선, 특수청소 여부뿐입니다.
       </p>
       <PriceTable />
-      <p class="note"><a href="/cost/">비용 산정 기준 전체 보기</a></p>
-
-      <EstimateCalc heading={`${short} 우리 집 예상 비용 계산`} regionHint={regionHint} />
+      {/*
+        예상 비용 계산기는 /cost/ 에만 둔다(2026-10-23). 시군구 페이지에서는 21일간 10세션이 썼지만 접수로 이어진 적이 0번이고
+        (접수 5건은 모두 첫 화면 번호 칸), 56쪽에 같은 계산기 문구가 깔려 본문 유사도를 0.08 올리고 있었다(docs/seo-naver.md 4-6).
+      */}
+      <p class="note"><a href="/cost/">비용 산정 기준 전체 보기</a> · <a href="/cost/#estimate">우리 집 조건으로 예상 비용 계산</a></p>
 
       {
         curated && (
@@ -192,7 +192,7 @@ const description = `${short}유품정리 업체 — ${summary} 비용 공개·�
         }
       </ul>
       <p>
-        <a href="/process/">진행 과정 5단계</a> · <a href="/#whyus-heading">다른 업체와 무엇이 다른가</a>
+        <a href="/process/">진행 과정</a> · <a href="/#whyus-heading">다른 업체와 무엇이 다른가</a>
       </p>
 
       <CaseGallery

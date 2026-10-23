@@ -301,3 +301,28 @@ if (document.getElementById('estimate')) {
     a.href = '#estimate';
   });
 }
+
+// 하단 고정 CTA 의 '상담 신청' — 이 페이지 위쪽에 번호 칸(지역 첫 화면·홈 히어로·비용 페이지)이 있으면
+// /consult/ 로 한 번 더 이동시키지 않고 그 칸으로 데려간다. 실제 접수 5건은 전부 이 칸에서 났다(2026-10 D1).
+// 그 칸이 화면에 보이는 동안에는 고정 바를 숨긴다 — 바가 칸의 제출 버튼을 가리고 있었다(모바일 y 738~812).
+const inlinePhone = ['area-phone', 'hero-phone', 'cost-phone']
+  .map((id) => document.getElementById(id))
+  .find((el): el is HTMLInputElement => el instanceof HTMLInputElement);
+if (inlinePhone) {
+  document.querySelectorAll<HTMLAnchorElement>('[data-consult-link]').forEach((a) => {
+    a.addEventListener('click', (event) => {
+      event.preventDefault();
+      inlinePhone.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      // 깔때기(funnel.ts)가 이 focus 를 '번호 칸을 직접 누름'으로 세지 않게 표시한다
+      inlinePhone.dataset.autofocus = '1';
+      inlinePhone.focus({ preventScroll: true });
+    });
+  });
+  const form = inlinePhone.closest('form');
+  if (form && 'IntersectionObserver' in window) {
+    new IntersectionObserver((entries) => {
+      // 콜백이 밀려 여러 개가 한꺼번에 오면 마지막 것이 지금 상태다
+      document.body.classList.toggle('has-form-inview', entries[entries.length - 1].isIntersecting);
+    }).observe(form);
+  }
+}

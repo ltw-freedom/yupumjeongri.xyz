@@ -50,12 +50,19 @@ track('view', { r: document.referrer });
 
 document.addEventListener('focusin', (event) => {
   const el = event.target;
-  if (el instanceof HTMLInputElement && el.name === 'phone') trackOnce('focus');
+  if (!(el instanceof HTMLInputElement) || el.name !== 'phone') return;
+  // 하단 '상담 신청'이 번호 칸으로 데려가며 건 focus 는 사람이 칸을 누른 것이 아니다 (consult-form.ts)
+  if (el.dataset.autofocus) {
+    delete el.dataset.autofocus;
+    return;
+  }
+  trackOnce('focus');
 });
 
 // 상담 페이지로 가는 링크(헤더·하단 고정 CTA·본문 버튼) — 폼이 없는 페이지에서 관심을 보였다는 신호
 document.addEventListener('click', (event) => {
   const a = (event.target as Element | null)?.closest?.('a[href]');
+  // 하단 '상담 신청'이 페이지 안 번호 칸으로 데려가는 경우(consult-form.ts)도 같은 관심 신호로 센다
   if (a && new URL((a as HTMLAnchorElement).href, location.href).pathname === '/consult/') trackOnce('cta');
 });
 

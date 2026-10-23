@@ -13,7 +13,7 @@ import { services } from '../data/services';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
 import { photos } from '../data/cases';
-import { localBusiness, faqSchema, webSite } from '../data/schema';
+import { organization, faqSchema, webSite } from '../data/schema';
 
 /**
  * AEO(Answer Engine) · GEO(Generative Engine) 대응:
@@ -65,7 +65,7 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
 <BaseLayout
   title={site.title}
   description={site.description}
-  jsonLd={[webSite(), localBusiness(), faqSchema(faqs)]}
+  jsonLd={[webSite(), organization(), faqSchema(faqs)]}
 >
   <Hero
     title="유품정리, <em>값부터</em> 공개합니다"

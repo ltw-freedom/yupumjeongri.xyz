@@ -5,8 +5,9 @@ import CTA from '../../../components/CTA.astro';
 import { regions, type Region } from '../../../data/areas';
 import { districtCities } from '../../../data/districts';
 import { services } from '../../../data/services';
-import { serviceSchema } from '../../../data/schema';
+import { serviceSchema, place } from '../../../data/schema';
 import { site } from '../../../data/site';
+import { priceAnswer } from '../../../data/pricing';
 
 export function getStaticPaths() {
   return regions.map((region) => ({
@@ -42,7 +43,7 @@ const cities = districtCities
       name: `${region.name} 유품정리`,
       description: region.summary,
       path: `/area/${region.slug}/`,
-      areaServed: [region.name],
+      areaServed: [place({ name: region.name })],
     }),
   ]}
 >
@@ -52,6 +53,13 @@ const cities = districtCities
     <div class="container">
       <h1>{region.name} 유품정리</h1>
       <p class="lead">{region.intro}</p>
+
+      <h2>{region.name} 유품정리 비용</h2>
+      {/* 첫 문장은 '{광역} 유품정리 비용' 질문에 대한 직답 — 검색·AI 발췌용 (pricing.ts priceAnswer) */}
+      <p>
+        {priceAnswer(`${region.name} 유품정리 비용`)} {region.slug === 'seoul' ? '서울 25개 구' : '경기 31개 시·군'} 어디서나 같은 가격표를 씁니다. 단가와
+        계산 근거는 <a href="/cost/">비용 안내</a>에 공개해 두었습니다.
+      </p>
 
       <h2>{region.name} 세부 지역</h2>
       <ul class="grid">

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { byNewest } from '../data/columnLinks';
 import { site, absoluteUrl } from '../data/site';
 import { services } from '../data/services';
 import { basePrices, unitRates, pricesAsOf, vatNote } from '../data/pricing';
@@ -19,9 +20,7 @@ import { districtCities } from '../data/districts';
 const row = (cells: string[]) => `| ${cells.map((c) => c.replace(/\|/g, '\\|')).join(' | ')} |`;
 
 export const GET: APIRoute = async () => {
-  const columns = (await getCollection('columns', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
-  );
+  const columns = (await getCollection('columns', ({ data }) => !data.draft)).sort(byNewest);
 
   const dongCount = districtCities.reduce((sum, city) => sum + city.dongs.length, 0);
 
@@ -102,8 +101,15 @@ export const GET: APIRoute = async () => {
     ]),
     '## 칼럼',
     '',
-    ...columns.map((c) => `- [${c.data.title}](${absoluteUrl(`/column/${c.id}/`)}): ${c.data.description}`),
-    '',
+    // 칼럼 본문은 넣지 않지만 칼럼 FAQ(질문형 직답)는 넣는다 — 한 파일만 읽는 모델도 답을 만들 수 있게
+    ...columns.flatMap((c) => [
+      `### [${c.data.title}](${absoluteUrl(`/column/${c.id}/`)})`,
+      '',
+      c.data.description,
+      '',
+      ...c.data.faq.flatMap((f) => [`- Q. ${f.q}`, `  A. ${f.a}`]),
+      ...(c.data.faq.length ? [''] : []),
+    ]),
     '## 서비스 지역',
     '',
     ...regions.flatMap((region) => [
@@ -111,10 +117,13 @@ export const GET: APIRoute = async () => {
       '',
       `${absoluteUrl(`/area/${region.slug}/`)}`,
       '',
-      ...region.cities.map(
-        (city) =>
-          `- [${city.name} 유품정리](${absoluteUrl(`/area/${region.slug}/${city.slug}/`)}): ${city.summary}`,
-      ),
+      ...districtCities
+        .filter((city) => city.region === region.slug)
+        .map((city) => {
+          const curated = region.cities.find((c) => c.slug === city.slug);
+          const url = absoluteUrl(`/area/${region.slug}/${city.slug}/`);
+          return `- [${city.name} 유품정리](${url})${curated ? `: ${curated.summary}` : ''}`;
+        }),
       '',
     ]),
     `시·군·구 및 읍·면·동 페이지 전체 목록은 ${absoluteUrl('/sitemap-index.xml')} 에 있습니다.`,

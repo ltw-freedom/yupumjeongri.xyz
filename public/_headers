@@ -11,3 +11,5 @@
 
 /llms-full.txt
   Content-Type: text/plain; charset=utf-8
+
+# /_astro/* 의 1년 캐시는 worker/index.js 가 200 응답에만 붙인다 (여기서 걸면 404 까지 캐시된다).

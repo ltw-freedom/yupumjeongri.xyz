@@ -3,8 +3,17 @@
  * 주거 형태별 기준 가격표.
  * /cost/ 와 지역(시·동) 페이지에서 공유한다 — 가격 공개가 이 사이트의
  * 차별화 축이라, 지역 페이지에도 같은 표를 그대로 노출한다.
+ * 서비스 페이지는 그 서비스 행만(rows) 싣는다. 이때 구조화 데이터도 같은 행만 내보낼 것(schema.ts aggregateOffer).
  */
 import { basePrices, vatNote } from '../data/pricing';
+
+interface Props {
+  rows?: { type: string; range: string; note: string }[];
+  /** 첫 열 머리글 — 기본 '주거 형태' */
+  label?: string;
+}
+
+const { rows = basePrices, label = '주거 형태' } = Astro.props;
 ---
 
 {/* price-table: 좁은 화면에서는 행을 카드처럼 쌓는다 — 3열 표가 가로로 잘려 '조건' 열이 안 보이던 문제 */}
@@ -13,14 +22,14 @@ import { basePrices, vatNote } from '../data/pricing';
     <caption class="price-table__vat">{vatNote}</caption>
     <thead>
       <tr>
-        <th scope="col">주거 형태</th>
+        <th scope="col">{label}</th>
         <th scope="col">기준 범위</th>
         <th scope="col">범위가 달라지는 조건</th>
       </tr>
     </thead>
     <tbody>
       {
-        basePrices.map((row) => (
+        rows.map((row) => (
           <tr>
             <th scope="row">{row.type}</th>
             <td>{row.range}</td>
