@@ -432,6 +432,9 @@ GSC 는 다른 구글 계정으로 소유확인돼 있다 → 콘솔 수치는 �
 - Crawl Control: 24시간 전부 **기본값(10칸 중 아래 5칸)**, 시간대 Default. → 전 시간대를 맨 위(Faster crawl)로 끌어올리고 Save changes. Cloudflare 정적 응답이라 부하 걱정은 없다.
 - '인바운드 링크 부족'(Moderate): 일반 안내문. 할 수 있는 일은 정당한 외부 언급뿐.
 
+**URL Inspection (같은 날)** — `/cost/`: **Discovered but not crawled**(발견 2026-08-18, 두 달 넘게 미크롤), 'URL cannot appear on Bing'. 운영자가 Request indexing 완료(10/27).
+→ 4-10 해석(크롤 예산 부족)과 같다. 색인 요청한 쪽이 1~2주 안에 Indexed 로 바뀌는지가 다음 확인점.
+
 4. 인바운드 링크: 자사 사이트끼리 링크는 금지(2026-09-20 결정)라 저장소에서 할 수 있는 일은 없다. 정당한 외부 언급만 해당.
 
 ## 5. 측정 — 공식 도구와 사람 표본만
