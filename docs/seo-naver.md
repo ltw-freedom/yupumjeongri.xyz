@@ -435,6 +435,10 @@ GSC 는 다른 구글 계정으로 소유확인돼 있다 → 콘솔 수치는 �
 **URL Inspection (같은 날)** — `/cost/`: **Discovered but not crawled**(발견 2026-08-18, 두 달 넘게 미크롤), 'URL cannot appear on Bing'. 운영자가 Request indexing 완료(10/27).
 → 4-10 해석(크롤 예산 부족)과 같다. 색인 요청한 쪽이 1~2주 안에 Indexed 로 바뀌는지가 다음 확인점.
 
+**Live URL (같은 날)** — `/column/bumonim-yupumjeongri-jikjeop-biyong/`: **URL can be indexed by Bing**(실시간 가져오기 정상 → Cloudflare 가 bingbot 을 막지 않는다).
+SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사이트를 재 보니 160자 초과는 칼럼 4편뿐(견적서 추가금 175·부모님 직접 171·같은 평수 168·비용 줄이는 법 163)
+→ 129~143자로 줄여 배포(첫 문장 직답·금액·부가세 별도는 유지). 이제 25~160자를 벗어난 쪽은 `/consult/done/`·404 뿐(색인 대상 아님). **새 칼럼 description 은 160자 이내.**
+
 4. 인바운드 링크: 자사 사이트끼리 링크는 금지(2026-09-20 결정)라 저장소에서 할 수 있는 일은 없다. 정당한 외부 언급만 해당.
 
 ## 5. 측정 — 공식 도구와 사람 표본만
