@@ -1,4 +1,8 @@
-import { priceAnswer } from './pricing';
+import { priceAnswer, priceRow, vatLabel } from './pricing';
+import { site } from './site';
+
+/** '40만 ~ 90만원' → '40만~90만원' (검색 결과 스니펫 폭을 아끼려고 공백을 뺀다) */
+const tight = (key: Parameters<typeof priceRow>[0]) => priceRow(key).range.replace(/\s*~\s*/, '~');
 
 export type Service = {
   slug: string;
@@ -22,9 +26,9 @@ export const services: Service[] = [
     slug: 'yupumjeongri',
     name: '유품정리',
     summary: '고인이 남긴 물건을 분류하고, 보관할 것과 정리할 것을 함께 결정합니다.',
-    title: '유품정리 서비스 | 유품 분류부터 공간 정돈까지',
-    description:
-      '유품정리 전문 서비스. 현장 확인, 유품 분류, 보관품 선별, 폐기, 공간 정돈까지 유가족의 속도에 맞춰 정중하게 진행합니다.',
+    // 검색 결과에서 숫자가 먼저 보이게 — 2026-10-27 서치어드바이저 CTR 0.8%, 이 사이트의 차별점은 가격 공개다
+    title: `유품정리 서비스·비용 | 원룸 ${tight('oneroom')}·${vatLabel} - ${site.name}`,
+    description: `유품정리 비용은 원룸 ${tight('oneroom')}, 투룸 ${tight('tworoom')}, 20평대 아파트 ${tight('apt20')}(${vatLabel}). 현장 확인·유품 분류·보관품 선별·폐기·공간 정돈까지, 견적서에 없는 금액은 청구하지 않습니다.`,
     lead: '유품정리는 짐을 치우는 일이 아니라, 남은 물건을 통해 한 사람의 시간을 정리하는 일입니다. 유가족이 직접 결정해야 하는 부분과 저희가 대신할 수 있는 부분을 나눠서 진행합니다.',
     cases: [
       '장례 이후 고인의 주거 공간을 정리해야 하는 경우',
