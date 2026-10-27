@@ -426,6 +426,12 @@ GSC 는 다른 구글 계정으로 소유확인돼 있다 → 콘솔 수치는 �
 1. 빨간 권고 'Investigate' 를 눌러 상세 문구 확인. 그리고 **Configuration → Crawl Control** 에서 크롤 속도가 낮게 묶여 있지 않은지(가능하면 최대 쪽으로).
 2. **Site Explorer → Excluded 6** 을 눌러 제외 사유. **URL Inspection** 으로 `/cost/`·`/area/gyeonggi/gunpo/` 를 검사해 'Discovered but not crawled' 인지 다른 사유인지.
 3. 2 의 결과가 '미크롤'이면 **Request indexing**(URL Inspection 결과의 버튼)으로 핵심 쪽부터: 홈·/cost/·/faq/·/service/yupumjeongri/·비용 칼럼 3편. IndexNow 재제출은 더 하지 않는다(오늘 전량 냄).
+**권고 상세 (같은 날 스크린샷)**
+- '크롤 용량 제한'(High, 사이트 단위 1건): 특정 페이지 오류가 아니다. 권하는 것은 ① 쓸모없는 URL 을 robots 로 막고 URL 파라미터를 줄일 것 ② Crawl Control 로 크롤 할당을 올릴 것.
+  ①은 해당 없음 — 파라미터 URL 이 없고(`?error=` 는 폼 되돌림뿐), 사이트맵 밖 동 페이지 약 870쪽은 접수가 나오는 템플릿이라 막지 않는다(동 페이지는 C16 동결).
+- Crawl Control: 24시간 전부 **기본값(10칸 중 아래 5칸)**, 시간대 Default. → 전 시간대를 맨 위(Faster crawl)로 끌어올리고 Save changes. Cloudflare 정적 응답이라 부하 걱정은 없다.
+- '인바운드 링크 부족'(Moderate): 일반 안내문. 할 수 있는 일은 정당한 외부 언급뿐.
+
 4. 인바운드 링크: 자사 사이트끼리 링크는 금지(2026-09-20 결정)라 저장소에서 할 수 있는 일은 없다. 정당한 외부 언급만 해당.
 
 ## 5. 측정 — 공식 도구와 사람 표본만
