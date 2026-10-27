@@ -16,7 +16,7 @@ import { services } from '../../../../data/services';
 import { site } from '../../../../data/site';
 import { casesFor } from '../../../../data/cases';
 import { serviceSchema, faqSchema, place } from '../../../../data/schema';
-import { priceAnswer } from '../../../../data/pricing';
+import { priceAnswer, priceRow, vatLabel } from '../../../../data/pricing';
 import { getCollection } from 'astro:content';
 import { relatedColumnsFor } from '../../../../data/columnLinks';
 
@@ -66,7 +66,13 @@ const summary = curated?.summary ?? `${dc.name} 전 지역 유품정리·고독�
 // 네이버 순위의 핵심 요인 — 패턴을 바꾸기 전에 docs/seo-naver.md 를 읽을 것
 const title = `${dc.name}유품정리 · ${short} 유품정리 비용·견적 | ${site.name}`;
 // 네이버 서치어드바이저 권고: 설명문 80자 이내
-const description = `${short}유품정리 업체 — ${summary} 비용 공개·추가금 0원·방문 견적.`;
+// 2026-10-27 파일럿: 이 5곳만 description 첫머리에 공개 가격을 싣는다 (서치어드바이저 30일 CTR 0.8%).
+// 4장 유지 규칙대로 몇 곳만 먼저 — 서치어드바이저 페이지별 노출·CTR 로 2주 전후를 비교한 뒤 넓히거나 되돌린다 (docs/seo-naver.md 4-9).
+const PRICE_DESC_PILOT = new Set(['gapyeong', 'goyang', 'gunpo', 'uijeongbu', 'seongbuk']);
+const fromPrice = `원룸 ${priceRow('oneroom').minPrice / 10_000}만원부터(${vatLabel})`;
+const description = PRICE_DESC_PILOT.has(dc.slug)
+  ? `${short}유품정리 업체 — ${fromPrice}. ${summary} 추가금 0원.`
+  : `${short}유품정리 업체 — ${summary} 비용 공개·추가금 0원·방문 견적.`;
 ---
 
 <BaseLayout
