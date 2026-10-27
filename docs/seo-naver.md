@@ -268,7 +268,7 @@ galmuricare 지역 페이지끼리(24~30%)와는 아직 차이가 있다. 남은
 
 **확인한 것**
 - 기술 기반은 원인이 아니다: 1,180쪽 canonical 자기참조·title/H1 중복 0·JSON-LD 파싱 오류 0·깨진 내부 링크 0, 검색·AI 봇 UA 20종 모두 200.
-- **Bing 색인 0 (10/23)** — ChatGPT 검색·Copilot 이 Bing 색인을 쓰므로 그 경로가 통째로 막혀 있다. 저장소·DNS 어디에도 Bing 소유확인 흔적이 없다.
+- **Bing 색인 0 (10/23)** — ChatGPT 검색·Copilot 이 Bing 색인을 쓰므로 그 경로가 통째로 막혀 있다. 저장소·DNS 어디에도 Bing 소유확인 흔적이 없다. ← **정정(10/27): Webmaster 는 8/13 부터 등록돼 있었다. 4-10.**
   ChatGPT 는 도메인을 직접 대면 /cost/ 가격을 정확히 옮기지만, '대한유품정리 어때?'·'유품정리 비용' 같은 질문엔 후보로 뽑지 못했다(로그아웃 실측).
 - 유입은 여전히 네이버뿐(D1, 10/2~10/22 사람 세션 45, 하루 약 2). 네이버 모바일로 지역·동 페이지에 온 22세션 중 5세션 접수(약 23%) —
   **전환보다 유입이 병목**. 접수 5건은 모두 첫 화면 번호 칸, 랜딩 5~34초 안. 계산기는 10세션이 썼고 접수 0.
@@ -309,8 +309,8 @@ ChatGPT·Gemini(로그아웃)·Bing·구글 검색도 내장 브라우저로 몇
 
 **운영자가 할 일 (상담 건수와 직결되는 순)**
 1. 10/20 15:50 관악 신림동 접수를 Slack #대한유품정리-상담에서 확인하고 회신.
-2. **Bing Webmaster Tools** — 사이트 추가 → 'Google Search Console에서 가져오기'(GSC 소유확인 완료라 메타 불필요) → 사이트맵
-   `https://yupumjeongri.xyz/sitemap-index.xml` 제출 → 'URL 제출'로 홈·/cost/·/faq/·서비스 3·칼럼. ChatGPT·Copilot 경로를 여는 유일한 수단이다.
+2. ~~**Bing Webmaster Tools** — 사이트 추가 → 'Google Search Console에서 가져오기'(GSC 소유확인 완료라 메타 불필요) → 사이트맵
+   `https://yupumjeongri.xyz/sitemap-index.xml` 제출 → 'URL 제출'로 홈·/cost/·/faq/·서비스 3·칼럼. ChatGPT·Copilot 경로를 여는 유일한 수단이다.~~ → 이미 등록돼 있었다(10/27 확인). 남은 건 4-10 의 크롤·색인 문제.
 3. 서치어드바이저 '웹 페이지 수집' — 이번 배포로 본문이 바뀐 **시군구 페이지(특히 4-4 의 제외 33쪽)**, /cost/, /faq/, 새 칼럼 2편. 그리고 '수집 현황 → 제외 사유' 기록.
 4. Cloudflare 대시보드 AI Crawl Control(또는 Security → Bots): GPTBot·OAI-SearchBot·ChatGPT-User·ClaudeBot·PerplexityBot 이 허용인지, 30일 요청 수.
 5. Search Console 사이트맵 제출 여부 확인, '페이지' 보고서의 제외 사유.
@@ -401,6 +401,32 @@ GSC 는 다른 구글 계정으로 소유확인돼 있다 → 콘솔 수치는 �
 대조군은 같은 기간 나머지 시군구 51쪽 평균. 5쪽 CTR 이 대조군보다 뚜렷이 오르고 노출이 떨어지지 않았으면 넓히고,
 노출이 빠지면 `PRICE_DESC_PILOT` 을 비워 되돌린다. 네이버가 description 대신 본문을 스니펫으로 쓰는 경우도 있어 효과가 안 보일 수 있다.
 부수 지표: D1 에서 이 5쪽 착지 세션 수(10/23 뒤 4일간 가평 1·고양 1·군포 1·의정부 1·성북 1).
+
+## 4-10. 2026-10-27 Bing Webmaster Tools (운영자 스크린샷, `console`)
+
+**정정: Bing Webmaster 는 이미 등록돼 있었다** — 사이트맵 제출일이 2026-08-13. 4-6 의 '소유확인 흔적 없음 → 등록하라'는 저장소·DNS 만 보고 내린 잘못된 판단이다
+(GSC 가져오기로 등록하면 저장소에 흔적이 남지 않는다). 막힌 곳은 등록이 아니라 **Bing 이 거의 색인하지 않는 것**이다.
+
+| 화면 | 값 |
+| --- | --- |
+| 사이트맵 | `sitemap-index.xml` 8/13 제출 · 마지막 크롤 10/23 · Success · URL 305. `rss.xml` 4. 발견 URL 계 309, 오류·경고 0 |
+| Site Explorer (최근 6개월) | URL 10 · **Indexed 4 · Excluded 6** · Error 0. 홈은 Indexed, 마지막 크롤 10/5, 200, 46.5KB, 백링크 없음 |
+| Search Performance (3개월) | 클릭 0 · 노출 0 |
+| AI Performance (Copilot·파트너 인용, 3개월) | 인용 0 · 인용 페이지 0 |
+| IndexNow | 최근 13시간 621 URL(오늘 `--all` 305 + 파일럿 등. 같은 URL 이 두 번 잡힌 것으로 보임), 누적 1.5K. 9/7 에 약 600 도 실제로 받았다 — 9/7 의 403 기록과 달리 일부는 들어간 것 |
+| 권고 (Top Recommendations) | 🔴 **크롤 용량 제한**(limited crawl capacity) · 🟠 **고품질 도메인의 인바운드 링크 부족** |
+
+**해석**
+- 305 URL 을 알고 있으면서 Explorer 에 잡힌 건 10, 색인은 4. Bing 은 신생·외부 링크 없는 사이트의 크롤 예산을 아주 작게 준다 — 두 권고가 같은 이야기다.
+  ChatGPT 검색·Copilot 이 Bing 색인을 쓰므로 AI 인용 0 도 여기서 나온다.
+- 우리 쪽 서버는 원인이 아니다: bingbot UA 로 홈·/cost/·군포 200, 0.3~0.5초. Worker 에 봇 차단·속도 제한 없음, robots 는 `*` 그룹 전부 허용·Crawl-delay 없음.
+  (Cloudflare Bot Fight Mode 등 대시보드 설정은 저장소 토큰으로 볼 수 없다 — 4-6 운영자 할 일 4.)
+
+**운영자가 할 일 (Bing)**
+1. 빨간 권고 'Investigate' 를 눌러 상세 문구 확인. 그리고 **Configuration → Crawl Control** 에서 크롤 속도가 낮게 묶여 있지 않은지(가능하면 최대 쪽으로).
+2. **Site Explorer → Excluded 6** 을 눌러 제외 사유. **URL Inspection** 으로 `/cost/`·`/area/gyeonggi/gunpo/` 를 검사해 'Discovered but not crawled' 인지 다른 사유인지.
+3. 2 의 결과가 '미크롤'이면 **Request indexing**(URL Inspection 결과의 버튼)으로 핵심 쪽부터: 홈·/cost/·/faq/·/service/yupumjeongri/·비용 칼럼 3편. IndexNow 재제출은 더 하지 않는다(오늘 전량 냄).
+4. 인바운드 링크: 자사 사이트끼리 링크는 금지(2026-09-20 결정)라 저장소에서 할 수 있는 일은 없다. 정당한 외부 언급만 해당.
 
 ## 5. 측정 — 공식 도구와 사람 표본만
 
