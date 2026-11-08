@@ -7,6 +7,8 @@ import PriceTable from '../../../../components/PriceTable.astro';
 import PhotoStrip from '../../../../components/PhotoStrip.astro';
 import AreaQuick from '../../../../components/AreaQuick.astro';
 import EstimateCalc from '../../../../components/EstimateCalc.astro';
+import DongHousingChart from '../../../../components/DongHousingChart.astro';
+import DongEstimateExample from '../../../../components/DongEstimateExample.astro';
 import { getRegion } from '../../../../data/areas';
 import { districtCities, nearbyDongs, type DistrictCity, type DistrictDong } from '../../../../data/districts';
 import { dongAliases, type DongAlias } from '../../../../data/dongAliases';
@@ -18,11 +20,16 @@ import { serviceSchema, faqSchema, place } from '../../../../data/schema';
 import { priceAnswer } from '../../../../data/pricing';
 import { getCollection } from 'astro:content';
 import { relatedColumnsFor } from '../../../../data/columnLinks';
+import { matchAdminDongs, dongHousingSentences, dongEstimateExample, dongHousingFallback } from '../../../../data/dongHousing';
+import { cityStatsBlock } from '../../../../data/cityStatsContent';
+import { casesFor } from '../../../../data/dongCases';
 
 /**
  * 법정동 페이지 — 지역 키워드 노출의 최전선.
  * 법정동 1,200여 곳 + 신도시 별칭(위례·동탄·광교 등)을 같은 템플릿으로 만든다.
  * 지어낸 지역 정보는 넣지 않고, 공개 가격 + 서비스 사실 + 내부 링크로 구성한다.
+ * 동마다 다른 내용은 '주거 형태와 예상 견적' 블록(2025 인구주택총조사 행정동 주택 구성 + 예시 계산)이 맡는다
+ * — dongHousing.ts. 지어낸 작업 사례·후기는 넣지 않는다. 실제 작업 기록은 dongCases.ts(운영자 확인분)만.
  */
 export function getStaticPaths() {
   const dongPaths = districtCities.flatMap((dc) =>
@@ -65,6 +72,48 @@ const columns = await getCollection('columns', ({ data }) => !data.draft);
 const relatedColumns = relatedColumnsFor(columns, dc.slug, dc.region);
 
 const faqs = dongFaqs(dc, unit);
+
+// 주거 형태 블록 — 2025 인구주택총조사(행정동) + 공개 가격표로 동마다 다른 실데이터를 싣는다 (dongHousing.ts)
+// 행정동을 이름으로 잇지 못한 페이지는 시군구 숫자를 이 동의 구성처럼 보이지 않게 블록 대신 한 줄 안내만 둔다
+const housing = matchAdminDongs(dc, unit);
+const housingSentences = housing.source === 'dong' ? dongHousingSentences(dc, unit, housing) : [];
+const example = housing.source === 'dong' ? dongEstimateExample(unit, housing) : null;
+const cityStatsHref = cityStatsBlock(dc) ? `/area/${dc.region}/${dc.slug}/#city-stats-heading` : null;
+// 운영자가 확인한 실제 작업 기록만 (dongCases.ts). 없으면 절을 그리지 않는다
+const cases = casesFor(dc.region, dc.slug, unit.slug);
+
+/**
+ * 현장 사진 띠 — 실제 현장 사진 가운데 3장을 동 slug 해시로 결정적으로 고른다(같은 시군구 동 페이지끼리 같은 캡션이
+ * 반복되지 않게). 캡션은 원래 사진의 '무슨 작업 · 어디' 그대로라 이 동의 현장처럼 읽히지 않는다.
+ * 특수청소·빈집 사진은 넣지 않는다(이 페이지 본문에서 새로 다루지 않는 주제).
+ */
+const photoPool = [
+  photos.teamLoadingTruck,
+  photos.sortedBagsGuitar,
+  photos.kitchenAfter,
+  photos.teamCrate,
+  photos.loadingBagsSunny,
+  photos.heroLadderTruck,
+  photos.balconyHighrise,
+  photos.livingBefore,
+  photos.roomBeforeBed,
+  photos.curtainRail,
+];
+function seedHash(seed: string): number {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return h;
+}
+const stripPhotos = (() => {
+  const pool = [...photoPool];
+  const out = [];
+  let h = seedHash(`photo:${dc.slug}:${unit.slug}`);
+  for (let k = 0; k < 3; k++) {
+    out.push(pool.splice(h % pool.length, 1)[0]);
+    h = Math.floor(h / 7) + 13;
+  }
+  return out;
+})();
 /** 구조화 데이터용 상위 행정구역 (성남시 > 분당구 > 정자동처럼 일반구가 있으면 중간에 넣는다) */
 const cityPlace = { name: dc.name, city: dc.name.endsWith('시'), parent: { name: region.name } };
 
@@ -122,6 +171,56 @@ const description = `${short}유품정리 업체 — ${display} 유품정리·�
 
       <EstimateCalc heading={`${short} 우리 집 예상 비용 계산`} regionHint={regionHint} />
 
+      <div class="dong-housing" data-housing-source={housing.source}>
+        {
+          housing.source === 'dong' && example ? (
+            <>
+              <h2>{display} 주거 형태와 예상 견적</h2>
+              <p>
+                {housingSentences.map((sentence, i) => (
+                  <>
+                    {i > 0 && ' '}
+                    {sentence.text}
+                    {sentence.link && (
+                      <>
+                        {' ('}<a href={sentence.link.href}>{sentence.link.label}</a>{')'}
+                      </>
+                    )}
+                  </>
+                ))}
+              </p>
+              <DongHousingChart dc={dc} unit={unit} h={housing} />
+              <DongEstimateExample example={example} />
+            </>
+          ) : (
+            <p class="note">
+              {dongHousingFallback(unit)}
+              {cityStatsHref && (
+                <>
+                  {' '}<a href={cityStatsHref}>{dc.name} 주택·가구 통계 보기</a>
+                </>
+              )}
+            </p>
+          )
+        }
+      </div>
+
+      {
+        cases.length > 0 && (
+          <>
+            <h2>{unit.name} 실제 작업 기록</h2>
+            <p class="note">운영자가 확인한 실제 작업만 싣습니다.</p>
+            <ul class="link-list">
+              {cases.map((c) => (
+                <li>
+                  {c.date} · {c.housing} · {c.priceRange} — {c.summary}
+                </li>
+              ))}
+            </ul>
+          </>
+        )
+      }
+
       {
         legalLinks.length > 0 && (
           <>
@@ -138,32 +237,21 @@ const description = `${short}유품정리 업체 — ${display} 유품정리·�
         )
       }
 
-      <h2>{short} 지역에서 제공하는 서비스</h2>
-      <ul class="grid">
-        {
-          services.map((service) => (
-            <li class="card">
-              <h3>
-                <a href={`/service/${service.slug}/`}>{service.name}</a>
-              </h3>
-              <p>{service.summary}</p>
-            </li>
-          ))
-        }
-      </ul>
-
-      <h2>진행 과정</h2>
-      <ol class="steps">
-        <li><strong>현장 확인</strong>물품 양과 반출 동선을 확인하고 항목별 견적을 안내드립니다.</li>
-        <li><strong>유품 분류</strong>서류·기록물과 일반 물품을 나눠 분류합니다.</li>
-        <li><strong>보관품 선별</strong>전달해 드릴 물건을 따로 포장합니다.</li>
-        <li><strong>폐기 · 반출</strong>폐기물을 종류별로 분리해 처리합니다.</li>
-        <li><strong>공간 정돈</strong>반출 후 청소까지 마무리합니다.</li>
-      </ol>
-      <p><a href="/process/">진행 과정 자세히 보기</a></p>
+      {/* 모든 동 페이지에 똑같이 깔리던 서비스 카드·5단계 목록은 유사문서 원인이라 링크 한 줄로 줄였다 (2026-11-08) */}
+      <p class="dong-links">
+        서비스:{' '}
+        {services.map((service, i) => (
+          <>
+            {i > 0 && ' · '}
+            <a href={`/service/${service.slug}/`}>{service.name}</a>
+          </>
+        ))}
+        {' · '}
+        <a href="/process/">진행 과정</a>
+      </p>
 
       <PhotoStrip
-        photos={[photos.teamLoadingTruck, photos.sortedBagsGuitar, photos.kitchenAfter]}
+        photos={stripPhotos}
         heading="직접 진행한 현장"
         compact
       />
@@ -207,3 +295,10 @@ const description = `${short}유품정리 업체 — ${display} 유품정리·�
 
   <CTA title={`${display} 유품정리 상담`} body="주거 형태와 짐의 양만 알려주셔도 대략적인 범위와 비용을 안내드립니다." regionHint={regionHint} />
 </BaseLayout>
+
+<style is:global>
+  .dong-links {
+    margin-top: 2rem;
+    font-size: 0.95rem;
+  }
+</style>

@@ -1,0 +1,218 @@
+---
+/**
+ * 동 페이지 주택 구성 막대 — 이 동(이름으로 이은 행정동 합) vs 시군구 전체.
+ * 행정동을 잇지 못한 페이지(source='city')에는 그리지 않는다 — [dong].astro 가 한 줄 안내로 대신한다.
+ *
+ * 1,096쪽에 실리므로 가볍게: 스크립트 없음. 스타일은 이 컴포넌트에만 둔다
+ * (global.css 에 넣으면 공통 CSS 해시가 바뀌어 동 페이지가 아닌 쪽 HTML 까지 달라진다).
+ * viewBox 폭 320 = 375px 화면의 본문 폭과 거의 같아 글자가 12px 아래로 줄지 않고, 넓은 화면은 max-width 로 막는다.
+ * 라벨이 칸에 넉넉히 안 들어가는 구간은 막대 안 라벨을 생략하고 아래 범례의 숫자로 대신한다.
+ * 숫자는 범례 한 곳에만 글로 적고, SVG 는 aria-describedby 로 범례를 가리킨다(같은 숫자 문장을 두 번 싣지 않는다).
+ */
+import type { DistrictCity, DistrictDong } from '../data/districts';
+import type { DongAlias } from '../data/dongAliases';
+import { josa } from '../data/districtContent';
+import { kindShares, otherShare, dongHousingSource, type DongHousing, type HousingSum } from '../data/dongHousing';
+
+interface Props {
+  dc: DistrictCity;
+  unit: DistrictDong | DongAlias;
+  h: DongHousing;
+}
+const { dc, unit, h } = Astro.props;
+if (h.source !== 'dong') throw new Error('DongHousingChart: 행정동을 잇지 못한 페이지에는 그리지 않습니다');
+
+const W = 320;
+const BAR = 26;
+const fmt = (n: number) => n.toLocaleString('ko-KR');
+const p1 = (v: number) => `${v.toFixed(1)}%`;
+const cls = { apartment: 'a', multiplex: 'm', rowhouse: 'r', detached: 'd' } as const;
+/** 막대 안 글자가 흰색인 구간 (짙은 색) */
+const dark = new Set(['apartment', 'multiplex']);
+
+type Seg = { c: string; x: number; w: number; label: string | null; on: boolean };
+function segments(sum: HousingSum): Seg[] {
+  const out: Seg[] = [];
+  let x = 0;
+  for (const s of kindShares(sum)) {
+    const w = (W * s.share) / 100;
+    if (w <= 0) continue;
+    const label = `${Math.round(s.share)}%`;
+    // 12px 숫자 ≈ 7.2 단위/글자 — 글자 폭 8 단위 + 양쪽 여유 3 단위가 안 되면 라벨 생략
+    const fits = w >= label.length * 8 + 6;
+    out.push({ c: cls[s.kind], x, w, label: fits ? label : null, on: dark.has(s.kind) });
+    x += w;
+  }
+  const rest = W - x;
+  if (rest > 0.05) out.push({ c: 'o', x, w: rest, label: null, on: false });
+  return out;
+}
+
+const r = (v: number) => Math.round(v * 10) / 10;
+const ownTitle = h.partial ? `행정동 ${h.adminNames.join('·')} 구역 ${fmt(h.total)}호` : `${unit.name} · 행정동 합계 ${fmt(h.total)}호`;
+const rows = [
+  { title: ownTitle, segs: segments(h) },
+  { title: `${dc.name} 전체 ${fmt(h.city.total)}호`, segs: segments(h.city) },
+];
+const ROW = 52;
+const height = rows.length * ROW;
+
+const own = kindShares(h);
+const city = kindShares(h.city);
+const legend = own.map((s, i) => ({
+  c: cls[s.kind],
+  label: s.label,
+  own: s.unknown ? '비공개·없음' : p1(s.share),
+  city: city[i].unknown ? '비공개·없음' : p1(city[i].share),
+}));
+const ownOther = otherShare(h);
+const cityOther = otherShare(h.city);
+---
+
+<figure class="dong-chart">
+  <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-labelledby="dong-chart-t" aria-describedby="dong-chart-legend">
+    <title id="dong-chart-t">{`${josa(h.partial ? `행정동 ${h.adminNames.join('·')} 구역` : unit.name, '과', '와')} ${dc.name} 전체의 주택 종류 비율`}</title>
+    {
+      rows.map((row, i) => (
+        <g transform={`translate(0 ${i * ROW})`}>
+          <text x="0" y="14" class="dc-k">{row.title}</text>
+          {row.segs.map((s) => (
+            <rect x={r(s.x)} y="20" width={r(s.w)} height={BAR} class={`dc-${s.c} dc-seg`} />
+          ))}
+          <rect x="0.5" y="20.5" width={W - 1} height={BAR - 1} class="dc-frame" />
+          {row.segs.map((s) =>
+            s.label ? (
+              <text x={r(s.x + s.w / 2)} y="37.5" text-anchor="middle" class={s.on ? 'dc-n dc-on' : 'dc-n'}>
+                {s.label}
+              </text>
+            ) : null,
+          )}
+        </g>
+      ))
+    }
+  </svg>
+  <ul class="dong-chart__legend" id="dong-chart-legend">
+    {
+      legend.map((l) => (
+        <li>
+          <i class={`dc-${l.c}`} />
+          {l.label} {l.own}<span> · {dc.name} {l.city}</span>
+        </li>
+      ))
+    }
+    {
+      (ownOther >= 0.05 || cityOther >= 0.05) && (
+        <li>
+          <i class="dc-o" />
+          기타 {p1(ownOther)}<span> · {dc.name} {p1(cityOther)}</span>
+        </li>
+      )
+    }
+  </ul>
+  <figcaption>
+    {dongHousingSource(unit, h)} 단독은 다가구 포함, 기타는 비주거용 건물 안 주택{h.nullCells.length > 0 && '과 0으로 센 칸의 몫'}입니다.
+    {h.sharedNames.length > 0 && ` 같은 행정동 자료를 ${h.sharedNames.join('·')} 페이지도 씁니다.`}
+  </figcaption>
+</figure>
+
+<style is:global>
+  .dong-chart {
+    margin: 1.5rem 0;
+  }
+
+  .dong-chart svg {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: auto;
+  }
+
+  .dong-chart .dc-k {
+    font-size: 12.5px;
+    font-weight: 600;
+    fill: var(--color-text);
+  }
+
+  .dong-chart .dc-n {
+    font-size: 12px;
+    font-weight: 700;
+    fill: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dong-chart .dc-on {
+    fill: var(--color-card);
+  }
+
+  /* 구간 사이를 카드색 1px 선으로 갈라 이웃 구간끼리 대비가 낮아도 경계가 보이게 한다 */
+  .dong-chart .dc-seg {
+    stroke: var(--color-card);
+    stroke-width: 1;
+  }
+
+  /* 막대 전체 테두리 — '기타' 구간이 배경에 묻히지 않게 */
+  .dong-chart .dc-frame {
+    fill: none;
+    stroke: var(--color-line-strong);
+    stroke-width: 1;
+  }
+
+  .dong-chart .dc-a {
+    fill: var(--color-accent);
+    background: var(--color-accent);
+  }
+
+  .dong-chart .dc-m {
+    fill: var(--color-gold);
+    background: var(--color-gold);
+  }
+
+  .dong-chart .dc-r {
+    fill: var(--color-gold-bright);
+    background: var(--color-gold-bright);
+  }
+
+  .dong-chart .dc-d {
+    fill: var(--color-line-strong);
+    background: var(--color-line-strong);
+  }
+
+  .dong-chart .dc-o {
+    fill: var(--color-accent-soft);
+    background: var(--color-accent-soft);
+  }
+
+  .dong-chart__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0.75rem 0 0.5rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dong-chart__legend li {
+    margin: 0;
+  }
+
+  .dong-chart__legend i {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-right: 0.35rem;
+    border: 1px solid var(--color-line-strong);
+    border-radius: 2px;
+    vertical-align: -0.05em;
+  }
+
+  .dong-chart__legend span {
+    color: var(--color-muted);
+  }
+
+  .dong-chart figcaption {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+</style>

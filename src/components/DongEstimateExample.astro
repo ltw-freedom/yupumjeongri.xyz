@@ -1,0 +1,87 @@
+---
+/**
+ * 동 페이지 '예시 계산' — 위 주택 구성에서 비중이 가장 큰 주거 형태로 계산기 조건 하나를 예로 골라 계산한 결과.
+ * 행정동을 잇지 못한 페이지에는 싣지 않는다(시군구 숫자를 이 동의 구성처럼 보이게 하지 않는다).
+ *
+ * 실제 작업 사례가 아니다. 제목·첫 줄에 그렇게 적고, 날짜·고객·현장 묘사 같은 '있었던 일' 어휘를 쓰지 않는다.
+ * 금액은 dongEstimateExample() → pricing.ts volumeMatrix() (계산기와 같은 식). 여기서 금액을 만들지 않는다.
+ * 스타일은 이 컴포넌트에만 둔다(global.css 해시를 바꾸지 않기 위해).
+ */
+import type { EstimateExample } from '../data/dongHousing';
+
+interface Props {
+  example: EstimateExample;
+}
+const { example } = Astro.props;
+---
+
+<aside class="dong-example" aria-labelledby="dong-example-heading">
+  <h3 id="dong-example-heading">{example.heading}</h3>
+  <p class="dong-example__disclaimer">{example.disclaimer}</p>
+  <p>{example.basis}</p>
+  <dl class="dong-example__rows">
+    {
+      example.rows.map((row) => (
+        <div>
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))
+    }
+    <div class="dong-example__total">
+      <dt>예시 범위</dt>
+      <dd>{example.range}</dd>
+    </div>
+  </dl>
+  {example.extra && <p>{example.extra}</p>}
+  <p class="note">
+    {example.asOf}. 정확한 금액은 <a href="#estimate">위 계산기</a>나 상담으로 확인하세요.
+  </p>
+</aside>
+
+<style is:global>
+  .dong-example {
+    margin: 1.5rem 0 2rem;
+    padding: clamp(1.1rem, 3vw, 1.6rem);
+    background: var(--color-card);
+    border: 1px dashed var(--color-line-strong);
+    border-radius: var(--radius-lg);
+  }
+
+  .dong-example h3 {
+    margin-top: 0;
+  }
+
+  .dong-example .dong-example__disclaimer {
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .dong-example .dong-example__rows {
+    margin: 0 0 1rem;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .dong-example .dong-example__rows > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--color-line);
+  }
+
+  .dong-example dt {
+    color: var(--color-muted);
+  }
+
+  .dong-example dd {
+    margin: 0;
+    text-align: right;
+  }
+
+  .dong-example .dong-example__total dd {
+    font-weight: 700;
+    color: var(--color-gold);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

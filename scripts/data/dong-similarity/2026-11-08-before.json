@@ -1,0 +1,142 @@
+{
+  "measuredAt": "2026-11-08T06:53:09.294Z",
+  "gitHead": "cf95873",
+  "method": {
+    "source": "dist/area/{region}/{city}/{dong}/index.html <main> 텍스트",
+    "removedNames": "동·짧은 동·일반구·짧은 일반구·시군구·짧은 시군구(짧은 이름은 2글자 이상만)·광역명",
+    "shingle": "5단어(공백 기준) 집합 Jaccard",
+    "withinCity": "같은 시군구 안 모든 쌍",
+    "crossCity": "다른 시군구 쌍을 slug 사전순으로 번호 매겨 floor((k+0.5)·전체/3000) 번째를 추출(난수 없음)",
+    "uniqueShingleRatio": "그 페이지에만 있는 shingle / 그 페이지 shingle (전체 페이지 기준)"
+  },
+  "pages": 1096,
+  "aliasPages": 6,
+  "meanWords": 696,
+  "meanShingles": 660,
+  "withinCity": {
+    "n": 16607,
+    "mean": 0.7214,
+    "median": 0.6954,
+    "p90": 0.8642,
+    "min": 0.5881,
+    "max": 0.9853
+  },
+  "crossCity": {
+    "n": 3000,
+    "mean": 0.689,
+    "median": 0.6617,
+    "p90": 0.8216,
+    "min": 0.5596,
+    "max": 0.9445,
+    "populationPairs": 583453
+  },
+  "uniqueShingleRatio": {
+    "n": 1096,
+    "mean": 0.0077,
+    "median": 0.0076,
+    "p90": 0.0108,
+    "min": 0,
+    "max": 0.0663
+  },
+  "pagesWithZeroUniqueShingles": 72,
+  "perCityWithinMean": {
+    "seoul/geumcheon": 0.889,
+    "seoul/dobong": 0.787,
+    "seoul/gwangjin": 0.7826,
+    "gyeonggi/gunpo": 0.7714,
+    "seoul/gwanak": 0.7618,
+    "gyeonggi/anyang": 0.7549,
+    "seoul/gangnam": 0.7524,
+    "gyeonggi/yeoncheon": 0.7504,
+    "seoul/jungnang": 0.7499,
+    "seoul/songpa": 0.7499,
+    "seoul/guro": 0.7479,
+    "seoul/gangdong": 0.7463,
+    "seoul/gangseo": 0.7436,
+    "seoul/eunpyeong": 0.7429,
+    "gyeonggi/uijeongbu": 0.7428,
+    "seoul/nowon": 0.7396,
+    "seoul/dongjak": 0.7392,
+    "seoul/gangbuk": 0.7379,
+    "gyeonggi/yangpyeong": 0.7376,
+    "seoul/dongdaemun": 0.7375,
+    "seoul/seongbuk": 0.7371,
+    "gyeonggi/namyangju": 0.7368,
+    "seoul/yeongdeungpo": 0.732,
+    "gyeonggi/gwangmyeong": 0.7305,
+    "seoul/jung": 0.7303,
+    "gyeonggi/gwacheon": 0.73,
+    "seoul/seocho": 0.7294,
+    "seoul/seongdong": 0.7291,
+    "seoul/yongsan": 0.7288,
+    "gyeonggi/gapyeong": 0.7282,
+    "gyeonggi/gimpo": 0.7272,
+    "gyeonggi/paju": 0.7269,
+    "seoul/mapo": 0.7262,
+    "gyeonggi/uiwang": 0.7261,
+    "gyeonggi/bucheon": 0.7245,
+    "gyeonggi/siheung": 0.7243,
+    "seoul/seodaemun": 0.7239,
+    "gyeonggi/dongducheon": 0.7229,
+    "gyeonggi/icheon": 0.7228,
+    "gyeonggi/ansan": 0.7222,
+    "gyeonggi/hanam": 0.721,
+    "seoul/jongno": 0.7205,
+    "gyeonggi/pocheon": 0.7203,
+    "gyeonggi/yangju": 0.7195,
+    "gyeonggi/anseong": 0.7177,
+    "gyeonggi/suwon": 0.7176,
+    "gyeonggi/yongin": 0.7166,
+    "gyeonggi/osan": 0.7163,
+    "gyeonggi/guri": 0.7162,
+    "gyeonggi/gwangju": 0.7161,
+    "gyeonggi/pyeongtaek": 0.716,
+    "gyeonggi/seongnam": 0.7158,
+    "gyeonggi/yeoju": 0.7157,
+    "gyeonggi/goyang": 0.7151,
+    "gyeonggi/hwaseong": 0.7141,
+    "seoul/yangcheon": 0.6978
+  },
+  "mostSimilarWithinCity": [
+    {
+      "slug": "seoul/geumcheon/siheung",
+      "meanWithinCity": 0.9076
+    },
+    {
+      "slug": "seoul/geumcheon/gasan",
+      "meanWithinCity": 0.8807
+    },
+    {
+      "slug": "seoul/geumcheon/doksan",
+      "meanWithinCity": 0.8787
+    },
+    {
+      "slug": "seoul/gwangjin/jayang",
+      "meanWithinCity": 0.8424
+    },
+    {
+      "slug": "seoul/gwangjin/hwayang",
+      "meanWithinCity": 0.8419
+    },
+    {
+      "slug": "seoul/gwangjin/junggok",
+      "meanWithinCity": 0.8393
+    },
+    {
+      "slug": "seoul/dobong/chang",
+      "meanWithinCity": 0.8325
+    },
+    {
+      "slug": "seoul/dobong/dobong",
+      "meanWithinCity": 0.8293
+    },
+    {
+      "slug": "gyeonggi/anyang/bisan",
+      "meanWithinCity": 0.8088
+    },
+    {
+      "slug": "seoul/gwangjin/guui",
+      "meanWithinCity": 0.8076
+    }
+  ]
+}
