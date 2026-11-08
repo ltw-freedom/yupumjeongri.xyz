@@ -4,14 +4,18 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import CTA from '../../components/CTA.astro';
 import FAQ from '../../components/FAQ.astro';
 import { site } from '../../data/site';
-import { faqSchema } from '../../data/schema';
+import { faqSchema, webPage } from '../../data/schema';
+import { contentDate } from '../../data/contentDates';
 import { faqGroups as groups, allFaqItems as allItems } from '../../data/faqs';
+
+// 실제로 본문을 고친 날 — contentDates.ts 수동 지도. 스키마 dateModified 와 하단 '최종 수정' 줄이 같은 값을 쓴다.
+const updated = contentDate('/faq/');
 ---
 
 <BaseLayout
   title={`유품정리 자주 묻는 질문 — 비용·견적·진행 | ${site.name}`}
   description="유품정리 비용·부가세·추가금·견적 비교부터 작업 진행, 고독사 현장, 정산까지 자주 받는 질문에 공개 가격 기준으로 답합니다."
-  jsonLd={[faqSchema(allItems)]}
+  jsonLd={[faqSchema(allItems), webPage({ path: '/faq/', name: '유품정리 자주 묻는 질문', dateModified: updated })]}
 >
   <Breadcrumb items={[{ label: 'FAQ' }]} />
 
@@ -24,6 +28,8 @@ import { faqGroups as groups, allFaqItems as allItems } from '../../data/faqs';
       </p>
 
       {groups.map((group) => <FAQ title={group.title} items={group.items} />)}
+
+      <p class="note">최종 수정 <time datetime={updated}>{updated}</time></p>
     </div>
   </section>
 

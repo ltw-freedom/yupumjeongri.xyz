@@ -8,9 +8,10 @@ import CaseGallery from '../../components/CaseGallery.astro';
 import { services, type Service } from '../../data/services';
 import { regions } from '../../data/areas';
 import { servicePhotos, casesByService } from '../../data/cases';
-import { serviceSchema, faqSchema } from '../../data/schema';
+import { serviceSchema, faqSchema, webPage } from '../../data/schema';
+import { contentDate } from '../../data/contentDates';
 import PriceTable from '../../components/PriceTable.astro';
-import { basePrices, priceAnswer, type PriceRow } from '../../data/pricing';
+import { basePrices, priceAnswerCore, type PriceRow } from '../../data/pricing';
 import { getCollection } from 'astro:content';
 import { byNewest } from '../../data/columnLinks';
 
@@ -52,6 +53,10 @@ const serviceColumns: Record<string, string[]> = {
 };
 const columnIds = serviceColumns[service.slug] ?? [];
 const columns = (await getCollection('columns', ({ id, data }) => !data.draft && columnIds.includes(id))).sort(byNewest);
+
+// 실제로 본문을 고친 날 — contentDates.ts 수동 지도(서비스마다 따로). 새 서비스를 추가하면 지도에도 넣어야 빌드가 통과한다.
+const path = `/service/${service.slug}/`;
+const updated = contentDate(path);
 ---
 
 <BaseLayout
@@ -66,6 +71,7 @@ const columns = (await getCollection('columns', ({ id, data }) => !data.draft &&
       withPrices: priceKeys,
     }),
     faqSchema(service.faqs),
+    webPage({ path, name: service.name, dateModified: updated }),
   ]}
 >
   <Breadcrumb items={[{ label: '서비스', href: '/service/' }, { label: service.name }]} />
@@ -102,7 +108,7 @@ const columns = (await getCollection('columns', ({ id, data }) => !data.draft &&
             <h2>{service.name} 비용은 얼마인가요</h2>
             {/* 첫 문장은 비용 질문에 대한 직답 — 검색·AI 발췌용 */}
             <p>
-              {priceAnswer()} 평형보다 물품 양, 주거 형태와 층수, 반출 동선, 폐기물 종류가 범위 안의 위치를 정합니다. 견적서를
+              {priceAnswerCore()} 평형보다 물품 양, 주거 형태와 층수, 반출 동선, 폐기물 종류가 범위 안의 위치를 정합니다. 견적서를
               구성하는 단가는 <a href="/cost/">비용 안내</a>에 공개해 두었습니다.
             </p>
             <PriceTable rows={priceRows} />
@@ -112,7 +118,7 @@ const columns = (await getCollection('columns', ({ id, data }) => !data.draft &&
             <h2>비용은 어떻게 정해지나요</h2>
             {/* 첫 문장은 비용 질문에 대한 직답 — 검색·AI 발췌용 */}
             <p>
-              {priceAnswer()} 물품 양, 주거 형태와 층수, 반출 동선, 폐기물 종류가 기본 요소이고 여기에 특수청소·소독 포함
+              {priceAnswerCore()} 물품 양, 주거 형태와 층수, 반출 동선, 폐기물 종류가 기본 요소이고 여기에 특수청소·소독 포함
               여부가 더해집니다. 항목별 기준은 <a href="/cost/">비용 안내</a>에 정리해 두었습니다.
             </p>
           </>
@@ -157,6 +163,8 @@ const columns = (await getCollection('columns', ({ id, data }) => !data.draft &&
           ))
         }
       </ul>
+
+      <p class="note">최종 수정 <time datetime={updated}>{updated}</time></p>
     </div>
   </section>
 

@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { byNewest } from '../data/columnLinks';
 import { site, absoluteUrl } from '../data/site';
 import { services } from '../data/services';
-import { basePrices, unitRates, pricesAsOf, vatNote } from '../data/pricing';
+import { basePrices, unitRates, pricesAsOf, vatLabel, vatNote, priceAnswerCore, volumeMatrix, estimator } from '../data/pricing';
 import { faqGroups } from '../data/faqs';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
@@ -24,10 +24,13 @@ export const GET: APIRoute = async () => {
 
   const dongCount = districtCities.reduce((sum, city) => sum + city.dongs.length, 0);
 
+  // 첫 요약문은 /llms.txt 와 같은 원칙 — 다른 브랜드 담당 주제(고독사 특수청소·빈집)를 앞세우지 않는다(2026-11-08)
+  const summary = `유품정리 비용을 기준일(${pricesAsOf}) 붙은 표로 공개하는 서울·경기 유품정리 업체. ${site.sloganSub}.`;
+
   const lines = [
     `# ${site.name} — 전문`,
     '',
-    `> ${site.description}`,
+    `> ${summary}`,
     '',
     `${site.url} 의 전체 내용을 한 파일로 정리한 것입니다.`,
     '요약본은 /llms.txt 에 있습니다.',
@@ -60,9 +63,17 @@ export const GET: APIRoute = async () => {
     '',
     `## 주거 형태별 비용 범위 (${pricesAsOf} 기준)`,
     '',
+    `요약: ${priceAnswerCore()}`,
+    '',
     row(['주거 형태', '비용 범위', '범위가 달라지는 조건']),
     row(['---', '---', '---']),
     ...basePrices.map((p) => row([p.type, p.range, p.note])),
+    '',
+    `### 평수별 · 짐 양별 비용 (${vatLabel})`,
+    '',
+    row(['주거 형태', ...estimator.volume.map((v) => `짐 ${v.label}`)]),
+    row(['---', ...estimator.volume.map(() => '---')]),
+    ...volumeMatrix().map((m) => row([m.label, ...m.cells.map((c) => c.range)])),
     '',
     '## 견적 단가',
     '',

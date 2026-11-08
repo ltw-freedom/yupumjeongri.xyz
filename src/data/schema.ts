@@ -154,6 +154,28 @@ export const provider = () => ({
   url: site.url,
 });
 
+/**
+ * 비칼럼 안내 페이지의 WebPage — dateModified 를 싣는 자리.
+ *
+ * 날짜는 contentDates.ts 의 수동 지도에서만 받는다(빌드 날짜 금지 — 가짜 신선도). 화면 하단 '최종 수정' 줄과 같은 값이어야 한다.
+ * WebSite 노드는 홈에만 있으므로 isPartOf 도 provider() 처럼 name·url 을 인라인해 이 페이지 안에서 풀리게 한다.
+ */
+export function webPage(options: { path: string; name: string; dateModified: string }) {
+  const url = absoluteUrl(options.path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${url}#webpage`,
+    url,
+    name: options.name,
+    inLanguage: 'ko',
+    dateModified: options.dateModified,
+    isPartOf: { '@type': 'WebSite', '@id': absoluteUrl('/#website'), name: site.name, url: site.url },
+    publisher: provider(),
+    about: provider(),
+  };
+}
+
 /** 지역 페이지가 다루는 서비스 — 이름에 지역을 넣고, 종류(serviceType)는 지역 없이 둔다 */
 const areaServiceTypes = services.map((service) => service.name);
 

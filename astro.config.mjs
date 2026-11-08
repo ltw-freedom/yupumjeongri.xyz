@@ -3,6 +3,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import remarkGfm from 'remark-gfm';
+// 비칼럼 페이지의 실제 내용 변경일 — 규칙은 그 파일 머리 주석 (빌드 날짜 자동 주입 금지)
+import { lookupContentDate } from './src/data/contentDates.ts';
 
 /**
  * 동 페이지 사이트맵 웨이브 (유품정리연구소 AREA.md 6장의 웨이브 발행 규칙).
@@ -64,7 +66,9 @@ export default defineConfig({
         return SITEMAP_DONG_WAVE === 'all' || wave1Dongs.has(pathname);
       },
       serialize: (item) => {
-        const lastmod = columnLastmod.get(new URL(item.url).pathname);
+        const pathname = new URL(item.url).pathname;
+        // 칼럼은 frontmatter, 나머지는 contentDates.ts 의 수동 지도. 둘 다 없으면(동 페이지 등) lastmod 를 붙이지 않는다.
+        const lastmod = columnLastmod.get(pathname) ?? lookupContentDate(pathname);
         return lastmod ? { ...item, lastmod } : item;
       },
     }),

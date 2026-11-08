@@ -13,17 +13,20 @@ import { services } from '../data/services';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
 import { photos } from '../data/cases';
-import { organization, faqSchema, webSite } from '../data/schema';
+import { organization, faqSchema, webSite, webPage } from '../data/schema';
+import { contentDate } from '../data/contentDates';
+import { priceAnswerCore } from '../data/pricing';
 
 /**
  * AEO(Answer Engine) · GEO(Generative Engine) 대응:
  * - 질문형 소제목 + 첫 문장에서 바로 답하는 요약 블록(.answer-box)
  * - 검색·AI 가 인용하기 좋은 완결형 문장으로 작성한다.
+ * 금액은 손으로 적지 않는다 — pricing.ts 를 고치면 홈 문장도 같이 바뀌게(2026-11-08, 예전엔 하드코딩).
  */
 const answerItems = [
   {
     q: '유품정리 비용은 얼마나 드나요?',
-    a: '원룸 40만~90만원, 투룸 90만~160만원, 20평대 아파트 150만~250만원이 기준 범위입니다(부가세 별도). 평형이 아니라 물품 양, 반출 동선, 특수청소 포함 여부로 정해지며, 대한유품정리는 산정 단가까지 비용 페이지에 공개합니다.',
+    a: `${priceAnswerCore()} 평형이 아니라 물품 양, 반출 동선, 특수청소 포함 여부로 정해지며, ${site.name}는 산정 단가까지 비용 페이지에 공개합니다.`,
   },
   {
     q: '견적 후에 금액이 늘어나지 않나요?',
@@ -60,12 +63,15 @@ const faqs = [
 
 /** 히어로 아래 사진 띠 — 팀·장비·현장이 한눈에 보이는 컷 3장 */
 const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyHighrise];
+
+// 실제로 본문을 고친 날 — contentDates.ts 수동 지도. 사이트맵 lastmod·WebPage dateModified·FAQ 아래 '최종 수정' 줄이 같은 값을 쓴다.
+const updated = contentDate('/');
 ---
 
 <BaseLayout
   title={site.title}
   description={site.description}
-  jsonLd={[webSite(), organization(), faqSchema(faqs)]}
+  jsonLd={[webSite(), organization(), faqSchema(faqs), webPage({ path: '/', name: site.title, dateModified: updated })]}
 >
   <Hero
     title="유품정리, <em>값부터</em> 공개합니다"
@@ -171,7 +177,8 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
     <div class="container">
       <div class="section-head">
         <p class="overline">04 — 진행 과정</p>
-        <h2>상담부터 공간 정돈까지 다섯 단계</h2>
+        {/* /process/ 는 전체 단계 전문이다 — 여기는 그중 핵심만 추린 것이라 '핵심'을 붙여 단계 수가 어긋나 보이지 않게 한다 */}
+        <h2>상담부터 공간 정돈까지, 핵심 다섯 단계</h2>
       </div>
       <ol class="steps">
         <li><strong>상담 · 현장 확인</strong>물품 양과 반출 동선을 확인하고 일정과 비용을 안내드립니다.</li>
@@ -180,7 +187,7 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
         <li><strong>폐기 · 반출</strong>폐기물은 종류별로 분리해 규정에 맞춰 처리합니다.</li>
         <li><strong>공간 정돈</strong>반출 후 청소까지 마무리합니다.</li>
       </ol>
-      <p><a href="/process/">진행 과정 자세히 보기</a></p>
+      <p><a href="/process/">전체 진행 과정 자세히 보기</a></p>
     </div>
   </section>
 
@@ -220,6 +227,8 @@ const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyH
   <section class="section">
     <div class="container">
       <FAQ items={faqs} />
+
+      <p class="note">최종 수정 <time datetime={updated}>{updated}</time></p>
     </div>
   </section>
 

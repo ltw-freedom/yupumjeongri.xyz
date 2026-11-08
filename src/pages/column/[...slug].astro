@@ -54,6 +54,12 @@ const articleSchema = {
   author: business,
   publisher: business,
 };
+
+// 화면의 작성·수정 날짜 — 위 Article 스키마와 같은 값(toISOString 의 날짜 부분)이라 둘이 어긋나지 않는다.
+// 수정일은 frontmatter updatedAt 이 있을 때만 — 없는 날짜를 만들어 붙이면 가짜 신선도다.
+const ymd = (date: Date) => date.toISOString().slice(0, 10);
+const published = ymd(entry.data.publishedAt);
+const modified = entry.data.updatedAt ? ymd(entry.data.updatedAt) : undefined;
 ---
 
 <BaseLayout
@@ -69,6 +75,7 @@ const articleSchema = {
   <article class="section">
     <div class="container">
       <h1>{entry.data.title}</h1>
+      <p class="note">{site.name} · 작성 <time datetime={published}>{published}</time>{modified && <span> · 수정 <time datetime={modified}>{modified}</time></span>}</p>
 
       <Content />
 

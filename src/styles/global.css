@@ -1789,7 +1789,26 @@ tbody th {
   min-width: 5.5rem;
 }
 
+/* /cost/ 평수별 표 — 4열이라 좁은 화면에서 행 머리글이 줄바꿈되게 둔다 */
+.volume-table tbody th {
+  white-space: normal;
+  min-width: 4.5rem;
+}
+
+.volume-table td {
+  white-space: nowrap;
+}
+
 @media (max-width: 599px) {
+  .volume-table {
+    font-size: 0.85rem;
+  }
+
+  .volume-table th,
+  .volume-table td {
+    padding: 0.6rem 0.25rem;
+  }
+
   .whyus-table {
     font-size: 0.9rem;
   }

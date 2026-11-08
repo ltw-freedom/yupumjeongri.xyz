@@ -10,6 +10,7 @@
  */
 import { onRequestPost, onRequestGet } from '../functions/api/consult.js';
 import { handleEvent, recordConsult } from './funnel.js';
+import { logBot } from './botlog.js';
 
 const CANONICAL_HOST = 'yupumjeongri.xyz';
 
@@ -35,7 +36,8 @@ const movedCode = (request) => (request.method === 'GET' || request.method === '
 const isLocalHost = (hostname) =>
   ['localhost', '127.0.0.1', '[::1]'].includes(hostname) || hostname.endsWith('.localhost');
 
-export default {
+/** 요청 하나의 실제 처리 — 리다이렉트·API·정적 자산. 봇 집계는 아래 export default 가 감싼다 */
+const site = {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const { pathname } = url;
@@ -78,6 +80,16 @@ export default {
       cached.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
       return cached;
     }
+    return response;
+  },
+};
+
+export default {
+  // 응답 갈래(리다이렉트 301/308·API·정적 자산·404)마다 넣지 않고, 최종 응답 한 곳에서 봇 방문을 센다.
+  // logBot 은 던지지 않고 INSERT 를 waitUntil 로 미루므로 응답 내용·속도는 그대로다.
+  async fetch(request, env, ctx) {
+    const response = await site.fetch(request, env, ctx);
+    logBot(request, response, env, ctx);
     return response;
   },
 };

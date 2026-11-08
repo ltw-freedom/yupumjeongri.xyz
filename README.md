@@ -212,6 +212,10 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
 - URL·slug 변경, `.xyz` → `.co.kr` 도메인 이전, 동 페이지 사이트맵 전량 투입은 순위 리셋 위험이 있다.
 - 순위·색인 측정: **`naver-rank.mjs`·`naver-index.mjs` 는 쓰지 않는다** — 2026-10-13·10-21 운영자 결정(네이버 검색 화면
   자동 조회 전면 중단). 서치어드바이저·Search Console·Bing Webmaster 와 사람이 직접 보는 소수 표본으로만 잰다(`docs/seo-naver.md` 5장).
+- 봇 실제 방문(콘솔 없이, 우리 Cloudflare 만 조회): `node scripts/bot-crawl.mjs --days 21` — Yeti·Googlebot·GPTBot 등 일별 요청·상태코드·상위 경로
+  (Cloudflare 적응형 표본, 과거 30일까지. 토큰은 `CF_API_TOKEN` 또는 wrangler OAuth).
+- 봇 방문 정확 집계: Worker 가 D1 `bot_hits` 에 KST 일별로 센다(`worker/botlog.js`, 처음 한 번 `npx wrangler d1 migrations apply yupumjeongri-funnel --remote`) —
+  `npx wrangler d1 execute yupumjeongri-funnel --remote --command "SELECT day, bot, SUM(hits) FROM bot_hits GROUP BY 1, 2 ORDER BY 1 DESC"`.
 - 시군구 페이지끼리 본문 유사도(유사문서 제외 원인, `docs/seo-naver.md` 4-2·4-5):
   `npm run build && node scripts/area-similarity.mjs`. 시군구 템플릿에 공통 문구를 더하면 이걸로 평균이 오르지 않는지 볼 것.
   지역마다 다른 본문은 `src/data/cityStats.ts`·`cityDongHousing.ts`(2025 인구주택총조사, KOSIS)에서 만든다 — 출처 없는 지역 정보는 넣지 않는다.

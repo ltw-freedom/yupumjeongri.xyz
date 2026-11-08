@@ -206,12 +206,89 @@ export function priceRow(key: PriceRow['key']): PriceRow {
   return basePrices.find((r) => r.key === key)!;
 }
 
+/** '40만 ~ 90만원' → '40만~90만원' (문장 안 표기) */
+export const inlineRange = (range: string) => range.replace(/\s*~\s*/g, '~');
+
 /**
- * 비용 직답 문장 — 질문("유품정리 비용 얼마?")에 첫 문장으로 답하는 용도(AEO).
- * 지역 페이지·/cost/·llms.txt 가 같은 문장을 쓰도록 여기서 만든다.
+ * 비용 직답 문장(지역 페이지판) — 질문("○○ 유품정리 비용 얼마?")에 첫 문장으로 답하는 용도(AEO).
+ *
+ * **지역(시·군·구, 읍·면·동) 페이지와 서비스 페이지가 아직 이 문장을 쓴다.** 지역 페이지 출력을 바꿀지는
+ * 별도 결정 대기라(2026-11-08) 문장을 한 글자도 바꾸지 말 것. 고독사 특수청소 금액 문장이 들어 있는데,
+ * 그 주제는 담당 지도상 다른 브랜드 몫이다 — 새로 쓰는 곳은 priceAnswerCore() 를 쓴다.
  * @param subject 문장 주어. 예: '마포구 유품정리 비용'
  */
 export function priceAnswer(subject = '유품정리 비용'): string {
   const r = (key: PriceRow['key']) => priceRow(key).range.replace(/\s*~\s*/, '~');
   return `${subject}은 ${pricesAsOf} 기준 원룸 ${r('oneroom')}, 투룸 ${r('tworoom')}, 20평대 아파트 ${r('apt20')}이며, 고독사 현장은 특수청소 ${priceRow('special').range.replace(/^위 금액\s*\+\s*/, '').replace(/\s*~\s*/, '~')}이 더해집니다(${vatLabel}).`;
+}
+
+/**
+ * 비용 직답 문장(대한 담당판) — /cost/·/faq/·홈·llms 가 쓴다.
+ * priceAnswer() 와 달리 고독사 특수청소 금액을 빼고(다른 브랜드 담당) 30평 이상 구간을 넣었다.
+ * '30평 아파트 유품정리 비용' 검색어가 첫 문장에서 바로 답을 찾게 하려는 것이다.
+ * @param subject 문장 주어. 받침 있는 말로 끝나야 '은'이 맞는다. 예: '유품정리 비용'
+ */
+export function priceAnswerCore(subject = '유품정리 비용'): string {
+  const r = (key: PriceRow['key']) => inlineRange(priceRow(key).range);
+  return `${subject}은 ${pricesAsOf} 기준 원룸 ${r('oneroom')}, 투룸 ${r('tworoom')}, 20평대 아파트 ${r('apt20')}, 30평 이상 아파트 ${r('apt30')}입니다(${vatLabel}).`;
+}
+
+/** 원 → '55만' (EstimateCalc 화면 표기와 같은 규칙) */
+const manwon = (won: number) => `${Math.round(won / 10_000).toLocaleString('ko-KR')}만`;
+
+export type VolumeCell = {
+  key: (typeof estimator.volume)[number]['key'];
+  /** '적은 편' · '보통' · '많은 편' */
+  label: string;
+  min: number;
+  max: number;
+  /** '55만 ~ 80만원' — basePrices.range 와 같은 띄어쓰기 */
+  range: string;
+  /** 기준 범위(basePrices) 안에 드는가. false 가 나오면 클램프하지 말고 estimator 설정을 다시 볼 것 */
+  withinBase: boolean;
+};
+
+export type VolumeRow = {
+  key: 'oneroom' | 'tworoom' | 'apt20';
+  /** '원룸 · 오피스텔' — estimator.housing 의 label */
+  label: string;
+  /** 이 행의 기준 범위 */
+  base: PriceRow;
+  cells: VolumeCell[];
+};
+
+/**
+ * 짐의 양 × 주거 형태 매트릭스 — /cost/ '평수별 유품정리 비용' 표와 llms 가 쓴다.
+ *
+ * **새 금액을 만들지 않는다.** 예상 비용 계산기(EstimateCalc)와 똑같은 식으로 빌드 때 미리 계산한 것이다:
+ * 기준 범위의 하한 + 폭 × 짐의 양 구간(from·to), estimator.roundTo 단위 반올림(Math.round).
+ * 그래서 표의 칸과 계산기 결과가 언제나 같다. 계산기 비율을 바꾸면 이 표도 저절로 따라온다.
+ *
+ * 30평 이상은 상한이 없어(apt30.maxPrice 없음) 짐의 양으로 좁힐 수 없다 — 표에 넣지 않고 따로 적는다.
+ */
+export function volumeMatrix(): VolumeRow[] {
+  const snap = (won: number) => Math.round(won / estimator.roundTo) * estimator.roundTo;
+  return (['oneroom', 'tworoom', 'apt20'] as const).map((key) => {
+    const housing = estimator.housing.find((h) => h.key === key)!;
+    const base = priceRow(key);
+    if (housing.max === undefined) throw new Error(`volumeMatrix: ${key} 에 상한(maxPrice)이 없다`);
+    const span = housing.max - housing.min;
+    return {
+      key,
+      label: housing.label,
+      base,
+      cells: estimator.volume.map((v) => {
+        const min = snap(housing.min + span * v.from);
+        const max = snap(housing.min + span * v.to);
+        return {
+          key: v.key,
+          label: v.label,
+          min,
+          max,
+          range: `${manwon(min)} ~ ${manwon(max)}원`,
+          withinBase: min >= base.minPrice && max <= (base.maxPrice ?? Infinity),
+        };
+      }),
+    };
+  });
 }

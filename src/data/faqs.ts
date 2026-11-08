@@ -6,26 +6,37 @@
  * (서비스별·지역별 FAQ 는 각각 services.ts / areas.ts 에 따로 있다.)
  */
 
-import { priceAnswer, priceRow, pricesAsOf, vatLabel } from './pricing';
+import { priceAnswerCore, volumeMatrix, inlineRange, pricesAsOf, vatLabel } from './pricing';
 
 export type FaqItem = { q: string; a: string };
 export type FaqGroup = { title: string; items: FaqItem[] };
 
 /** '40만 ~ 90만원' → '40만~90만원' (문장 안 표기) */
-const inline = (range: string) => range.replace(/\s*~\s*/g, '~');
+const inline = inlineRange;
+
+/** 원룸 행의 짐 양별 범위 — 계산기·/cost/ 평수별 표와 같은 값(pricing.ts volumeMatrix) */
+const oneroom = volumeMatrix().find((row) => row.key === 'oneroom')!;
 
 export const faqGroups: FaqGroup[] = [
   {
     /**
      * 비용 질문은 숫자로 시작하는 답으로 — AI 답변 엔진이 인용하는 꼴이 '질문 문장 + 숫자 첫 문장'이다
      * (2026-10-23 ChatGPT·Gemini 실측). 금액은 pricing.ts 에서 만든다. 이 그룹은 대한 담당(비용·견적서) 질문만.
+     *
+     * /cost/ FAQ 가 '유품정리 비용은 얼마인가요?'·'원룸 유품정리 비용은 얼마인가요?'를 같은 꼴로 갖고 있어(2026-11-08),
+     * 여기서는 질문 각도를 달리한다 — 두 페이지가 같은 문답을 겹쳐 내면 어느 쪽도 대표 답이 되지 못한다.
+     * 비용 직답은 priceAnswerCore(고독사 특수청소 금액 없음, 30평 이상 포함).
      */
     title: '비용 · 견적',
     items: [
-      { q: '유품정리 비용은 얼마인가요?', a: priceAnswer() },
+      { q: '원룸·투룸·아파트별로 유품정리 비용이 얼마나 다른가요?', a: priceAnswerCore() },
       {
-        q: '원룸 유품정리 비용은 얼마인가요?',
-        a: `원룸·오피스텔(10평 이하)은 ${pricesAsOf} 기준 ${inline(priceRow('oneroom').range)}입니다(${vatLabel}). ${priceRow('oneroom').note} 엘리베이터 없는 3층 이상이라 계단 운반 인력이 붙으면 범위 위쪽에서 정해집니다.`,
+        q: '같은 원룸이라도 짐 양에 따라 유품정리 비용이 얼마나 달라지나요?',
+        a: `${oneroom.cells.map((cell) => `짐이 ${cell.label}이면 ${inline(cell.range)}`).join(', ')}입니다(원룸·오피스텔, ${pricesAsOf} 기준, ${vatLabel}). 기준 범위(${inline(oneroom.base.range)}, ${vatLabel})를 짐의 양으로 좁힌 값이고, 엘리베이터 없는 3층 이상이라 계단 운반 인력이 붙으면 범위 위쪽에서 정해집니다.`,
+      },
+      {
+        q: '유품정리 견적은 어떻게 받나요?',
+        a: '상담 폼에 주거 형태·층과 엘리베이터 여부·짐의 양·큰 가전 수·비워야 할 날짜를 남기면 기준표 범위를 먼저 안내하고, 현장 확인 뒤 항목별 견적서를 드립니다. 필수 항목은 휴대폰 번호 하나이고, 견적을 받은 뒤 계약하지 않으셔도 됩니다.',
       },
       {
         q: '유품정리 견적에 부가세가 포함되나요?',

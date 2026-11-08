@@ -3,7 +3,19 @@ import { getCollection } from 'astro:content';
 import { byNewest } from '../data/columnLinks';
 import { site, absoluteUrl } from '../data/site';
 import { services } from '../data/services';
-import { basePrices, unitRates, marketComparison, marketComparisonNote, priceAnswer, pricesAsOf, vatNote } from '../data/pricing';
+import {
+  basePrices,
+  unitRates,
+  marketComparison,
+  marketComparisonNote,
+  priceAnswerCore,
+  pricesAsOf,
+  vatLabel,
+  vatNote,
+  volumeMatrix,
+  estimator,
+  priceRow,
+} from '../data/pricing';
 import { regions } from '../data/areas';
 import { districtCities } from '../data/districts';
 import { faqGroups } from '../data/faqs';
@@ -27,10 +39,16 @@ export const GET: APIRoute = async () => {
 
   const dongCount = districtCities.reduce((sum, city) => sum + city.dongs.length, 0);
 
+  /**
+   * 첫 요약문 — site.description 은 끝이 '고독사 특수청소·빈집 정리 업체'라 다른 브랜드 담당 주제를 앞세운다.
+   * LLM 이 이 사이트를 한 줄로 소개할 때 쓰는 문장이라 대한 담당(유품정리 비용 공개)으로 따로 쓴다(2026-11-08).
+   */
+  const summary = `유품정리 비용을 기준일(${pricesAsOf}) 붙은 표로 공개하는 서울·경기 유품정리 업체. ${site.sloganSub}.`;
+
   const lines = [
     `# ${site.name}`,
     '',
-    `> ${site.description}`,
+    `> ${summary}`,
     '',
     `- 슬로건: ${site.slogan}`,
     `- 세 가지 원칙: ${site.promises.map((p) => `${p.label}(${p.detail})`).join(' / ')}`,
@@ -40,7 +58,7 @@ export const GET: APIRoute = async () => {
     '',
     `## 주거 형태별 비용 범위 (${pricesAsOf} 기준)`,
     '',
-    `요약: ${priceAnswer()}`,
+    `요약: ${priceAnswerCore()}`,
     '',
     vatNote,
     '',
@@ -53,6 +71,14 @@ export const GET: APIRoute = async () => {
     ...basePrices.map((p) => row([p.type, p.range, p.note])),
     '',
     `같은 조건의 예상 비용은 ${absoluteUrl('/cost/#estimate')} 의 계산기로 바로 확인할 수 있습니다 (위 표의 범위 안에서 계산).`,
+    '',
+    // 평수별 표 — 계산기와 같은 식(volumeMatrix)으로 만든 값. '원룸 유품정리 비용' 류 질문에 칸 하나로 답할 수 있게
+    `## 평수별 · 짐 양별 비용 (${pricesAsOf} 기준, ${vatLabel})`,
+    '',
+    row(['주거 형태', ...estimator.volume.map((v) => `짐 ${v.label}`)]),
+    row(['---', ...estimator.volume.map(() => '---')]),
+    ...volumeMatrix().map((m) => row([m.label, ...m.cells.map((c) => c.range)])),
+    `30평 이상은 ${priceRow('apt30').range}(${vatLabel})이며 방문 확인 뒤 확정합니다. 전문: ${absoluteUrl('/cost/#pyeong')}`,
     '',
     '## 가격을 공개한 다른 업체와의 비교',
     '',
