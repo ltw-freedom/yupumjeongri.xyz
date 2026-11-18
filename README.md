@@ -296,7 +296,7 @@ npm run build && npx wrangler deploy
 배경: 10/30 네이버 노출 −93%, 구글 3개월 노출 45 → 11/15 동 페이지 1,096쪽 noindex·사이트맵 84 URL 로 축소 배포(`docs/seo-naver.md` 4-15).
 끝낸 항목은 체크하고 날짜를 적는다. 1~2 는 이번 배포 효과를 앞당기는 일이라 가장 먼저.
 
-- [ ] **0. Cloudflare 에서 이 저장소 연결하기 — 자동 배포** (5분, 2026-11-18 추가)
+- [x] **0. Cloudflare 에서 이 저장소 연결하기 — 자동 배포** (2026-11-18 운영자가 연결. 빌드 설정은 전부터 있었고 GitHub 연결만 끊겨 있었다)
   - 대시보드 → Workers & Pages → `yupumjeongri-xyz` → Settings → Build → Connect repository → `ltw-freedom/yupumjeongri.xyz`
   - 설정값은 [배포](#cloudflare-workers-배포) 절의 표 그대로. 끝나면 Claude 에 알려 시험 푸시로 확인
 - [ ] **1. 네이버 서치어드바이저 — 사이트맵 다시 제출 + 핵심 페이지 수집 요청** (10분)
