@@ -130,7 +130,6 @@ export const GET: APIRoute = async () => {
         .filter((city) => city.region === region.slug)
         .map((city) => `  - [${city.name} 유품정리](${absoluteUrl(`/area/${region.slug}/${city.slug}/`)})`),
     ]),
-    `- 읍·면·동 페이지 목록: ${absoluteUrl('/sitemap-index.xml')}`,
     '',
     '## 더 읽을 것',
     '',

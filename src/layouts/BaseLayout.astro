@@ -12,7 +12,11 @@ interface Props {
   ogImage?: string;
   /** 페이지별 구조화 데이터 (JSON-LD) */
   jsonLd?: Record<string, unknown>[];
-  noindex?: boolean;
+  /**
+   * true      → noindex, nofollow (접수 완료·404 처럼 검색에 나올 이유도, 따라갈 링크도 없는 쪽)
+   * 'follow'  → noindex, follow   (동 페이지처럼 방문자는 쓰지만 검색 색인에서는 빼는 쪽 — 링크는 따라가게 둔다)
+   */
+  noindex?: boolean | 'follow';
   /** 칼럼 등 글 페이지는 'article' — article:published_time 메타가 함께 나간다 */
   ogType?: 'website' | 'article';
   publishedAt?: Date;
@@ -49,7 +53,7 @@ const showMobileCta = !Astro.url.pathname.startsWith(site.consultPath);
     {/* 네이버 서치어드바이저 소유확인 — 삭제하면 등록이 풀린다 */}
     <meta name="naver-site-verification" content="31c67f451d279ad1942783f4c01997f59dbacce4" />
     <meta name="theme-color" content="#16233D" />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {noindex && <meta name="robots" content={noindex === 'follow' ? 'noindex, follow' : 'noindex, nofollow'} />}
 
     {/* /favicon.ico 는 관례로 찾는 크롤러·브라우저용(16·32·48px), SVG 는 지원하는 브라우저용. scripts/build-icons.mjs 가 굽는다 */}
     <link rel="icon" href="/favicon.ico" sizes="32x32" />

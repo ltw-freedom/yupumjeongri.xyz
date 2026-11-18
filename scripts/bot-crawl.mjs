@@ -15,7 +15,8 @@
  *   node scripts/bot-crawl.mjs --days 21    최대 30 (Free 플랜 보존 기간이 31일)
  *
  * 토큰: 환경변수 CF_API_TOKEN (권한 Analytics:Read + Zone:Read). 없으면 wrangler login 의 OAuth 토큰을 설정 파일에서 읽는다
- *   (Windows: %USERPROFILE%\.wrangler\config\default.toml 또는 %APPDATA%\xdg.config\.wrangler\config\default.toml).
+ *   (Windows: %USERPROFILE%\.wrangler\config\default.toml 또는 %APPDATA%\xdg.config\.wrangler\config\default.toml,
+ *    macOS: ~/Library/Preferences/.wrangler/config/default.toml).
  *   OAuth 토큰은 몇 시간마다 만료된다 — 만료면 `npx wrangler whoami` 를 한 번 돌리면 갱신된다.
  * 날짜는 KST 로 묶는다(KST 00:00 = UTC 전날 15:00). 봇 판별 표는 worker/botlog.js 의 BOTS 를 그대로 쓴다.
  */
@@ -52,6 +53,7 @@ function loadToken() {
   if (process.env.CF_API_TOKEN) return { token: process.env.CF_API_TOKEN, from: '환경변수 CF_API_TOKEN', oauth: false };
   const candidates = [
     join(homedir(), '.wrangler', 'config', 'default.toml'),
+    join(homedir(), 'Library', 'Preferences', '.wrangler', 'config', 'default.toml'), // macOS
     process.env.APPDATA && join(process.env.APPDATA, 'xdg.config', '.wrangler', 'config', 'default.toml'),
     process.env.XDG_CONFIG_HOME && join(process.env.XDG_CONFIG_HOME, '.wrangler', 'config', 'default.toml'),
     join(homedir(), '.config', '.wrangler', 'config', 'default.toml'),

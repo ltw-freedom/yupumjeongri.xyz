@@ -5,19 +5,18 @@ import sitemap from '@astrojs/sitemap';
 import remarkGfm from 'remark-gfm';
 // 비칼럼 페이지의 실제 내용 변경일 — 규칙은 그 파일 머리 주석 (빌드 날짜 자동 주입 금지)
 import { lookupContentDate } from './src/data/contentDates.ts';
+// 동 페이지 색인 기준 — 실제 작업 기록이 있는 동만 ([dong].astro 의 noindex 와 같은 기준)
+import { dongCases } from './src/data/dongCases.ts';
 
 /**
- * 동 페이지 사이트맵 웨이브 (유품정리연구소 AREA.md 6장의 웨이브 발행 규칙).
+ * 동 페이지 사이트맵 — 2026-11-15 부터 동 페이지는 noindex, follow 다 (docs/seo-naver.md 4-15).
  *
- * 동 페이지 1,000여 개는 전부 빌드되고 내부 링크로 연결되지만, 사이트맵으로
- * 검색엔진에 "밀어주는" 것은 단계적으로 한다. 신규 도메인이 한 번에 소화할 수
- * 있는 신규 URL 은 제한적이고, 색인 대기열에만 쌓이면 그 자체가 저품질 신호다.
- *
- *  - 'wave1': 큐레이션 지역의 동 + 신도시 별칭만 사이트맵에 포함 (기본)
- *  - 'all'  : 동 페이지 전부 포함 — 1차 웨이브 색인률이 80%를 넘으면 올린다
+ * 예전에는 웨이브(wave1 221쪽 → 'all')로 단계 발행했지만, 네이버(10/30 노출 −93%, 색인 112 → 50)·구글(색인 574 · 3개월 노출 45)이
+ * 동 1,090쪽 지역명 치환 템플릿을 포함한 사이트 전체를 낮게 본 것으로 판단해 동 페이지를 색인에서 뺐다.
+ * noindex 페이지를 사이트맵에 넣으면 신호가 어긋나므로, 사이트맵에는 noindex 가 아닌 동(= dongCases.ts 에 운영자가 확인한
+ * 실제 작업 기록이 있는 동)만 넣는다. src/data/sitemap-wave1.json 은 이력으로만 남긴다.
  */
-const SITEMAP_DONG_WAVE = /** @type {'wave1' | 'all'} */ ('wave1');
-const wave1Dongs = new Set(JSON.parse(readFileSync(new URL('./src/data/sitemap-wave1.json', import.meta.url), 'utf-8')));
+const indexableDongs = new Set(dongCases.map((c) => `/area/${c.region}/${c.city}/${c.dong}/`));
 /**
  * 칼럼 사이트맵 lastmod — frontmatter 의 updatedAt(없으면 publishedAt). Bing 은 lastmod 로 재수집 순서를 정한다.
  * 칼럼만 넣는다: 날짜가 실제로 기록된 문서는 칼럼뿐이고, 빌드 날짜를 전 페이지에 찍는 건 가짜 신선도다.
@@ -62,8 +61,8 @@ export default defineConfig({
         if (page.includes('/consult/done/')) return false;
         const pathname = new URL(page).pathname;
         if (!isDongPath(pathname)) return true;
-        // 동 페이지는 웨이브 단위로만 사이트맵에 올린다 (위 SITEMAP_DONG_WAVE 설명)
-        return SITEMAP_DONG_WAVE === 'all' || wave1Dongs.has(pathname);
+        // 동 페이지는 실제 작업 기록이 있어 색인 대상인 것만 (위 indexableDongs 설명)
+        return indexableDongs.has(pathname);
       },
       serialize: (item) => {
         const pathname = new URL(item.url).pathname;

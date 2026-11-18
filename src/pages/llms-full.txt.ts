@@ -137,7 +137,7 @@ export const GET: APIRoute = async () => {
         }),
       '',
     ]),
-    `시·군·구 및 읍·면·동 페이지 전체 목록은 ${absoluteUrl('/sitemap-index.xml')} 에 있습니다.`,
+    `시·군·구 페이지 전체 목록은 ${absoluteUrl('/sitemap-index.xml')} 에 있습니다.`,
     '',
   ];
 

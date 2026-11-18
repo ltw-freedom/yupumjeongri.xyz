@@ -289,7 +289,7 @@ writeFileSync(join(root, 'src/data/districts.ts'), banner + body, 'utf-8');
 // 그 자체가 저품질 신호가 된다.
 //
 // 1차 웨이브 = 큐레이션 지역(areas.ts에 손으로 쓴 콘텐츠가 있는 시·군·구)의 동 전체.
-// 확대하려면 astro.config.mjs 의 SITEMAP_DONG_WAVE 를 'all' 로 바꾼다.
+// 2026-11-15 부터 사이트맵은 이 목록을 쓰지 않는다 — 동 페이지는 noindex, 실제 작업 기록이 있는 동만 사이트맵(astro.config.mjs indexableDongs). 이력용으로만 생성.
 // ---------------------------------------------------------------------------
 const CURATED_CITY_SLUGS = ['gangnam', 'songpa', 'seocho', 'gwanak', 'mapo', 'seongnam', 'suwon', 'goyang'];
 const aliases = JSON.parse(readFileSync(join(root, 'src/data/dongAliases.json'), 'utf-8'));
