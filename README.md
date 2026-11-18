@@ -245,6 +245,40 @@ Cloudflare 대시보드에서 해당 경로에 **Rate limiting rule** 을 걸 �
 커스텀 도메인 `yupumjeongri.xyz` 는 대시보드에서 이 Worker 에 연결되어 있고,
 `wrangler.jsonc` 에는 routes 를 적지 않으므로 배포해도 그대로 유지된다.
 
+### 자동 배포 — main 에 푸시하면 배포 (2026-11-18 전환)
+
+운영자 결정(2026-11-18)으로 손으로 돌리던 배포를 없앤다. Cloudflare 가 이 저장소를 직접 보고
+(Workers Builds), `main` 에 푸시할 때마다 빌드해서 배포한다. 어느 기기에서 푸시해도 결과가 같다.
+
+| 단계 | 값 |
+|---|---|
+| 연결 위치 | 대시보드 → Workers & Pages → `yupumjeongri-xyz` → Settings → Build → Connect repository |
+| Production branch | `main` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+| Build variables | `NODE_VERSION=22` (`.nvmrc` 와 같은 값). 그 밖에 넣을 값은 없다 — 빌드는 환경변수를 읽지 않는다 |
+| Preview builds | 켜지 않는다. 프리뷰도 운영 `SLACK_WEBHOOK_URL` 을 써서 시험 제출이 운영 Slack 으로 간다 |
+
+- **연결됐는지 아는 법**: GitHub 커밋 옆에 `Workers Builds: yupumjeongri-xyz` 표시가 붙는다.
+  이 표시가 없는 동안은 아직 연결 전이고, 푸시해도 배포되지 않는다.
+- **푸시가 곧 배포다.** 확인하지 않은 변경, 문서만 고친 커밋도 `main` 에 푸시하면 운영이 다시 빌드된다.
+  푸시 전에 `npm run check` 와 `npm run build` 를 통과시킨다. 덜 끝난 작업은 `main` 이 아닌 브랜치로 올린다.
+- **배포 확인**: 커밋 옆 표시가 성공인지 보고, `/` · `/cost/` · `/consult/` · `/llms.txt` 응답과
+  `sitemap-0.xml` 의 주소 수를 본다. 실패하면 대시보드의 빌드 로그 첫 오류 줄을 본다.
+- **IndexNow 는 자동 배포에 넣지 않았다.** 넣으면 문서만 고친 푸시에도 같은 주소를 매번 다시 보내게 된다
+  ("바뀐 URL 만" 원칙). 칼럼을 더하거나 고친 푸시는 배포가 끝난 뒤
+  `npm run build && node scripts/indexnow.mjs --recent`, 그 밖에는 바뀐 경로만
+  `node scripts/indexnow.mjs <경로>` 로 보낸다. Cloudflare 로그인 없이 어느 기기에서나 된다.
+- **되돌리기**: 대시보드 → Deployments 에서 이전 버전을 고르거나 `npx wrangler rollback`.
+  그 뒤 원인 커밋을 되돌려 푸시한다(안 그러면 다음 푸시가 다시 덮는다).
+- 전환 시점(2026-11-18) 확인: `origin/main`(`874e3a6`)을 새로 받아 빌드한 결과가 운영본과 같았다
+  (사이트맵 84 주소, `/` · `/cost/` · `/llms.txt` 본문 일치). 연결만으로 운영 내용은 바뀌지 않는다.
+
+### 손으로 배포 (급할 때만)
+
+자동 배포가 실패했고 바로 고칠 수 없을 때만 쓴다. 다음 푸시 때 자동 배포가 다시 덮어쓴다.
+
 ```bash
 npm run build && npx wrangler deploy
 ```
@@ -262,6 +296,9 @@ npm run build && npx wrangler deploy
 배경: 10/30 네이버 노출 −93%, 구글 3개월 노출 45 → 11/15 동 페이지 1,096쪽 noindex·사이트맵 84 URL 로 축소 배포(`docs/seo-naver.md` 4-15).
 끝낸 항목은 체크하고 날짜를 적는다. 1~2 는 이번 배포 효과를 앞당기는 일이라 가장 먼저.
 
+- [ ] **0. Cloudflare 에서 이 저장소 연결하기 — 자동 배포** (5분, 2026-11-18 추가)
+  - 대시보드 → Workers & Pages → `yupumjeongri-xyz` → Settings → Build → Connect repository → `ltw-freedom/yupumjeongri.xyz`
+  - 설정값은 [배포](#cloudflare-workers-배포) 절의 표 그대로. 끝나면 Claude 에 알려 시험 푸시로 확인
 - [ ] **1. 네이버 서치어드바이저 — 사이트맵 다시 제출 + 핵심 페이지 수집 요청** (10분)
   - 요청 → 사이트맵 제출: `https://yupumjeongri.xyz/sitemap-index.xml` (305 → 84 URL 로 바뀜)
   - 요청 → 웹 페이지 수집: `/` · `/cost/` · `/faq/` · `/process/` · `/service/yupumjeongri/`
