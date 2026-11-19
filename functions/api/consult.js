@@ -1,13 +1,15 @@
 /**
  * POST /api/consult — 상담 폼을 받아 Slack 으로 넘긴다.
  *
- * Cloudflare Pages Functions. 저장소 루트의 functions/ 는 Pages 가 자동으로 잡아가고,
- * Astro 의 정적 빌드(dist/)와 나란히 배포된다. 어댑터를 바꿀 필요는 없다.
+ * 파일 위치와 onRequestPost/onRequestGet 이름은 Pages Functions 규약이지만, 실서비스는 Pages 가 아니라
+ * Worker yupumjeongri-xyz 다. worker/index.js 가 이 핸들러를 import 해 /api/consult 에 연결한다
+ * (로직은 이 파일 한 곳만 고치면 된다). 어댑터를 바꿀 필요는 없다.
  *
  * !! 웹훅 URL 은 절대 코드에 넣지 않는다 !!
  * 이 사이트는 정적 사이트라 클라이언트에 들어간 값은 전부 공개된다.
- * Cloudflare Pages > Settings > Environment variables 에 SLACK_WEBHOOK_URL 을
- * "Secret" 타입으로 등록할 것. 로컬은 저장소 루트 .dev.vars 에 넣는다(.gitignore 됨).
+ * 운영 SLACK_WEBHOOK_URL 은 Worker yupumjeongri-xyz 의 Secret 이다
+ * (npx wrangler secret put SLACK_WEBHOOK_URL --name yupumjeongri-xyz, 배포해도 유지된다 — README '상담 접수' 절).
+ * 로컬은 저장소 루트 .dev.vars 에 넣는다(.gitignore 됨).
  */
 
 /** 폼 값 하나를 다듬어 꺼낸다. 길이를 제한해 웹훅 폭탄을 막는다. */
