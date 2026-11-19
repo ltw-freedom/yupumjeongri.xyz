@@ -68,7 +68,7 @@ src/
 │   └── 404.astro
 ├── content/columns/        마크다운 칼럼
 ├── data/
-│   ├── site.ts             사이트 공통 정보 (상호, 전화, 상담 URL)
+│   ├── site.ts             사이트 공통 정보 (상호, 상담 URL — 전화 상담은 없다)
 │   ├── services.ts         서비스 정의
 │   ├── areas.ts            지역 정의 → /area/{region}/{city}/ 자동 생성
 │   └── schema.ts           JSON-LD 빌더
