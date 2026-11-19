@@ -349,4 +349,4 @@ npm run build && npx wrangler deploy
 - 비용 직답 문장 `priceAnswer()` — `/cost/`·지역·서비스 페이지·llms.txt 가 같은 문장을 쓴다. 가격을 고치면 `pricesAsOf` 기준일도 올릴 것.
 - `SLACK_WEBHOOK_URL` Secret — Worker 에 등록됨. 9/13·10/2 실제 접수 경로로 Slack 도착 확인.
 - 실제 현장 사진 — `src/assets/cases/` 가공본 + `src/data/cases.ts`
-- 서울 25개 구, 경기 31개 시·군, 동·읍·면 1090쪽 (`src/data/districts.ts`, 2026-11-15 부터 동 페이지는 noindex)
+- 서울 25개 구, 경기 31개 시·군, 동·읍·면 1,096쪽 (법정동 1,090 `src/data/districts.ts` + 신도시 별칭 6 `src/data/dongAliases.json`, 2026-11-15 부터 동 페이지는 noindex)
