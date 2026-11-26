@@ -44,6 +44,7 @@ export async function onRequestPost(context) {
   const webhook = env.SLACK_WEBHOOK_URL;
   if (!webhook) {
     console.error('SLACK_WEBHOOK_URL 환경변수가 없습니다.');
+    context.onConsultFail?.('config', '');
     return redirect('/consult/?error=config', origin);
   }
 
@@ -166,14 +167,17 @@ export async function onRequestPost(context) {
 
     if (!res.ok) {
       console.error('Slack 전송 실패', res.status, await res.text());
+      context.onConsultFail?.(`slack-${res.status}`, page);
       return redirect(sendFailPath, origin);
     }
   } catch (err) {
     console.error('Slack 전송 중 예외', err);
+    context.onConsultFail?.('exception', page);
     return redirect(sendFailPath, origin);
   }
 
   // 깔때기 기록 (worker/funnel.js) — Worker 가 넘겨줄 때만. 덧붙이기는 새 접수가 아니다.
+  // 위의 전송 실패(onConsultFail)는 덧붙이기도 센다 — 웹훅이 끊겼는지 보려는 숫자라서다. 번호·내용은 넘기지 않는다.
   if (!followup) context.onConsult?.(page);
   return redirect(donePath, origin);
 }

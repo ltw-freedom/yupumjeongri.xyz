@@ -613,6 +613,58 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
    지어낸 사례 금지, 실제 작업만. 같은 기록을 `dongCases.ts` 에 넣으면 그 동 페이지가 색인으로 돌아온다.
 3. 실제 의뢰인 한 줄 후기(README TODO) — 구글·AI 신뢰 신호.
 
+## 4-16. 2026-11-26 상담 0건 진단과 첫 대책 — 끊긴 것은 폼이 아니라 방문
+
+운영자 결정(2026-11-25 "사이트는 계속 가져간다, 상담 0건에 대책을 세운다", 2026-11-26 "할 수 있는 것부터, 네이버 블로그는 아직 보류").
+진단은 11/25 `d1`(읽기 전용 조회)·코드·자사 도메인 응답으로 했다. 운영 폼 시험 제출은 하지 않았고 네이버 검색 화면도 조회하지 않았다(5장).
+**이 절의 변경은 2026-11-26 에 작업 트리에 만들었고, `main` 푸시(= 배포) 전이다.** 푸시한 날을 이 줄에 적을 것.
+
+**진단** `d1`
+- 0 이 되는 단계는 폼이 아니라 방문이다. 10/02~10/28(27일) 방문 세션 98(네이버 54), 실제 접수 6(시험 1건 제외).
+  10/29~11/25(28일) 방문 10(네이버 2), 번호 칸 누름·제출·접수 0. 옛 접수율(세션당 5~6%)이면 이 기간 기대 접수는 0.5건이다.
+- 원인 후보(가능성 순): ① 네이버의 사이트 단위 하향(4-15) — 11/15 동 페이지 noindex 뒤에도 Yeti 수집은 하루 0~15회로 회복 기준(30회) 미만
+  ② 접수가 주로 나던 동 페이지가 지금 전부 noindex 이고, 다시 여는 재료인 `dongCases.ts` 가 비어 있다
+  ③ 유입 길이 자연검색 하나뿐이다(블로그 보류, 플레이스·광고·전화 없음, 구글은 처음부터 거의 노출 없음, 칼럼은 10/23 뒤 없었음).
+- 폼 고장 가능성은 낮다(웹훅 Secret 등록됨, 10/28 시험 때 D1·Slack 도착 확인, 최신 빌드 성공).
+  다만 **Slack 전송이 실패하면 D1 에도 남지 않아 웹훅이 끊겨도 알 길이 없는 구조였다.** 10/28 뒤 실제 제출이 없어 지금 살아 있는지는 검증되지 않았다.
+
+**바꾼 것 (푸시 전)**
+- **전송 실패 기록.** `/api/consult` 가 Slack 으로 넘기지 못한 신청을 D1 `events` 에 `type = 'fail'` 로 센다(`functions/api/consult.js` → `worker/funnel.js` `recordConsultFail`).
+  까닭은 `ref` 칸에: `config`(웹훅 Secret 없음) · `slack-404` 같은 `slack-<상태코드>` · `exception`(연결 실패). 번호·내용은 남기지 않는다(횟수·까닭·신청 페이지·기기뿐).
+  표를 새로 만들지 않아 마이그레이션이 없다. 신청자가 보는 화면(`?error=send`·`?error=config`)은 그대로다.
+- **주 1회 깔때기 요약.** 월요일 09:00 KST 에 지난 7일(방문·네이버·번호 칸 누름·제출·접수·전송 실패, 유입 출처·착지·검색어, 그 전 7일)을
+  Slack 상담 채널로 보낸다(`worker/funnel.js` `sendWeekly`, `wrangler.jsonc` `triggers.crons` `0 0 * * MON`). 접수가 0 인 주에도 온다 —
+  **월요일에 이 요약이 오지 않으면 웹훅이 끊긴 것**이라, 시험 제출 없이 웹훅 생존을 확인하는 장치를 겸한다. 매일 요약(10/08 끔)을 되살린 것이 아니다.
+- **칼럼 1편.** `/column/binjip-jeongri-biyong/` '빈집 정리 비용, 평수보다 쌓인 짐의 부피로 정해지는 이유' — 금액은 전부 `pricing.ts` 공개 값(빈집 원룸 기준 50만~150만원, 단가 4줄, 부가세 별도), 사례·후기 없음.
+  빈집 서비스 페이지의 '관련 칼럼'과 가평·양평·평택 시군구 페이지(`cityStats.ts` 빈집 비율 상위 3곳)에 링크가 생긴다. 사이트맵 84 → 85.
+  '고독사 비용'은 9/3 칼럼(`godoksa-yupumjeongri-biyong`)이 이미 답한다. 고독사·빈집 **서비스 페이지**의 서비스별 비용 답(4-6, `[slug].astro` 주석)은 이번에 넣지 않았다 — 다음 후보.
+- 같은 주제를 다룬 다른 글과 구성·문장이 겹치지 않는지는 눈으로 봤다(이 저장소에는 대조 검사기가 없다). 이 글은 자기 가격표의 '원룸 기준' 한 줄이 왜 부피 기준인지와 견적서 네 줄로 풀었다.
+
+**확인한 것** — `npm run check` 0 errors, `npm run build` 1,183쪽·사이트맵 85. 전송 실패·주간 요약은 가짜 Slack 주소와 메모리 DB 로만 시험했다
+(성공 1건은 `consult`, 404·500·연결 실패·Secret 없음은 각각 `fail` 로 기록, 번호 형식 오류는 세지 않음, 번호가 D1 에 들어가지 않음, `scheduled` 가 요약 1건 전송).
+운영 Worker·운영 D1·운영 Slack 에서는 돌려 보지 않았다. `area-similarity.mjs` 는 돌리지 않았다(시군구 템플릿·공통 문구는 그대로이고 3곳에 칼럼 링크 한 줄만 는다).
+
+**푸시 뒤 할 일**
+1. 커밋 옆 `Workers Builds` 표시와 `/` · `/cost/` · `/consult/` · `/llms.txt` 응답, 사이트맵 85 주소 확인. 대시보드 Worker → Settings → Triggers 에 cron 한 줄(월요일 00:00 UTC)이 생겼는지 운영자가 확인.
+2. IndexNow: `npm run build && node scripts/indexnow.mjs --recent` (새 칼럼 푸시라 `--recent`).
+3. 수집 요청(운영자가 서치어드바이저에서, 하루 50건 이하) — 4-15 의 1번이 아직이면 그것부터:
+   - 사이트맵 다시 제출: `https://yupumjeongri.xyz/sitemap-index.xml`
+   - `https://yupumjeongri.xyz/`
+   - `https://yupumjeongri.xyz/cost/`
+   - `https://yupumjeongri.xyz/faq/`
+   - `https://yupumjeongri.xyz/process/`
+   - `https://yupumjeongri.xyz/service/yupumjeongri/`
+   - `https://yupumjeongri.xyz/column/binjip-jeongri-biyong/` (새 칼럼)
+   - `https://yupumjeongri.xyz/column/`
+   - `https://yupumjeongri.xyz/service/binjip-jeongri/`
+   - `https://yupumjeongri.xyz/column/godoksa-yupumjeongri-biyong/`
+   - GSC: 사이트맵 다시 제출, URL 검사로 `/` · `/cost/` · `/column/binjip-jeongri-biyong/` 색인 생성 요청. 동 페이지는 요청하지 않는다(noindex).
+4. 첫 월요일 09:00 에 Slack 요약이 오는지 본다. 안 오면 웹훅 Secret 을 다시 넣는다(README '웹훅 URL 은 코드에 넣지 않는다').
+5. 전송 실패 조회: `npx wrangler d1 execute yupumjeongri-funnel --remote --command "SELECT day, ref, path, COUNT(*) FROM events WHERE type = 'fail' GROUP BY 1, 2, 3 ORDER BY 1 DESC"`
+
+**남은 판단 (운영자)** — 방문을 바로 만드는 수단은 이번 변경에 없다. 검색 광고(예산), 실제 작업 기록 넘기기(`dongCases.ts` → 그 동만 색인 복귀), 네이버 블로그(보류 중)는 운영자가 정한다.
+웹훅 생존을 지금 바로 확인하려면 운영 폼 시험 제출 한 번이 필요하다(접수 숫자에 1건 섞이므로 날짜를 이 문서에 적는다).
+
 ## 5. 측정 — 공식 도구와 사람 표본만
 
 > **2026-10-13·10-21 운영자 결정으로 아래 두 스크립트는 쓰지 않는다.** 네이버 통합검색·웹문서탭 화면을 스크립트·curl·브라우저 자동화로

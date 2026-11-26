@@ -3,7 +3,7 @@
 **대한유품정리** 웹사이트. **Astro (SSG)** 정적 사이트를 **Cloudflare Worker** 로 서빙한다([배포](#cloudflare-workers-배포)).
 
 상담 접수는 사이트 자체 폼 하나로 받는다 — `/consult/` 등 번호 칸 → Worker `/api/consult` → Slack #대한유품정리-상담.
-깔때기 기록은 D1 `yupumjeongri-funnel`. 다른 브랜드 시스템과는 연결하지 않는다(브랜드 격리).
+깔때기 기록은 D1 `yupumjeongri-funnel`, 월요일 아침에 지난 7일 요약이 같은 Slack 채널로 온다. 다른 브랜드 시스템과는 연결하지 않는다(브랜드 격리).
 
 ## 브랜드 · 포지셔닝
 
@@ -179,6 +179,16 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 npx wrangler pages dev dist --compatibility-date=2026-08-10
 ```
 
+### 전송 실패 기록과 주간 요약 (2026-11-26)
+
+Slack 전송이 실패하면 신청자는 `?error=send`(Secret 이 없으면 `?error=config`)로 되돌아가고, 그 횟수와 까닭이 D1 `events` 에
+`type = 'fail'` 로 남는다(`worker/funnel.js` `recordConsultFail`). 번호·내용은 남기지 않는다. 전에는 실패가 어디에도 남지 않아
+웹훅이 끊겨도 알 수 없었다.
+
+월요일 09:00 KST 에 지난 7일 깔때기 요약(방문 → 번호 칸 → 제출 → 접수, 전송 실패, 유입 출처)이 Slack 상담 채널로 온다
+(`sendWeekly`, `wrangler.jsonc` 의 `triggers.crons`). 접수가 없는 주에도 오므로 **월요일에 요약이 안 오면 웹훅이 끊긴 것**이다.
+cron 을 끌 때는 `triggers` 를 지우지 말고 `crons` 를 빈 배열로 둔다. 배경과 조회 명령은 `docs/seo-naver.md` 4-16.
+
 ### 스팸 방어
 
 허니팟 필드(`hp_leave_blank`, `FormHidden.astro`) + 필수값 검증 + 필드별 길이 제한이 들어가 있다.
@@ -300,6 +310,7 @@ npm run build && npx wrangler deploy
   - 대시보드 → Workers & Pages → `yupumjeongri-xyz` → Settings → Build → Connect repository → `ltw-freedom/yupumjeongri.xyz`
   - 설정값은 [배포](#cloudflare-workers-배포) 절의 표 그대로. 끝나면 Claude 에 알려 시험 푸시로 확인
 - [ ] **1. 네이버 서치어드바이저 — 사이트맵 다시 제출 + 핵심 페이지 수집 요청** (10분)
+  - 2026-11-26: 새 칼럼(빈집 정리 비용)을 더한 목록은 `docs/seo-naver.md` 4-16 '푸시 뒤 할 일' 3번에 있다(사이트맵 84 → 85)
   - 요청 → 사이트맵 제출: `https://yupumjeongri.xyz/sitemap-index.xml` (305 → 84 URL 로 바뀜)
   - 요청 → 웹 페이지 수집: `/` · `/cost/` · `/faq/` · `/process/` · `/service/yupumjeongri/`
   - 동 페이지는 수집 요청하지 말 것(noindex 라 의미 없음)

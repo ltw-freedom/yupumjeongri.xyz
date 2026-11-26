@@ -24,9 +24,10 @@
       "database_id": "6e9fd8d1-4803-4ccd-9b72-5bf0765909c0"
     }
   ],
-  // 매일 09:00 KST 깔때기 Slack 요약은 2026-10-08 껐다. 빈 배열이어야 배포 때 기존 cron 이 지워진다
+  // 월요일 09:00 KST(00:00 UTC)에 지난 7일 깔때기 요약을 Slack 상담 채널로 보낸다 (worker/funnel.js sendWeekly, 2026-11-26).
+  // 매일 09:00 요약은 2026-10-08 껐다. cron 을 끌 때는 triggers 를 지우지 말고 crons 를 빈 배열로 둔다
   // (triggers 를 통째로 빼면 대시보드에 남은 cron 이 그대로 돈다).
   "triggers": {
-    "crons": []
+    "crons": ["0 0 * * MON"]
   }
 }

@@ -49,7 +49,7 @@ const priceRows = priceKeys ? basePrices.filter((row) => priceKeys.includes(row.
 const serviceColumns: Record<string, string[]> = {
   yupumjeongri: ['yupumjeongri-biyong-julineun-beop', 'bumonim-yupumjeongri-jikjeop-biyong', 'gyeonjeokseo-chugageum-hwagin', 'bieoteo-jip-gyeonjeok', 'yupumjeongri-junbi'],
   'godoksa-yupumjeongri': ['godoksa-yupumjeongri-biyong', 'godoksa-hyeonjang-choigi-daeeung'],
-  'binjip-jeongri': ['paju-yupumjeongri-pyeonghyeong', 'imdaecha-bojeunggeum-jeongsan'],
+  'binjip-jeongri': ['binjip-jeongri-biyong', 'paju-yupumjeongri-pyeonghyeong', 'imdaecha-bojeunggeum-jeongsan'],
 };
 const columnIds = serviceColumns[service.slug] ?? [];
 const columns = (await getCollection('columns', ({ id, data }) => !data.draft && columnIds.includes(id))).sort(byNewest);

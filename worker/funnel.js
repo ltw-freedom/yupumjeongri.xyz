@@ -1,12 +1,18 @@
 /**
- * 방문·상담 깔때기 — 이벤트 기록(POST /api/event). 숫자는 D1 에 쌓이기만 한다
- * (매일 09:00 Slack 요약은 실제 상담이 들어오기 시작해 2026-10-08 껐다).
+ * 방문·상담 깔때기 — 이벤트 기록(POST /api/event)과 주 1회 Slack 요약. 숫자는 D1 에 쌓인다.
+ * (매일 09:00 요약은 실제 상담이 들어오기 시작해 2026-10-08 껐다. 2026-11-26 부터 월요일 09:00 KST 에
+ *  지난 7일 요약 한 번만 보낸다 — 접수가 0 인 주에도 오므로, 이 요약이 오는 것 자체가 Slack 웹훅이 살아 있다는 확인이다.)
  *
  * 브라우저 쪽은 src/scripts/funnel.ts. 저장소는 D1 yupumjeongri-funnel (스키마 migrations/).
  * 번호·IP 는 저장하지 않는다. 유입 출처는 호스트만, 검색어는 리퍼러에 실려 올 때만 남긴다.
  *
+ * 상담 폼이 Slack 으로 넘기지 못한 신청은 type 'fail' 로 센다(2026-11-26). 전에는 전송이 실패하면 어디에도 남지 않아
+ * 웹훅이 끊겨도 알 길이 없었다. 번호·내용은 남기지 않고 횟수와 까닭만 남긴다 — ref 칸에 까닭을 적는다:
+ *   config(웹훅 Secret 없음) · slack-404 처럼 slack-<상태코드> · exception(연결 실패). 표를 새로 만들지 않아 마이그레이션이 필요 없다.
+ *
  * 숫자를 직접 보려면:
  *   npx wrangler d1 execute yupumjeongri-funnel --remote --command "SELECT day, type, COUNT(*) FROM events GROUP BY 1, 2 ORDER BY 1 DESC"
+ *   전송 실패만: ... --command "SELECT day, ref, path, COUNT(*) FROM events WHERE type = 'fail' GROUP BY 1, 2, 3 ORDER BY 1 DESC"
  */
 
 const TYPES = new Set(['view', 'focus', 'invalid', 'submit', 'calc', 'cta']);
@@ -70,4 +76,105 @@ export async function handleEvent(request, env, ctx) {
 export function recordConsult(env, ctx, request, page) {
   if (!env.FUNNEL_DB) return;
   ctx.waitUntil(insert(env, { type: 'consult', path: page, device: deviceOf(request) }).catch((err) => console.error('funnel consult', err)));
+}
+
+/**
+ * 상담 신청을 Slack 으로 넘기지 못했다 — 횟수와 까닭만 센다. 번호·내용은 남기지 않는다.
+ * reason: 'config' | 'slack-<상태코드>' | 'exception' (events.ref 칸에 들어간다)
+ */
+export function recordConsultFail(env, ctx, request, reason, page) {
+  if (!env.FUNNEL_DB) return;
+  const ref = String(reason ?? '').replace(/[^\w-]/g, '').slice(0, 30) || 'unknown';
+  ctx.waitUntil(insert(env, { type: 'fail', path: page, ref, device: deviceOf(request) }).catch((err) => console.error('funnel fail', err)));
+}
+
+async function all(env, sql, ...binds) {
+  return (await env.FUNNEL_DB.prepare(sql).bind(...binds).all()).results ?? [];
+}
+
+/** endDay(KST, 그날 포함)까지 7일의 깔때기 숫자와, 견줄 그 전 7일 */
+export async function summarizeWeek(env, endDay) {
+  const at = Date.parse(`${endDay}T12:00:00+09:00`);
+  const startDay = kstDay(-6, at);
+  const prevStart = kstDay(-13, at);
+  const prevEnd = kstDay(-7, at);
+  const [counts] = await all(
+    env,
+    `SELECT
+       COUNT(DISTINCT CASE WHEN type = 'view' THEN sid END)    AS visitors,
+       SUM(type = 'view')                                      AS views,
+       COUNT(DISTINCT CASE WHEN type = 'view' AND ref != '' THEN sid END) AS external,
+       COUNT(DISTINCT CASE WHEN type = 'view' AND ref LIKE '%naver.com' THEN sid END) AS naver,
+       COUNT(DISTINCT CASE WHEN type = 'view' AND device = 'mobile' THEN sid END) AS mobile,
+       COUNT(DISTINCT CASE WHEN type = 'calc' THEN sid END)    AS calc,
+       COUNT(DISTINCT CASE WHEN type = 'cta' THEN sid END)     AS cta,
+       COUNT(DISTINCT CASE WHEN type = 'focus' THEN sid END)   AS focus,
+       SUM(type = 'invalid')                                   AS invalid,
+       COUNT(DISTINCT CASE WHEN type = 'submit' THEN sid END)  AS submit,
+       SUM(type = 'consult')                                   AS consult,
+       SUM(type = 'fail')                                      AS fail
+     FROM events WHERE day >= ? AND day <= ?`,
+    startDay,
+    endDay,
+  );
+  const range = [startDay, endDay];
+  const fails = await all(env, `SELECT ref, COUNT(*) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'fail' GROUP BY ref ORDER BY n DESC LIMIT 5`, ...range);
+  const sources = await all(
+    env,
+    `SELECT ref, COUNT(DISTINCT sid) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'view' AND ref != '' GROUP BY ref ORDER BY n DESC LIMIT 5`,
+    ...range,
+  );
+  const landings = await all(
+    env,
+    `SELECT path, COUNT(DISTINCT sid) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'view' AND ref != '' GROUP BY path ORDER BY n DESC LIMIT 5`,
+    ...range,
+  );
+  const queries = await all(
+    env,
+    `SELECT query, COUNT(*) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'view' AND query != '' GROUP BY query ORDER BY n DESC LIMIT 5`,
+    ...range,
+  );
+  const [prev] = await all(
+    env,
+    `SELECT COUNT(DISTINCT CASE WHEN type = 'view' THEN sid END) AS visitors,
+            COUNT(DISTINCT CASE WHEN type = 'view' AND ref LIKE '%naver.com' THEN sid END) AS naver,
+            SUM(type = 'consult') AS consult
+     FROM events WHERE day >= ? AND day <= ?`,
+    prevStart,
+    prevEnd,
+  );
+  return { startDay, endDay, counts, fails, sources, landings, queries, prev };
+}
+
+export function weeklyText({ startDay, endDay, counts: c, fails, sources, landings, queries, prev }) {
+  const n = (v) => Number(v ?? 0);
+  const md = (day) => `${Number(day.slice(5, 7))}/${Number(day.slice(8, 10))}`;
+  const list = (rows, key) => (rows.length ? rows.map((r) => `${r[key]} ${r.n}`).join(' · ') : '없음');
+  return [
+    `*대한유품정리 지난 7일(${md(startDay)}~${md(endDay)}) 방문·상담 깔때기*`,
+    `방문 *${n(c?.visitors)}명* (페이지뷰 ${n(c?.views)}) — 외부 유입 ${n(c?.external)} · 네이버 ${n(c?.naver)} · 모바일 ${n(c?.mobile)}`,
+    `계산기 사용 ${n(c?.calc)} → 상담 버튼 ${n(c?.cta)} → 번호 칸 누름 *${n(c?.focus)}* → 제출 ${n(c?.submit)} (형식 오류 ${n(c?.invalid)}) → 접수 *${n(c?.consult)}건*`,
+    ...(n(c?.fail)
+      ? [`:warning: *Slack 으로 넘기지 못한 신청 ${n(c?.fail)}건* (${list(fails, 'ref')}) — 신청자는 오류 화면을 봤습니다. 웹훅 Secret 을 확인하세요.`]
+      : []),
+    `유입 출처: ${list(sources, 'ref')}`,
+    `들어온 페이지: ${list(landings, 'path')}`,
+    `검색어: ${list(queries, 'query')}`,
+    `그 전 7일: 방문 ${n(prev?.visitors)}명 · 네이버 ${n(prev?.naver)} · 접수 ${n(prev?.consult)}건`,
+    '_매주 월요일 09:00 에 옵니다. 안 오면 상담 알림 웹훅이 끊긴 것입니다._',
+  ].join('\n');
+}
+
+/** cron — 어제까지 7일 요약을 상담 채널로. 접수가 0 인 주에도 보낸다(웹훅 생존 확인을 겸한다). */
+export async function sendWeekly(env) {
+  if (!env.FUNNEL_DB) return;
+  const text = weeklyText(await summarizeWeek(env, kstDay(-1)));
+  // 로컬(wrangler dev --test-scheduled)은 웹훅이 없으면 로그로만 — /__scheduled 로 확인한다
+  if (!env.SLACK_WEBHOOK_URL) return console.log(text);
+  const res = await fetch(env.SLACK_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) console.error('깔때기 주간 요약 전송 실패', res.status, await res.text());
 }

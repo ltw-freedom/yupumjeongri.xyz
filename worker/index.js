@@ -9,7 +9,7 @@
  * 배포: npx wrangler deploy  (설정은 루트 wrangler.jsonc)
  */
 import { onRequestPost, onRequestGet } from '../functions/api/consult.js';
-import { handleEvent, recordConsult } from './funnel.js';
+import { handleEvent, recordConsult, recordConsultFail, sendWeekly } from './funnel.js';
 import { logBot } from './botlog.js';
 
 const CANONICAL_HOST = 'yupumjeongri.xyz';
@@ -59,7 +59,13 @@ const site = {
     if (pathname === '/api/event') return handleEvent(request, env, ctx);
 
     if (pathname === '/api/consult' || pathname === '/api/consult/') {
-      const context = { request, env, onConsult: (page) => recordConsult(env, ctx, request, page) };
+      const context = {
+        request,
+        env,
+        onConsult: (page) => recordConsult(env, ctx, request, page),
+        // Slack 으로 넘기지 못한 신청 — 횟수와 까닭만 D1 에 센다 (worker/funnel.js)
+        onConsultFail: (reason, page) => recordConsultFail(env, ctx, request, reason, page),
+      };
       return request.method === 'POST' ? onRequestPost(context) : onRequestGet(context);
     }
 
@@ -91,5 +97,9 @@ export default {
     const response = await site.fetch(request, env, ctx);
     logBot(request, response, env, ctx);
     return response;
+  },
+  // wrangler.jsonc triggers.crons — 월요일 09:00 KST 에 지난 7일 방문·상담 깔때기 요약 (worker/funnel.js sendWeekly)
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(sendWeekly(env));
   },
 };
