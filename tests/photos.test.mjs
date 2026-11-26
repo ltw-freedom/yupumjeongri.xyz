@@ -77,6 +77,7 @@ test('저장: 허용 형식만 30일 TTL 로, 형식 표시(MIME·이름)는 믿
   assert.equal(r.stored.length, 2);
   assert.equal(r.failed, 2);
   assert.equal(r.dropped, 0);
+  assert.deepEqual(r.types, ['image/jpeg', 'image/png']); // stored 와 같은 순서 — Slack image 블록 여부를 가른다
   for (const id of r.stored) assert.match(id, /^[0-9a-f]{32}$/); // 128비트
   assert.notEqual(r.stored[0], r.stored[1]);
   for (const p of kv.puts) assert.equal(p.opts.expirationTtl, PHOTO_TTL_DAYS * 86400);
@@ -97,13 +98,13 @@ test('저장: 장당 5MB 초과는 빼고, 5장을 넘으면 넘는 만큼 뺀�
 
 test('저장: KV 바인딩이 없거나 put 이 실패해도 던지지 않고 실패 수만 센다', async () => {
   const none = await storePhotos({}, [file(JPEG), file(PNG)]);
-  assert.deepEqual(none, { stored: [], failed: 2, dropped: 0 });
+  assert.deepEqual(none, { stored: [], types: [], failed: 2, dropped: 0 });
   const kv = new FakeKV();
   kv.put = async () => {
     throw new Error('KV put failed: 429 daily limit');
   };
   const r = await storePhotos({ PHOTOS: kv }, [file(JPEG)]);
-  assert.deepEqual(r, { stored: [], failed: 1, dropped: 0 });
+  assert.deepEqual(r, { stored: [], types: [], failed: 1, dropped: 0 });
 });
 
 test('본문 상한: 넘으면 null, 안 넘으면 그대로', async () => {

@@ -12,8 +12,12 @@
  * 로컬은 저장소 루트 .dev.vars 에 넣는다(.gitignore 됨).
  *
  * 현장 사진(선택, 최대 5장, 2026-11-27): 상담 폼과 같은 요청(multipart)으로 온다. 본문은 8MB 까지만 읽고,
- * 번호 검증을 통과한 신청의 사진만 KV PHOTOS 에 30일 넣은 뒤 Slack 메시지에 열람 링크를 붙인다(worker/photos.js).
- * 사진 저장이 실패해도 접수는 그대로 보내고 실패한 장 수만 적는다.
+ * 번호 검증을 통과한 신청의 사진만 KV PHOTOS 에 30일 넣은 뒤 Slack 메시지에 image 블록(열람 주소)으로 싣는다(worker/photos.js).
+ * 사진 저장이 실패해도 접수는 그대로 보내고 실패한 장 수만 적는다. Slack 이 사진을 받아 가지 못해 메시지를 거절하면
+ * image 블록을 빼고 링크로 한 번 더 보낸다.
+ *
+ * Slack 알림 모양(2026-11-27, 브랜드 공통 형식): 아래 consultSlackPayload(). 번호 한 칸 폼(QuickConsult·EstimateCalc)과
+ * 완료 화면 덧붙이기도 이 핸들러로 와서 같은 모양이 된다(덧붙이기는 머리글이 다르다).
  */
 
 import { discardPhotos, MAX_REQUEST_BYTES, photoFiles, photoUrl, PHOTO_TTL_DAYS, readCappedBody, storePhotos } from '../../worker/photos.js';
@@ -41,6 +45,165 @@ function normalizePhone(raw) {
   return digits.length === 11
     ? `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`
     : `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+/** 웹훅으로 한 번 보낸다. 실패 응답이면 본문(Slack 의 오류 이름)을 남긴다 */
+async function postSlack(webhook, payload) {
+  const res = await fetch(webhook, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) console.error('Slack 전송 실패', res.status, await res.text().catch(() => ''));
+  return res;
+}
+
+// --- Slack 상담 알림 모양 (2026-11-27, 사업주 요청으로 브랜드 공통 형식) ---------------------------------
+// 머리글 → <!channel> → 한 줄에 한 항목(상담 분야·작업희망일·연락처·주소·현장 정보·문의 내용) → 사진 image 블록 → 운영 안내.
+// 2열 fields 는 쓰지 않는다 — Slack 모바일에서 복사하면 줄바꿈이 사라진다.
+// 연락처는 하이픈 평문이다(모바일 앱이 번호를 알아보고 누르면 전화가 걸린다. Slack 링크는 http(s) 만 되어 tel: 을 못 쓴다).
+// 주소는 카카오맵 링크 API 로 감싼다(폰에서 카카오맵 앱으로 넘어간다. kakaomap:// 앱 스킴은 Slack 이 막는다).
+// 월요일 깔때기 요약(worker/funnel.js)은 이 모양과 따로다.
+
+const KAKAO_MAP_SEARCH_URL = 'https://map.kakao.com/link/search/';
+/** Slack image 블록이 그릴 수 있는 형식. WebP·HEIC·HEIF 는 image 블록 대신 링크 한 줄로 둔다 */
+export const SLACK_IMAGE_TYPES = new Set(['image/jpeg', 'image/png']);
+/** Slack section 한 블록의 글자 수 한도 */
+const SECTION_MAX = 3000;
+
+/** Slack mrkdwn 이스케이프 — 사용자 입력의 <!channel>·<주소|글자> 가 멘션·링크로 먹지 않게 */
+export const slackEscape = (value) =>
+  String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+export const kakaoMapUrl = (address) => KAKAO_MAP_SEARCH_URL + encodeURIComponent(String(address).trim());
+
+/**
+ * 알림에 싣는 (라벨, 값) 목록 — 본문 블록과 복사용 text 가 같은 구성을 쓴다.
+ * 이 사이트 폼에는 이름 칸이 없어 '이름' 줄을 두지 않고, 희망일 칸이 없어 작업희망일은 늘 '미지정'이다.
+ * 덧붙이기(완료 화면)는 번호와 덧붙인 글·사진만 오므로 그 두 줄만 둔다 — 빈 칸을 '미지정'으로 채우면 앞선 신청과 헷갈린다.
+ */
+export function consultItems(c) {
+  const message = c.message ? [{ label: '문의 내용', value: c.message }] : [];
+  if (c.followup) return [{ label: '연락처', value: c.phone }, ...message];
+  // 계산기·상담 폼에서 고른 현장 조건. 주거 형태 이름에도 ' · ' 가 들어 있어 짐의 양·특수청소는 앞말을 붙인다
+  const siteInfo = [c.housing, c.volume && `짐 ${c.volume}`, c.access, c.special && `특수청소 ${c.special}`]
+    .filter(Boolean)
+    .join(' · ');
+  return [
+    { label: '상담 분야', value: c.type || '미지정' },
+    { label: '작업희망일', value: '미지정' },
+    { label: '연락처', value: c.phone },
+    c.address
+      ? { label: '주소', value: c.address, note: c.addressNote, map: kakaoMapUrl(c.address) }
+      : { label: '주소', value: '미입력' },
+    ...(siteInfo ? [{ label: '현장 정보', value: siteInfo }] : []),
+    ...message,
+    ...(c.estimate ? [{ label: '화면에 보여준 예상 비용', value: c.estimate }] : []),
+  ];
+}
+
+/** 한 항목을 mrkdwn 한 줄로 — 주소 글자는 카카오맵 링크로 감싼다 */
+function itemLine({ label, value, note, map }) {
+  const text = map ? `<${map}|${slackEscape(value)}>` : slackEscape(value);
+  return `*${label}:* ${text}${note ? ` ${slackEscape(note)}` : ''}`;
+}
+
+/** 긴 줄을 한도 안으로 자른다. 이스케이프한 &amp; 같은 글자와 서로게이트 쌍은 가르지 않는다 */
+function splitLong(line, max) {
+  const parts = [];
+  let rest = line;
+  while (rest.length > max) {
+    let cut = max;
+    const amp = rest.lastIndexOf('&', cut - 1);
+    if (amp > cut - 5 && !rest.slice(amp, cut).includes(';')) cut = amp;
+    const code = rest.charCodeAt(cut - 1);
+    if (code >= 0xd800 && code <= 0xdbff) cut -= 1;
+    parts.push(rest.slice(0, cut));
+    rest = rest.slice(cut);
+  }
+  parts.push(rest);
+  return parts;
+}
+
+/** 줄들을 section 한도(3,000자) 안의 덩어리로 묶는다. 문의 내용은 2,000자까지 받으므로 보통 한 덩어리다 */
+function sectionTexts(lines) {
+  const out = [];
+  let cur = '';
+  for (const piece of lines.flatMap((line) => splitLong(line, SECTION_MAX))) {
+    if (cur && cur.length + 1 + piece.length > SECTION_MAX) {
+      out.push(cur);
+      cur = piece;
+    } else cur = cur ? `${cur}\n${piece}` : piece;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+const mrkdwnSection = (text) => ({ type: 'section', text: { type: 'mrkdwn', text } });
+
+/**
+ * 상담 한 건의 웹훅 payload. images: false 면 image 블록 없이 사진을 모두 링크 줄로 둔다
+ * (Slack 이 사진을 받아 가지 못해 거절했을 때 다시 보내는 모양).
+ * 문의 내용은 자르지 않는다 — 이 사이트는 상담 내용을 Slack 에만 남겨서 자르면 그대로 사라진다(폼 상한 2,000자).
+ */
+export function consultSlackPayload(c, { images = true } = {}) {
+  const title = c.followup ? '같은 접수에 덧붙인 내용이 들어왔어요' : '새 상담 신청이 들어왔어요';
+  const items = consultItems(c);
+  const photos = c.photos ?? [];
+  const n = photos.length;
+
+  const blocks = [
+    { type: 'header', text: { type: 'plain_text', text: title, emoji: false } },
+    // 채널 알림이 '멘션만'이어도 폰에 푸시가 가게 한다. header 는 plain_text 라 멘션을 따로 둔다
+    mrkdwnSection('<!channel>'),
+    ...sectionTexts(items.map(itemLine)).map(mrkdwnSection),
+  ];
+
+  // 사진은 순서대로 — 그릴 수 있는 형식은 image 블록, 그 밖(또는 images: false)은 링크 줄. 이어진 링크 줄은 한 section 으로 묶는다
+  let links = [];
+  const flushLinks = () => {
+    if (links.length) blocks.push(mrkdwnSection(links.join('\n')));
+    links = [];
+  };
+  photos.forEach((photo, i) => {
+    const drawable = SLACK_IMAGE_TYPES.has(photo.type);
+    if (images && drawable) {
+      flushLinks();
+      blocks.push({
+        type: 'image',
+        title: { type: 'plain_text', text: `현장 사진 ${i + 1}/${n}` },
+        image_url: photo.url,
+        alt_text: `현장 사진 ${i + 1}`,
+      });
+    } else {
+      const format = String(photo.type ?? '').replace('image/', '').toUpperCase();
+      const why = drawable ? '' : ` (${format || '원본'} — Slack 미리보기 안 됨, 눌러서 열기)`;
+      links.push(`<${photo.url}|현장 사진 ${i + 1}/${n}>${why}`);
+    }
+  });
+  flushLinks();
+
+  const notes = [];
+  if (n) notes.push(`현장 사진은 ${PHOTO_TTL_DAYS}일 뒤 자동 삭제`);
+  if (c.photoFailed) notes.push(`:warning: 사진 ${c.photoFailed}장은 저장하지 못했습니다 (형식·용량·저장 오류).`);
+  if (c.skippedByBrowser) notes.push(`신청자가 고른 사진 중 ${c.skippedByBrowser}장은 용량이 커서 브라우저에서 뺐습니다.`);
+  if (c.honeypot) notes.push(':warning: 스팸 의심 — 허니팟 칸에 값이 있음 (번호가 정상이라 접수함)');
+  notes.push(
+    c.followup
+      ? 'yupumjeongri.xyz · 같은 번호의 앞선 신청에 덧붙인 내용 (새 신청 아님) · 상담 종료 후 바로 파기'
+      : `yupumjeongri.xyz${c.page ? ` · 신청 페이지 ${c.page}` : ''} · 상담 종료 후 바로 파기`,
+  );
+  blocks.push({ type: 'context', elements: [{ type: 'mrkdwn', text: notes.join('\n') }] });
+
+  // 알림 미리보기와 '메시지 복사'용 평문 — 본문과 같은 줄 구성, 링크 없이. 사진은 빈 줄 뒤에 주소만 한 줄에 하나씩.
+  // 이 text 도 Slack 이 mrkdwn 으로 읽으므로 사용자 입력은 이스케이프한다(화면에는 원래 글자로 보인다)
+  const textLines = [
+    title,
+    ...items.map(({ label, value, note }) => `${label}: ${slackEscape(value)}${note ? ` ${note}` : ''}`),
+  ];
+  if (n) textLines.push('', `현장 사진 ${n}장`, ...photos.map((p) => p.url));
+
+  return { text: textLines.join('\n'), blocks };
 }
 
 export async function onRequestPost(context) {
@@ -124,84 +287,36 @@ export async function onRequestPost(context) {
   const photos = await storePhotos(env, files);
   const photoFailed = photos.failed + photos.dropped;
 
-  const receivedAt = new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date());
-
-  const rows = followup
-    ? [
-        ['휴대폰', phone],
-        ['받은 시각', `${receivedAt} (KST)`],
-      ]
-    : [
-        ['휴대폰', phone],
-        ['지역', region || (regionHint ? `${regionHint} (신청 페이지 기준)` : '—')],
-        ['서비스', type || '—'],
-        ['접수 시각', `${receivedAt} (KST)`],
-      ];
-
-  // 계산기 조건은 고른 것만 붙인다. Slack section 한 블록의 fields 는 최대 10개.
-  const estimateRows = [
-    ['주거 형태', housing],
-    ['짐의 양', volume],
-    ['층수 · 엘리베이터', access],
-    ['특수청소', special],
-    ['화면에 보여준 예상 비용', estimate],
-  ].filter(([, value]) => value);
-
-  const toFields = (list) =>
-    list.map(([label, value]) => ({ type: 'mrkdwn', text: `*${label}*\n${value}` }));
-
-  // 사진 링크 — 이미지 블록은 쓰지 않는다. Slack 이 이미지를 못 불러오면 메시지 전체가 거절되어 접수가 사라진다.
-  const photoLines = [];
-  if (photos.stored.length) {
-    photoLines.push(
-      `*현장 사진 ${photos.stored.length}장* (${PHOTO_TTL_DAYS}일 뒤 자동 삭제)`,
-      photos.stored.map((id, i) => `<${photoUrl(origin, id)}|사진 ${i + 1}>`).join('  ·  '),
-    );
-  }
-  if (photoFailed) photoLines.push(`:warning: 사진 ${photoFailed}장은 저장하지 못했습니다 (형식·용량·저장 오류).`);
-  if (skippedByBrowser) photoLines.push(`신청자가 고른 사진 중 ${skippedByBrowser}장은 용량이 커서 브라우저에서 뺐습니다.`);
-
-  const title = followup ? '상담 신청 추가 내용' : '새 상담 신청';
-  const payload = {
-    text: `${title} — ${phone}${photos.stored.length ? ` · 사진 ${photos.stored.length}장` : ''}${honeypot ? ' (스팸 의심)' : ''}`, // 알림 미리보기용
-    blocks: [
-      {
-        type: 'header',
-        text: { type: 'plain_text', text: honeypot ? `${title} (스팸 의심 — 허니팟 값 있음)` : title, emoji: false },
-      },
-      { type: 'section', fields: toFields(rows) },
-      ...(estimateRows.length ? [{ type: 'section', fields: toFields(estimateRows) }] : []),
-      ...(message
-        ? [{ type: 'section', text: { type: 'mrkdwn', text: `*${followup ? '덧붙인 내용' : '상담 내용'}*\n${message}` } }]
-        : []),
-      ...(photoLines.length ? [{ type: 'section', text: { type: 'mrkdwn', text: photoLines.join('\n') } }] : []),
-      {
-        type: 'context',
-        elements: [
-          {
-            type: 'mrkdwn',
-            text: followup
-              ? 'yupumjeongri.xyz · 같은 번호의 앞선 신청에 덧붙인 내용 (새 신청 아님) · 상담 종료 후 바로 파기'
-              : `yupumjeongri.xyz${page ? ` · 신청 페이지 ${page}` : ''} · 상담 종료 후 바로 파기`,
-          },
-        ],
-      },
-    ],
+  const slack = {
+    followup,
+    honeypot: Boolean(honeypot),
+    phone,
+    type,
+    // 지역 칸이 비었으면 빠른 상담 폼이 보낸 페이지의 지역명 — 신청자가 적은 값이 아니라는 표시를 붙인다
+    address: region || regionHint,
+    addressNote: !region && regionHint ? '(신청 페이지 기준)' : '',
+    housing,
+    volume,
+    access,
+    special,
+    estimate,
+    message,
+    page,
+    photos: photos.stored.map((id, i) => ({ url: photoUrl(origin, id), type: photos.types[i] })),
+    photoFailed,
+    skippedByBrowser,
   };
 
   try {
-    const res = await fetch(webhook, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    let res = await postSlack(webhook, consultSlackPayload(slack));
+    // image 블록의 사진을 Slack 이 받아 가지 못하면 메시지 전체가 400(invalid_blocks 등)으로 거절된다.
+    // 사진 때문에 접수가 사라지지 않게 image 블록을 빼고 사진을 링크 줄로 바꿔 한 번 더 보낸다.
+    if (!res.ok && slack.photos.some((p) => SLACK_IMAGE_TYPES.has(p.type))) {
+      console.warn('Slack 이 사진 블록이 든 메시지를 거절해 링크로 다시 보냄', res.status);
+      res = await postSlack(webhook, consultSlackPayload(slack, { images: false }));
+    }
 
     if (!res.ok) {
-      console.error('Slack 전송 실패', res.status, await res.text());
       context.onConsultFail?.(`slack-${res.status}`, page);
       await discardPhotos(env, photos.stored);
       return redirect(sendFailPath, origin);

@@ -1,9 +1,11 @@
 /**
- * 상담 폼 현장 사진 — KV PHOTOS 에 30일 두고, Slack 상담 메시지에는 열람 링크만 싣는다 (2026-11-27).
+ * 상담 폼 현장 사진 — KV PHOTOS 에 30일 두고, Slack 상담 메시지에는 열람 주소를 싣는다 (2026-11-27).
+ * JPEG·PNG 는 image 블록으로 메시지 안에 바로 보이고, Slack 이 그리지 못하는 형식은 링크 한 줄이다(functions/api/consult.js).
  *
  * 흐름: 브라우저(src/scripts/photo-field.ts)가 사진을 긴 변 1600px JPEG 로 줄여 상담 폼과 한 요청으로 보낸다
  *   → functions/api/consult.js 가 번호 검증을 통과한 신청에서만 storePhotos() 로 KV 에 넣는다
- *   → Slack 메시지에 /api/photo/<id> 링크 → 이 Worker 의 servePhoto() 가 내준다.
+ *   → Slack 메시지의 image 블록·링크가 /api/photo/<id> 를 가리킴 → 이 Worker 의 servePhoto() 가 내준다
+ *     (image 블록은 Slack 서버가 이 주소를 직접 받아 간다).
  *
  * - 사진은 선택 항목이다. 저장이 실패해도 접수는 막지 않고, 실패한 장 수를 Slack 메시지에 적는다.
  * - 키는 crypto.getRandomValues 16바이트(128비트)를 16진수 32자로 쓴 것 — 추측할 수 없는 주소가 곧 열람 권한이다.
@@ -90,15 +92,16 @@ export async function readCappedBody(request, max = MAX_REQUEST_BYTES) {
 
 /**
  * 사진을 KV 에 넣는다. 앞에서부터 MAX_PHOTOS 장까지만 본다.
- * 돌려주는 값: stored = 저장된 사진의 id, failed = 형식·크기·저장 오류로 넣지 못한 장 수, dropped = 장 수 초과로 뺀 수
+ * 돌려주는 값: stored = 저장된 사진의 id, types = stored 와 같은 순서의 형식(image/jpeg …, Slack 에서 image 블록으로
+ * 그릴지 가를 때 쓴다), failed = 형식·크기·저장 오류로 넣지 못한 장 수, dropped = 장 수 초과로 뺀 수
  */
 export async function storePhotos(env, files) {
   const take = files.slice(0, MAX_PHOTOS);
   const dropped = files.length - take.length;
-  if (!take.length) return { stored: [], failed: 0, dropped };
+  if (!take.length) return { stored: [], types: [], failed: 0, dropped };
   if (!env.PHOTOS) {
     console.error('PHOTOS KV 바인딩이 없어 사진을 저장하지 못함', take.length);
-    return { stored: [], failed: take.length, dropped };
+    return { stored: [], types: [], failed: take.length, dropped };
   }
 
   const results = await Promise.allSettled(
@@ -112,19 +115,22 @@ export async function storePhotos(env, files) {
         expirationTtl: PHOTO_TTL_DAYS * 86400,
         metadata: { type, at: Date.now() },
       });
-      return id;
+      return { id, type };
     }),
   );
   const stored = [];
+  const types = [];
   let failed = 0;
   for (const r of results) {
-    if (r.status === 'fulfilled') stored.push(r.value);
-    else {
+    if (r.status === 'fulfilled') {
+      stored.push(r.value.id);
+      types.push(r.value.type);
+    } else {
       failed += 1;
       console.error('사진 저장 실패', String(r.reason?.message ?? r.reason));
     }
   }
-  return { stored, failed, dropped };
+  return { stored, types, failed, dropped };
 }
 
 /** Slack 전송이 실패한 신청의 사진은 지운다 — 신청자가 다시 보내면 새로 저장되므로 남겨 둘 까닭이 없다 */

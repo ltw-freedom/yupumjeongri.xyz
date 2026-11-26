@@ -34,7 +34,7 @@ npm run dev      # http://localhost:4321
 npm run build    # dist/ 생성
 npm run preview  # 빌드 결과 미리보기
 npm run check    # 타입 체크
-npm test         # 상담 폼 현장 사진 검사 (tests/photos.test.mjs, Node 20 이상, KV·Slack 에 닿지 않는다)
+npm test         # 상담 폼 현장 사진·Slack 알림 모양 검사 (tests/photos.test.mjs, tests/slack.test.mjs, Node 20 이상, KV·Slack 에 닿지 않는다)
 npm run og       # public/og-image.png 다시 굽기
 ```
 
@@ -166,7 +166,7 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 
 ```text
 사진 고름 ─▶ 브라우저가 한 장씩 줄임(긴 변 1600px JPEG 0.8, EXIF 회전 유지) ─▶ 상담 폼과 한 요청(multipart)
-  ─▶ /api/consult: 본문 8MB 까지만 읽음 → 번호 검증 통과 → KV put(expirationTtl 30일) → Slack 에 열람 링크
+  ─▶ /api/consult: 본문 8MB 까지만 읽음 → 번호 검증 통과 → KV put(expirationTtl 30일) → Slack 메시지에 image 블록(열람 주소)
   ─▶ /api/photo/<무작위 32자> 열람 (30일 뒤 KV 에서 저절로 지워지면 404)
 ```
 
@@ -181,10 +181,26 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 - 열람 주소는 추측할 수 없는 128비트 무작위 키가 곧 권한이다(서명 Secret 없음). 응답은 `X-Robots-Tag: noindex`, `Cache-Control: private`,
   `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; sandbox`. 저장된 형식이 허용 목록 밖이면 내려받기(attachment)로만 낸다.
   `robots.txt` 는 전부터 `/api/` 를 막는다.
-- Slack 메시지에는 이미지 블록을 쓰지 않고 링크만 단다 — Slack 이 이미지를 못 불러오면 메시지 전체가 거절되어 접수가 사라진다.
+- Slack 메시지에는 사진을 image 블록으로 싣는다(2026-11-27 사업주 요청, 메시지 안에서 바로 보이게). Slack 이 그리지 못하는 WebP·HEIC·HEIF 는 링크 한 줄이다.
+  Slack 이 사진을 받아 가지 못하면 메시지 전체를 400 으로 거절하므로, 그때는 image 블록을 빼고 링크로 한 번 더 보낸다 — 사진 때문에 접수가 사라지지 않는다.
 - 깔때기: 사진을 보낸 접수는 `events` 의 `consult` 행 `ref` 에 `photo-<장 수>` 가 남고, 월요일 요약에 '사진을 함께 보낸 접수'가 붙는다.
 - 개인정보 고지: `/consult/` 폼 하단과 사진 칸 안내(`site.privacy.photoNote`), `/llms-full.txt`. 보관 기간을 바꾸면 `PHOTO_TTL_DAYS` 와 `site.privacy.photoDays` 를 같이.
 - 사진 하나를 바로 지우려면 `npx wrangler kv key delete <id> --binding PHOTOS --remote` (id 는 링크 끝 32자).
+
+### Slack 알림 모양 (2026-11-27)
+
+사업주가 정한 브랜드 공통 형식이다(`consultSlackPayload()`, `functions/api/consult.js`). 네 종류 폼이 모두 이 모양으로 온다.
+
+- 머리글 `새 상담 신청이 들어왔어요`(완료 화면 덧붙이기는 `같은 접수에 덧붙인 내용이 들어왔어요`) → `<!channel>`(채널 알림이 '멘션만'이어도 폰 푸시) →
+  한 줄에 한 항목: 상담 분야 · 작업희망일 · 연락처 · 주소 · 현장 정보 · 문의 내용 · 화면에 보여준 예상 비용 → 사진 image 블록 → 맨 아래 운영 안내(context).
+- 2열 `fields` 는 쓰지 않는다 — Slack 모바일에서 복사하면 줄바꿈이 사라진다.
+- 연락처는 `010-1234-5678` 평문이다(모바일 앱이 알아보고 누르면 전화가 걸린다. Slack 링크는 http(s) 만 되어 `tel:` 은 못 쓴다).
+- 주소는 `https://map.kakao.com/link/search/<지역>` 링크로 감싼다(폰에서 카카오맵 앱으로 넘어간다). 지역 칸이 비면 빠른 상담 폼의 `regionHint` 를 쓰고 `(신청 페이지 기준)` 을 붙인다.
+- 이 폼에는 이름·희망일 칸이 없다. 이름 줄은 두지 않고 작업희망일은 늘 `미지정` 이다. 칸을 늘리려면 위 '받는 항목은 최소로'대로 먼저 상의한다.
+- 문의 내용은 자르지 않는다(폼 상한 2,000자). 상담 내용은 Slack 에만 남기 때문이다. section 한도 3,000자를 넘으면 section 을 나눈다.
+- 사용자 입력은 `&` `<` `>` 를 이스케이프한다 — 입력 안의 `<!channel>` 이나 링크 꾸밈이 먹지 않는다.
+- 메시지 `text`(알림 미리보기·'메시지 복사')는 같은 항목을 `라벨: 값` 평문으로, 사진이 있으면 빈 줄 뒤 `현장 사진 N장` 과 주소를 한 줄에 하나씩.
+- 월요일 깔때기 요약(`worker/funnel.js`)은 이 형식과 따로다.
 
 ### 웹훅 URL 은 코드에 넣지 않는다
 
@@ -367,6 +383,8 @@ npm run build && npx wrangler deploy
   2026-11-03: 새 접수 0, 네이버 유입 10/27 뒤 7일째 0 — `docs/seo-naver.md` 4-12)
 - [ ] 현장 사진(2026-11-27) — 로컬 커밋만, 아직 푸시 전. 푸시하면 KV 바인딩 `PHOTOS` 가 함께 배포된다(대시보드 설정 없음).
   푸시 뒤 실제 사진 접수가 처음 들어오면 Slack 링크가 열리는지 본다(운영 폼 시험 제출은 사업주가 정할 때만)
+- [ ] Slack 알림 모양(2026-11-27, 브랜드 공통 형식) — 로컬 커밋만, 푸시 전. 푸시 뒤 첫 실제 접수에서 사진이 Slack 메시지 안에 보이는지,
+  주소 링크가 폰에서 카카오맵으로 열리는지 본다(운영 폼 시험 제출은 사업주가 정할 때만)
 - [ ] `/api/consult` Rate limiting rule — 유입이 늘면 Cloudflare 대시보드에서 건다 ([스팸 방어](#스팸-방어))
   (2026-11-27: 사진을 받기 시작해, 누가 번호 형식만 맞춰 반복 제출하면 KV 쓰기 한도(계정 전체 하루 1,000건)를 쓸 수 있다 — 남용이 보이면 바로)
   (2026-10-20: 스팸 0건, 외부 유입 하루 2명 안팎 — 아직 불필요. 2026-10-27 재확인: 10/20 뒤 제출 0, 유입 하루 2 — 그대로 불필요. 2026-11-03: 유입 거의 0 — 불필요)
