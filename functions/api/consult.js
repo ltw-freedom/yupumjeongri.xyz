@@ -14,7 +14,7 @@
  * 현장 사진(선택, 최대 5장, 2026-11-27): 상담 폼과 같은 요청(multipart)으로 온다. 본문은 8MB 까지만 읽고,
  * 번호 검증을 통과한 신청의 사진만 KV PHOTOS 에 30일 넣은 뒤 Slack 메시지에 image 블록(열람 주소)으로 싣는다(worker/photos.js).
  * 사진 저장이 실패해도 접수는 그대로 보내고 실패한 장 수만 적는다. Slack 이 사진을 받아 가지 못해 메시지를 거절하면
- * image 블록을 빼고 링크로 한 번 더 보낸다.
+ * 2초·5초 기다렸다 image 블록 그대로 다시 보내고(KV 지역 반영 지연 대비), 그래도 안 되면 image 블록을 빼고 링크로 보낸다.
  *
  * Slack 알림 모양(2026-11-27, 브랜드 공통 형식): 아래 consultSlackPayload(). 번호 한 칸 폼(QuickConsult·EstimateCalc)과
  * 완료 화면 덧붙이기도 이 핸들러로 와서 같은 모양이 된다(덧붙이기는 머리글이 다르다).
@@ -70,6 +70,13 @@ const KAKAO_MAP_SEARCH_URL = 'https://map.kakao.com/link/search/';
 export const SLACK_IMAGE_TYPES = new Set(['image/jpeg', 'image/png']);
 /** Slack section 한 블록의 글자 수 한도 */
 const SECTION_MAX = 3000;
+/**
+ * image 블록 메시지가 거절됐을 때 image 블록 그대로 다시 보내기 전에 기다리는 시간(ms). 고객이 완료 화면을 기다리는
+ * 동기 경로라 합계 7초로 묶는다. 그래도 거절되면 링크 판으로 보낸다.
+ */
+export const SLACK_IMAGE_RETRY_DELAYS = [2000, 5000];
+/** 웹훅 자체가 없거나 막힌 응답 — 기다렸다 다시 보내도 소용없다 */
+const WEBHOOK_GONE = new Set([403, 404, 410]);
 
 /** Slack mrkdwn 이스케이프 — 사용자 입력의 <!channel>·<주소|글자> 가 멘션·링크로 먹지 않게 */
 export const slackEscape = (value) =>
@@ -187,6 +194,9 @@ export function consultSlackPayload(c, { images = true } = {}) {
   if (n) notes.push(`현장 사진은 ${PHOTO_TTL_DAYS}일 뒤 자동 삭제`);
   if (c.photoFailed) notes.push(`:warning: 사진 ${c.photoFailed}장은 저장하지 못했습니다 (형식·용량·저장 오류).`);
   if (c.skippedByBrowser) notes.push(`신청자가 고른 사진 중 ${c.skippedByBrowser}장은 용량이 커서 브라우저에서 뺐습니다.`);
+  if (!images && photos.some((p) => SLACK_IMAGE_TYPES.has(p.type))) {
+    notes.push('Slack 이 사진을 바로 불러오지 못해 링크로 보냈습니다. 링크를 누르면 사진이 열립니다.');
+  }
   if (c.honeypot) notes.push(':warning: 스팸 의심 — 허니팟 칸에 값이 있음 (번호가 정상이라 접수함)');
   notes.push(
     c.followup
@@ -308,12 +318,28 @@ export async function onRequestPost(context) {
   };
 
   try {
+    // 사진은 위 storePhotos() 를 await 한 뒤라 KV 저장이 끝난 상태에서 보낸다(waitUntil 로 미루지 않는다).
     let res = await postSlack(webhook, consultSlackPayload(slack));
-    // image 블록의 사진을 Slack 이 받아 가지 못하면 메시지 전체가 400(invalid_blocks 등)으로 거절된다.
-    // 사진 때문에 접수가 사라지지 않게 image 블록을 빼고 사진을 링크 줄로 바꿔 한 번 더 보낸다.
-    if (!res.ok && slack.photos.some((p) => SLACK_IMAGE_TYPES.has(p.type))) {
-      console.warn('Slack 이 사진 블록이 든 메시지를 거절해 링크로 다시 보냄', res.status);
-      res = await postSlack(webhook, consultSlackPayload(slack, { images: false }));
+    // image 블록의 사진을 Slack 이 받아 가지 못하면 메시지 전체가 400(invalid_blocks 등)으로 거절된다 — Slack 이 메시지를
+    // 받지 않은 것이라 다시 보내도 중복이 아니다. 흔한 까닭은 KV 지역 반영 지연이다: 쓴 곳(한국)에는 바로 보이지만
+    // Slack 서버가 있는 미국 쪽에는 수십 초 늦게 보일 수 있다(2026-11-27 다른 브랜드 운영 시험에서 Slackbot GET 404).
+    // 그래서 잠깐 기다렸다가 image 블록 그대로 다시 보내고(SLACK_IMAGE_RETRY_DELAYS), 그래도 안 되면 링크로 바꿔 보낸다.
+    // 웹훅 자체가 끊긴 응답(403·404·410)은 기다려도 소용없어 바로 링크 판으로 간다. 네트워크 예외는 아래 catch — 다시 보내지 않는다.
+    const hasImages = slack.photos.some((p) => SLACK_IMAGE_TYPES.has(p.type));
+    if (!res.ok && hasImages) {
+      const sleep = context.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+      if (!WEBHOOK_GONE.has(res.status)) {
+        for (const ms of SLACK_IMAGE_RETRY_DELAYS) {
+          console.warn(`Slack 이 사진 블록이 든 메시지를 거절해 ${ms / 1000}초 뒤 다시 보냄`, res.status);
+          await sleep(ms);
+          res = await postSlack(webhook, consultSlackPayload(slack));
+          if (res.ok) break;
+        }
+      }
+      if (!res.ok) {
+        console.warn('Slack 이 사진 블록이 든 메시지를 끝내 거절해 링크로 다시 보냄', res.status);
+        res = await postSlack(webhook, consultSlackPayload(slack, { images: false }));
+      }
     }
 
     if (!res.ok) {
