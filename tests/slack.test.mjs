@@ -3,7 +3,7 @@
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { consultSlackPayload, kakaoMapUrl, onRequestPost, SLACK_IMAGE_RETRY_DELAYS, slackEscape } from '../functions/api/consult.js';
+import { consultSlackPayload, kakaoMapUrl, onRequestPost, SLACK_IMAGE_DELAYS, slackEscape } from '../functions/api/consult.js';
 
 class FakeKV {
   constructor() {
@@ -58,13 +58,17 @@ let slackCalls;
 let replies;
 /** 기다린 시간(ms) — 실제로 기다리지 않고 기록만 한다(onRequestPost 의 context.sleep 주입) */
 let slept;
+/** 기다림과 전송의 순서 — 'wait 3000', 'send' … */
+let order;
 const realFetch = globalThis.fetch;
 beforeEach(() => {
   slackCalls = [];
   replies = [];
   slept = [];
+  order = [];
   globalThis.fetch = async (url, init) => {
     slackCalls.push({ url, body: JSON.parse(init.body) });
+    order.push('send');
     const r = replies.shift() ?? { status: 200, body: 'ok' };
     return new Response(r.body, { status: r.status });
   };
@@ -85,6 +89,7 @@ async function submit(fields, photos = [], env = {}) {
     onConsultFail: (...a) => calls.fail.push(a),
     sleep: async (ms) => {
       slept.push(ms);
+      order.push(`wait ${ms}`);
     },
   });
   return { location: res.headers.get('Location'), calls, body: slackCalls.at(-1)?.body };
@@ -301,14 +306,27 @@ test('번호 한 칸 폼: 번호만 와도 같은 모양 (분야·희망일 미�
 
 const imageCount = (body) => types(body).filter((t) => t === 'image').length;
 
-test('다시 보내기: 사진 블록 때문에 400 이면 2초 기다렸다 image 블록 그대로 다시 보내 사진째 살린다', async () => {
-  assert.deepEqual(SLACK_IMAGE_RETRY_DELAYS, [2000, 5000]);
+test('첫 전송 전 대기: image 블록이 있으면 3초 기다린 뒤 보낸다, 받으면 더 기다리지 않는다', async () => {
+  assert.deepEqual(SLACK_IMAGE_DELAYS, { firstDelay: 3000, retryDelay: 5000 });
+  const { location } = await submit({ phone: '010-1234-5678' }, [file(JPEG)], { PHOTOS: new FakeKV() });
+  assert.equal(location, 'https://yupumjeongri.xyz/consult/done/?photos=1');
+  assert.deepEqual(order, ['wait 3000', 'send']);
+});
+
+test('첫 전송 전 대기: 사진이 없거나 HEIC 만이면(image 블록 없음) 기다리지 않는다', async () => {
+  await submit({ phone: '010-1234-5678' });
+  assert.deepEqual(order, ['send']);
+  order = [];
+  await submit({ phone: '010-1234-5678' }, [file(HEIC, 'a.heic')], { PHOTOS: new FakeKV() });
+  assert.deepEqual(order, ['send']);
+});
+
+test('다시 보내기: 사진 블록 때문에 400 이면 5초 기다렸다 image 블록 그대로 한 번 다시 보내 사진째 살린다', async () => {
   replies = [{ status: 400, body: 'invalid_blocks' }];
   const kv = new FakeKV();
   const { location, calls } = await submit({ phone: '010-1234-5678', page: '/consult/' }, [file(JPEG), file(JPEG)], { PHOTOS: kv });
   assert.equal(location, 'https://yupumjeongri.xyz/consult/done/?photos=2');
-  assert.equal(slackCalls.length, 2);
-  assert.deepEqual(slept, [2000]);
+  assert.deepEqual(order, ['wait 3000', 'send', 'wait 5000', 'send']);
   assert.equal(imageCount(slackCalls[0].body), 2);
   assert.deepEqual(slackCalls[1].body, slackCalls[0].body); // 같은 메시지 그대로
   assert.equal(kv.deleted.length, 0);
@@ -316,23 +334,14 @@ test('다시 보내기: 사진 블록 때문에 400 이면 2초 기다렸다 ima
   assert.equal(calls.consult.length, 1);
 });
 
-test('다시 보내기: 두 번째도 거절되면 5초 더 기다려 한 번 더 — 세 번째에 받으면 사진째', async () => {
-  replies = [{ status: 400, body: 'invalid_blocks' }, { status: 400, body: 'invalid_blocks' }];
-  const { location } = await submit({ phone: '010-1234-5678' }, [file(JPEG)], { PHOTOS: new FakeKV() });
-  assert.equal(location, 'https://yupumjeongri.xyz/consult/done/?photos=1');
-  assert.deepEqual(slept, [2000, 5000]);
-  assert.equal(slackCalls.length, 3);
-  for (const c of slackCalls) assert.equal(imageCount(c.body), 1);
-});
-
-test('다시 보내기: 세 번 모두 거절되면 image 블록을 빼고 링크 판으로 접수를 살린다', async () => {
-  replies = [400, 400, 400].map((status) => ({ status, body: 'invalid_blocks' }));
+test('다시 보내기: 재시도도 거절되면 더 기다리지 않고 image 블록을 뺀 링크 판으로 접수를 살린다', async () => {
+  replies = [400, 400].map((status) => ({ status, body: 'invalid_blocks' }));
   const kv = new FakeKV();
   const { location, calls } = await submit({ phone: '010-1234-5678', page: '/consult/' }, [file(JPEG), file(JPEG)], { PHOTOS: kv });
   assert.equal(location, 'https://yupumjeongri.xyz/consult/done/?photos=2');
-  assert.deepEqual(slept, [2000, 5000]);
-  assert.equal(slackCalls.length, 4);
-  const links = slackCalls[3].body;
+  assert.deepEqual(order, ['wait 3000', 'send', 'wait 5000', 'send', 'send']);
+  const links = slackCalls[2].body;
+  assert.equal(imageCount(slackCalls[1].body), 2);
   assert.equal(imageCount(links), 0);
   for (const id of kv.map.keys()) assert.ok(JSON.stringify(links).includes(`<https://yupumjeongri.xyz/api/photo/${id}|현장 사진`));
   assert.ok(contextText(links).includes('Slack 이 사진을 바로 불러오지 못해 링크로 보냈습니다'));
@@ -344,22 +353,22 @@ test('다시 보내기: 세 번 모두 거절되면 image 블록을 빼고 링�
 });
 
 test('다시 보내기: 링크 판까지 실패하면 전처럼 사진을 지우고 실패로 센다', async () => {
-  replies = [400, 400, 400, 500].map((status) => ({ status, body: 'error' }));
+  replies = [400, 400, 500].map((status) => ({ status, body: 'error' }));
   const kv = new FakeKV();
   const { location, calls } = await submit({ phone: '010-1234-5678' }, [file(JPEG)], { PHOTOS: kv });
   assert.equal(location, 'https://yupumjeongri.xyz/consult/?error=send');
-  assert.equal(slackCalls.length, 4);
+  assert.equal(slackCalls.length, 3);
   assert.equal(kv.map.size, 0);
   assert.equal(kv.deleted.length, 1);
   assert.deepEqual(calls.fail, [['slack-500', '']]);
   assert.equal(calls.consult.length, 0);
 });
 
-test('다시 보내기: 웹훅이 끊긴 응답(404 등)은 기다리지 않고 링크 판 한 번만', async () => {
+test('다시 보내기: 웹훅이 끊긴 응답(403·404·410)은 재시도 대기 없이 링크 판 한 번만', async () => {
   replies = [404, 404].map((status) => ({ status, body: 'no_service' }));
   const { location, calls } = await submit({ phone: '010-1234-5678' }, [file(JPEG)], { PHOTOS: new FakeKV() });
   assert.equal(location, 'https://yupumjeongri.xyz/consult/?error=send');
-  assert.deepEqual(slept, []);
+  assert.deepEqual(order, ['wait 3000', 'send', 'send']);
   assert.equal(slackCalls.length, 2);
   assert.equal(imageCount(slackCalls[1].body), 0);
   assert.deepEqual(calls.fail, [['slack-404', '']]);
@@ -373,7 +382,7 @@ test('다시 보내기: 네트워크 예외는 다시 보내지 않는다(결과
   const { location, calls } = await submit({ phone: '010-1234-5678' }, [file(JPEG)], { PHOTOS: new FakeKV() });
   assert.equal(location, 'https://yupumjeongri.xyz/consult/?error=send');
   assert.equal(slackCalls.length, 1);
-  assert.deepEqual(slept, []);
+  assert.deepEqual(slept, [3000]); // 첫 전송 전 대기뿐
   assert.deepEqual(calls.fail, [['exception', '']]);
 });
 

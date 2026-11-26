@@ -196,6 +196,7 @@ async function post(req, env) {
     env: { SLACK_WEBHOOK_URL: 'https://hooks.example.test/x', ...env },
     onConsult: (...a) => calls.consult.push(a),
     onConsultFail: (...a) => calls.fail.push(a),
+    sleep: async () => {}, // Slack 첫 전송 전 대기(SLACK_IMAGE_DELAYS)를 시험에서는 건너뛴다
   });
   return { res, calls, location: res.headers.get('Location') };
 }
