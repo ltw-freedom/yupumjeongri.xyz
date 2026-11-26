@@ -1,0 +1,41 @@
+---
+/**
+ * 현장 사진 칸(선택, 최대 5장) — /consult/ 폼과 접수 완료 화면의 덧붙이기 폼에 들어간다 (2026-11-27).
+ *
+ * JS 가 켤 때만 보인다(hidden). 고른 사진은 src/scripts/photo-field.ts 가 브라우저에서 줄여 폼과 한 요청으로 보내고,
+ * 서버(functions/api/consult.js → worker/photos.js)가 KV 에 30일 둔 뒤 Slack 상담 메시지에 링크로 붙인다.
+ * 사진이 있어도 금액을 사진만으로 확정한다고 쓰지 않는다 — 확정은 방문 견적서다(README '받는 항목').
+ */
+import { site } from '../data/site';
+
+interface Props {
+  /** 한 페이지에 폼이 여러 개일 수 있어 id 접두사를 받는다 */
+  id: string;
+  label?: string;
+}
+
+const { id, label = '현장 사진' } = Astro.props;
+---
+
+<div class="field photo-field" data-photo-field hidden>
+  <p class="photo-field__head">
+    <span class="photo-field__label">{label}</span>
+    <span class="photo-field__opt">선택 · 최대 5장</span>
+    <span class="photo-field__count" data-photo-count aria-live="polite"></span>
+  </p>
+  <input
+    id={`${id}-photos`}
+    class="photo-field__input"
+    name="photos"
+    type="file"
+    accept="image/*"
+    multiple
+  />
+  <label for={`${id}-photos`} class="button button--ghost photo-field__pick">사진 고르기</label>
+  <ul class="photo-field__list" data-photo-list></ul>
+  <p class="photo-field__msg" data-photo-msg role="status" hidden></p>
+  <p class="hint">
+    방 안과 짐이 보이게 몇 장이면 첫 연락에서 범위를 더 좁혀 말씀드릴 수 있습니다. {site.privacy.photoNote}
+  </p>
+  <input type="hidden" name="photo_skipped" value="0" />
+</div>

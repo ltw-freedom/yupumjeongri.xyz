@@ -10,6 +10,9 @@
  * 웹훅이 끊겨도 알 길이 없었다. 번호·내용은 남기지 않고 횟수와 까닭만 남긴다 — ref 칸에 까닭을 적는다:
  *   config(웹훅 Secret 없음) · slack-404 처럼 slack-<상태코드> · exception(연결 실패). 표를 새로 만들지 않아 마이그레이션이 필요 없다.
  *
+ * 현장 사진을 함께 보낸 접수는 type 'consult' 행의 ref 칸에 'photo-<장 수>' 를 적는다(2026-11-27, 사진이 없으면 빈 값).
+ * 사진 자체와 열람 주소는 D1 에 넣지 않는다 — 사진은 KV PHOTOS 에만 30일 있다(worker/photos.js).
+ *
  * 숫자를 직접 보려면:
  *   npx wrangler d1 execute yupumjeongri-funnel --remote --command "SELECT day, type, COUNT(*) FROM events GROUP BY 1, 2 ORDER BY 1 DESC"
  *   전송 실패만: ... --command "SELECT day, ref, path, COUNT(*) FROM events WHERE type = 'fail' GROUP BY 1, 2, 3 ORDER BY 1 DESC"
@@ -72,10 +75,12 @@ export async function handleEvent(request, env, ctx) {
   return done;
 }
 
-/** 상담 접수 성공 — 서버에서 직접 센다 (JS 가 꺼진 브라우저도 포함) */
-export function recordConsult(env, ctx, request, page) {
+/** 상담 접수 성공 — 서버에서 직접 센다 (JS 가 꺼진 브라우저도 포함). 사진을 함께 받았으면 장 수만 ref 에 'photo-3' 처럼 */
+export function recordConsult(env, ctx, request, page, photoCount = 0) {
   if (!env.FUNNEL_DB) return;
-  ctx.waitUntil(insert(env, { type: 'consult', path: page, device: deviceOf(request) }).catch((err) => console.error('funnel consult', err)));
+  const n = Math.max(0, Math.min(9, Math.trunc(Number(photoCount) || 0)));
+  const ref = n ? `photo-${n}` : '';
+  ctx.waitUntil(insert(env, { type: 'consult', path: page, ref, device: deviceOf(request) }).catch((err) => console.error('funnel consult', err)));
 }
 
 /**
@@ -112,6 +117,8 @@ export async function summarizeWeek(env, endDay) {
        SUM(type = 'invalid')                                   AS invalid,
        COUNT(DISTINCT CASE WHEN type = 'submit' THEN sid END)  AS submit,
        SUM(type = 'consult')                                   AS consult,
+       SUM(type = 'consult' AND ref LIKE 'photo-%')            AS consult_photo,
+       SUM(CASE WHEN type = 'consult' AND ref LIKE 'photo-%' THEN CAST(substr(ref, 7) AS INTEGER) ELSE 0 END) AS photos,
        SUM(type = 'fail')                                      AS fail
      FROM events WHERE day >= ? AND day <= ?`,
     startDay,
@@ -154,6 +161,7 @@ export function weeklyText({ startDay, endDay, counts: c, fails, sources, landin
     `*대한유품정리 지난 7일(${md(startDay)}~${md(endDay)}) 방문·상담 깔때기*`,
     `방문 *${n(c?.visitors)}명* (페이지뷰 ${n(c?.views)}) — 외부 유입 ${n(c?.external)} · 네이버 ${n(c?.naver)} · 모바일 ${n(c?.mobile)}`,
     `계산기 사용 ${n(c?.calc)} → 상담 버튼 ${n(c?.cta)} → 번호 칸 누름 *${n(c?.focus)}* → 제출 ${n(c?.submit)} (형식 오류 ${n(c?.invalid)}) → 접수 *${n(c?.consult)}건*`,
+    ...(n(c?.consult_photo) ? [`그중 현장 사진을 함께 보낸 접수 ${n(c?.consult_photo)}건 (사진 ${n(c?.photos)}장, 30일 뒤 자동 삭제)`] : []),
     ...(n(c?.fail)
       ? [`:warning: *Slack 으로 넘기지 못한 신청 ${n(c?.fail)}건* (${list(fails, 'ref')}) — 신청자는 오류 화면을 봤습니다. 웹훅 Secret 을 확인하세요.`]
       : []),

@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import PhotoStrip from '../../components/PhotoStrip.astro';
 import FormHidden from '../../components/FormHidden.astro';
+import PhotoField from '../../components/PhotoField.astro';
 import { site } from '../../data/site';
 import { services } from '../../data/services';
 import { photos } from '../../data/cases';
@@ -25,6 +26,7 @@ const errors: Record<string, string> = {
   send: '전송 중 문제가 생겼습니다. 입력하신 내용은 그대로 두었으니 잠시 후 다시 보내 주세요.',
   form: '입력 내용을 읽지 못했습니다. 다시 시도해 주세요.',
   config: '접수 시스템 점검 중입니다. 잠시 후 다시 시도해 주세요.',
+  toolarge: '사진 용량이 커서 보내지 못했습니다. 입력하신 내용은 그대로 두었으니 사진 수를 줄여 다시 보내 주세요.',
 };
 
 const recentPhotos = [photos.teamLoadingTruck, photos.sortedBagsGuitar, photos.kitchenAfter];
@@ -145,14 +147,17 @@ const updated = contentDate('/consult/');
           ></textarea>
         </div>
 
+        {/* 현장 사진(선택, 최대 5장) — JS 가 켤 때만 보인다. 브라우저에서 줄여 같은 요청으로 보낸다(src/scripts/photo-field.ts) */}
+        <PhotoField id="consult" />
+
         <FormHidden id="consult" />
 
         <button class="button button--primary" type="submit">상담 신청</button>
 
         {/* 별도 동의 절차는 두지 않는다. 상담 회신에 필요한 최소 항목만 받고 고지로 갈음한다. */}
         <p class="hint">
-          받는 정보는 {site.privacy.items}뿐입니다. {site.privacy.purpose} 목적으로만 쓰고{' '}
-          {site.privacy.retention} 파기합니다.
+          받는 정보는 {site.privacy.items}, {site.privacy.photoItem}뿐입니다. {site.privacy.purpose} 목적으로만 쓰고{' '}
+          {site.privacy.retention} 파기합니다. 현장 사진은 받은 날부터 {site.privacy.photoDays}일 뒤 자동으로 삭제됩니다.
         </p>
       </form>
 

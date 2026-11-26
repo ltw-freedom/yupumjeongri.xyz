@@ -1280,6 +1280,124 @@ tbody th {
   font-size: 1.05rem;
 }
 
+/* --- 현장 사진 칸 (PhotoField.astro, 2026-11-27) — JS 가 켤 때만 보인다 --- */
+.photo-field[hidden],
+.photo-field__msg[hidden] {
+  display: none;
+}
+
+.photo-field__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.photo-field__label {
+  font-weight: 600;
+}
+
+.photo-field__opt,
+.photo-field__count {
+  font-size: 0.82rem;
+  color: var(--color-muted);
+}
+
+.photo-field__count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 실제 파일 칸은 화면에서 감추고 라벨을 버튼처럼 쓴다. display:none 이면 키보드로 닿지 않는다 */
+.field .photo-field__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.photo-field__pick {
+  width: 100%;
+  min-height: 48px;
+  border-style: dashed;
+}
+
+.photo-field__input:focus-visible + .photo-field__pick {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.photo-field__input:disabled + .photo-field__pick {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.photo-field__list {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 0.5rem;
+}
+
+.photo-field__list:empty {
+  display: none;
+}
+
+.photo-field__item {
+  position: relative;
+}
+
+.photo-field__thumb {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.photo-field__item.is-busy .photo-field__thumb {
+  opacity: 0.7;
+}
+
+.photo-field__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-field__remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-height: 28px;
+  padding: 0 0.5rem;
+  font: inherit;
+  font-size: 0.75rem;
+  color: #fff;
+  background: rgba(14, 23, 48, 0.78);
+  border: 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.photo-field__msg {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #912018;
+}
+
 /* 허니팟. display:none 은 일부 봇이 걸러내므로 화면 밖으로 밀어낸다. */
 .honeypot {
   position: absolute;

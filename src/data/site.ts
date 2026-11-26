@@ -49,6 +49,13 @@ export const site = {
     items: '휴대폰 번호, 지역, 상담 내용',
     purpose: '유품정리 상담 회신 및 견적 안내',
     retention: '상담 종료 후 바로',
+    /**
+     * 현장 사진(선택, 2026-11-27) — /consult/ 폼과 접수 완료 화면의 덧붙이기 칸에서만 받는다.
+     * 보관 기간은 worker/photos.js PHOTO_TTL_DAYS(KV 자동 삭제)와 같게 둘 것.
+     */
+    photoItem: '현장 사진(보내신 경우)',
+    photoDays: 30,
+    photoNote: '사진은 견적 확인에만 쓰고, 받은 날부터 30일 뒤 자동으로 삭제합니다.',
   },
 } as const;
 

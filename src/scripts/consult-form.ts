@@ -10,17 +10,37 @@
  *  - 접수 완료 페이지에 접수증(시각·가린 번호·지역)을 채우고, 같은 접수에 내용을 덧붙이는 칸을 연다
  *  - 같은 탭에서 이미 접수했다면 다른 페이지의 폼 위에 "이미 접수되었습니다"를 띄운다 (중복 신청 방지)
  *  - 모바일에서 입력 칸에 포커스가 있으면 하단 고정 CTA 를 숨긴다 (키보드 위에 떠서 입력을 가린다)
+ *  - 현장 사진 칸이 있는 폼(/consult/, 완료 화면 덧붙이기)은 보내기 전에 사진 줄이기를 마저 끝내고 보낸다 (photo-field.ts)
  *
  * 판정 규칙은 functions/api/consult.js 의 normalizePhone() 과 같게 유지할 것.
  */
 
 import { track } from './funnel';
+import { setupPhotoField, type PhotoField } from './photo-field';
 
 const DRAFT_KEY = 'consult-draft';
 const SENT_KEY = 'consult-sent';
 const PHONE_RE = /^01[016789]\d{7,8}$/;
 /** 되살리지 않는 필드 — 허니팟과 페이지마다 달라지는 값 */
-const SKIP = new Set(['hp_leave_blank', 'page']);
+const SKIP = new Set(['hp_leave_blank', 'page', 'photos', 'photo_skipped']);
+
+/**
+ * 사진이 있으면 기본 전송을 멈추고 줄이기를 끝낸 뒤 보낸다. 사진이 없으면 false — 그대로 기본 전송.
+ * 버튼에는 '사진 준비 중 2/3' 처럼 진행 상태를 보인다. form.submit() 은 submit 이벤트를 다시 부르지 않는다.
+ */
+function submitWithPhotos(event: SubmitEvent, form: HTMLFormElement, photos: PhotoField | null, button: HTMLButtonElement | null): boolean {
+  if (!photos?.count()) return false;
+  event.preventDefault();
+  photos
+    .prepare((done, total) => {
+      if (button) button.textContent = done < total ? `사진 준비 중 ${done}/${total}` : '보내는 중…';
+    })
+    .finally(() => {
+      if (button) button.textContent = '보내는 중…';
+      form.submit();
+    });
+  return true;
+}
 
 function digitsOf(value: string): string {
   return value.replace(/\D/g, '').replace(/^82/, '0');
@@ -131,6 +151,7 @@ function clearPhoneError(form: HTMLFormElement) {
 function enhance(form: HTMLFormElement) {
   const page = form.querySelector<HTMLInputElement>('input[name="page"]');
   if (page) page.value = location.pathname;
+  const photos = setupPhotoField(form);
 
   const phone = form.querySelector<HTMLInputElement>('input[name="phone"]');
   phone?.addEventListener('input', () => {
@@ -170,6 +191,7 @@ function enhance(form: HTMLFormElement) {
       // 같은 틱에 disabled 로 바꾸면 일부 브라우저가 submitter 를 폼 데이터에서 뺀다 — 한 틱 미룬다
       setTimeout(() => (button.disabled = true));
     });
+    submitWithPhotos(event, form, photos, pressed as HTMLButtonElement | null);
   });
 }
 
@@ -237,9 +259,11 @@ if (receipt) {
       phoneField.value = sent.phone;
       more.querySelector<HTMLInputElement>('input[name="page"]')!.value = location.pathname;
       more.hidden = false;
+      const photos = setupPhotoField(more);
       more.addEventListener('submit', (event) => {
         const text = more.querySelector<HTMLTextAreaElement>('textarea[name="message"]');
-        if (!text?.value.trim()) {
+        // 글이나 사진 둘 중 하나는 있어야 한다
+        if (!text?.value.trim() && !photos?.count()) {
           event.preventDefault();
           text?.focus();
           return;
@@ -249,13 +273,34 @@ if (receipt) {
           button.textContent = '보내는 중…';
           setTimeout(() => (button.disabled = true));
         }
+        submitWithPhotos(event, more, photos, button);
       });
     }
   }
 
   const added = params.get('added');
   if (added === '1') document.querySelector<HTMLElement>('[data-added]')?.removeAttribute('hidden');
-  if (params.get('error') === 'send') document.querySelector<HTMLElement>('[data-added-error]')?.removeAttribute('hidden');
+  const addedError = document.querySelector<HTMLElement>('[data-added-error]');
+  if (addedError && (params.get('error') === 'send' || params.get('error') === 'toolarge')) {
+    if (params.get('error') === 'toolarge') {
+      addedError.textContent = '사진 용량이 커서 보내지 못했습니다. 사진 수를 줄여 다시 보내 주세요. 처음 신청은 이미 접수되어 있습니다.';
+    }
+    addedError.hidden = false;
+  }
+
+  // 사진 전달 결과 — 서버가 붙여 보낸 숫자만 읽는다
+  const photoStatus = document.querySelector<HTMLElement>('[data-photo-status]');
+  const sentPhotos = Number(params.get('photos')) || 0;
+  const failedPhotos = Number(params.get('photo_failed')) || 0;
+  if (photoStatus && (sentPhotos || failedPhotos)) {
+    photoStatus.textContent = [
+      sentPhotos ? `현장 사진 ${sentPhotos}장도 함께 전달되었습니다.` : '',
+      failedPhotos ? `사진 ${failedPhotos}장은 저장하지 못했습니다. 아래 칸에서 다시 보내 주세요.` : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
+    photoStatus.hidden = false;
+  }
 }
 
 // 이미 접수한 사람이 다른 페이지의 상담 폼을 다시 만나면 접수됐다고 알린다.
@@ -286,7 +331,7 @@ window.addEventListener('pageshow', (event) => {
 // 모바일 하단 고정 CTA — 입력 중에는 숨긴다
 // 키보드가 올라오는 칸만 — 라디오·체크박스를 누를 때는 숨기지 않는다
 const isField = (el: EventTarget | null) =>
-  (el instanceof HTMLInputElement && !['radio', 'checkbox', 'hidden', 'submit', 'button'].includes(el.type)) ||
+  (el instanceof HTMLInputElement && !['radio', 'checkbox', 'hidden', 'submit', 'button', 'file'].includes(el.type)) ||
   el instanceof HTMLTextAreaElement;
 document.addEventListener('focusin', (event) => {
   if (isField(event.target)) document.body.classList.add('is-typing');

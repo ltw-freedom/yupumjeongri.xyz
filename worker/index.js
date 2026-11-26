@@ -11,6 +11,7 @@
 import { onRequestPost, onRequestGet } from '../functions/api/consult.js';
 import { handleEvent, recordConsult, recordConsultFail, sendWeekly } from './funnel.js';
 import { logBot } from './botlog.js';
+import { servePhoto } from './photos.js';
 
 const CANONICAL_HOST = 'yupumjeongri.xyz';
 
@@ -62,12 +63,15 @@ const site = {
       const context = {
         request,
         env,
-        onConsult: (page) => recordConsult(env, ctx, request, page),
+        onConsult: (page, photoCount) => recordConsult(env, ctx, request, page, photoCount),
         // Slack 으로 넘기지 못한 신청 — 횟수와 까닭만 D1 에 센다 (worker/funnel.js)
         onConsultFail: (reason, page) => recordConsultFail(env, ctx, request, reason, page),
       };
       return request.method === 'POST' ? onRequestPost(context) : onRequestGet(context);
     }
+
+    // 상담 폼 현장 사진 열람 — Slack 상담 메시지의 링크만 이 주소를 안다. 30일 뒤 KV 에서 저절로 지워진다(worker/photos.js)
+    if (pathname.startsWith('/api/photo/')) return servePhoto(request, env, pathname);
 
     // 끝 슬래시 없는 페이지 주소(/cost)는 정적 자산 기본 동작이 307(임시)로 보낸다.
     // 사이트 정책(trailingSlash: 'always')에 맞춰 여기서 먼저 301(영구)로 보낸다. /sitemap.xml 도 여기서.

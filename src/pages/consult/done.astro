@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FormHidden from '../../components/FormHidden.astro';
+import PhotoField from '../../components/PhotoField.astro';
 import { site } from '../../data/site';
 
 // 접수 완료 페이지는 검색 결과에 뜰 이유가 없다.
@@ -55,6 +56,8 @@ import { site } from '../../data/site';
       <p class="form-error" data-added-error role="alert" hidden>
         덧붙인 내용을 보내지 못했습니다. 잠시 후 다시 보내 주세요. 처음 신청은 이미 접수되어 있습니다.
       </p>
+      {/* 서버가 붙여 보낸 ?photos=N&photo_failed=M — 사진이 전달됐는지 알린다(src/scripts/consult-form.ts) */}
+      <p class="done__status" data-photo-status role="status" hidden></p>
 
       {/* 다시 신청하는 대신 같은 접수에 내용을 덧붙인다 — 서버는 followup=1 을 보고 '추가 내용'으로 보낸다 */}
       <form class="form done__more" method="POST" action="/api/consult" data-followup hidden>
@@ -69,6 +72,7 @@ import { site } from '../../data/site';
           ></textarea>
           <p class="hint">동·읍·면, 주거 형태와 평수, 층수, 희망 일정을 적어 주시면 연락드릴 때 바로 범위를 말씀드릴 수 있습니다.</p>
         </div>
+        <PhotoField id="followup" />
         <input type="hidden" name="phone" value="" data-followup-phone />
         <input type="hidden" name="followup" value="1" />
         <FormHidden id="followup" />
