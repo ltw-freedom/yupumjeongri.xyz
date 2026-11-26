@@ -181,7 +181,9 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 - 열람 주소는 추측할 수 없는 128비트 무작위 키가 곧 권한이다(서명 Secret 없음). 응답은 `X-Robots-Tag: noindex`, `Cache-Control: private`,
   `X-Content-Type-Options: nosniff`, `Content-Security-Policy: default-src 'none'; sandbox`. 저장된 형식이 허용 목록 밖이면 내려받기(attachment)로만 낸다.
   `robots.txt` 는 전부터 `/api/` 를 막는다.
-- Slack 메시지에는 사진을 image 블록으로 싣는다(2026-11-27 사업주 요청, 메시지 안에서 바로 보이게). Slack 이 그리지 못하는 WebP·HEIC·HEIF 는 링크 한 줄이다.
+- Slack 메시지에는 사진을 image 블록으로 싣는다(2026-11-27 사업주 요청, 메시지 안에서 바로 보이게). Slack 이 열람 주소에서 사진을 불러와
+  메시지에 보여 준다 — 사진이 Slack 에 링크로만 가는 것이 아니다. Slack 이 그리지 못하는 WebP·HEIC·HEIF 는 링크 한 줄이다.
+  KV 에서 30일 뒤 지워진 뒤에도 Slack 이 불러와 둔 사진이 Slack 쪽에 남는지는 확인하지 않았다.
   Slack 이 사진을 받아 가지 못하면 메시지 전체를 400 으로 거절하므로, 그때는 image 블록을 빼고 링크로 한 번 더 보낸다 — 사진 때문에 접수가 사라지지 않는다.
 - 깔때기: 사진을 보낸 접수는 `events` 의 `consult` 행 `ref` 에 `photo-<장 수>` 가 남고, 월요일 요약에 '사진을 함께 보낸 접수'가 붙는다.
 - 개인정보 고지: `/consult/` 폼 하단과 사진 칸 안내(`site.privacy.photoNote`), `/llms-full.txt`. 보관 기간을 바꾸면 `PHOTO_TTL_DAYS` 와 `site.privacy.photoDays` 를 같이.
@@ -382,7 +384,7 @@ npm run build && npx wrangler deploy
   2026-10-27: + 10/20 관악 신림동(D1 기록, 운영자 회신 확인 대기), 그 뒤 새 접수 0 — 작업까지 간 건은 아직 운영자 확인 전.
   2026-11-03: 새 접수 0, 네이버 유입 10/27 뒤 7일째 0 — `docs/seo-naver.md` 4-12)
 - [ ] 현장 사진(2026-11-27) — 로컬 커밋만, 아직 푸시 전. 푸시하면 KV 바인딩 `PHOTOS` 가 함께 배포된다(대시보드 설정 없음).
-  푸시 뒤 실제 사진 접수가 처음 들어오면 Slack 링크가 열리는지 본다(운영 폼 시험 제출은 사업주가 정할 때만)
+  푸시 뒤 실제 사진 접수가 처음 들어오면 Slack 에서 사진이 열리는지 본다(운영 폼 시험 제출은 사업주가 정할 때만)
 - [ ] Slack 알림 모양(2026-11-27, 브랜드 공통 형식) — 로컬 커밋만, 푸시 전. 푸시 뒤 첫 실제 접수에서 사진이 Slack 메시지 안에 보이는지,
   주소 링크가 폰에서 카카오맵으로 열리는지 본다(운영 폼 시험 제출은 사업주가 정할 때만)
 - [ ] `/api/consult` Rate limiting rule — 유입이 늘면 Cloudflare 대시보드에서 건다 ([스팸 방어](#스팸-방어))

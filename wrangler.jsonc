@@ -26,6 +26,7 @@
   ],
   // 상담 폼 현장 사진 (worker/photos.js, 2026-11-27). 사진만 넣고 30일 expirationTtl 로 저절로 지워진다.
   // 사진은 D1 에 넣지 않는다. 열람 주소는 /api/photo/<무작위 32자> 이고 Slack 상담 메시지에만 실린다.
+  // JPEG·PNG 는 Slack 이 이 주소에서 사진을 불러와 메시지에 보여 준다(image 블록).
   "kv_namespaces": [
     {
       "binding": "PHOTOS",

@@ -70,7 +70,8 @@ const site = {
       return request.method === 'POST' ? onRequestPost(context) : onRequestGet(context);
     }
 
-    // 상담 폼 현장 사진 열람 — Slack 상담 메시지의 링크만 이 주소를 안다. 30일 뒤 KV 에서 저절로 지워진다(worker/photos.js)
+    // 상담 폼 현장 사진 열람 — 이 주소는 Slack 상담 메시지에만 실린다. JPEG·PNG 는 image 블록이라 Slack 이 이 주소에서 사진을
+    // 불러와 메시지에 보여 준다. 30일 뒤 KV 에서 저절로 지워진다(worker/photos.js)
     if (pathname.startsWith('/api/photo/')) return servePhoto(request, env, pathname);
 
     // 끝 슬래시 없는 페이지 주소(/cost)는 정적 자산 기본 동작이 307(임시)로 보낸다.
