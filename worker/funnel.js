@@ -2,7 +2,7 @@
  * 방문·상담 깔때기 — 이벤트 기록(POST /api/event)과 하루 집계. 숫자는 D1 에 쌓인다.
  * Slack 으로는 요약을 보내지 않는다. 2026-11-28 사업주 결정("Slack 상담 채널엔 실제 고객 문의만, 주간 요약은 관제판에서")으로
  * 월요일 주간 요약(2026-11-26~11-28, 실제로 한 번도 나가지 않음)을 없앴다. 대신 매일 09:00 KST cron 이 어제 하루 숫자를
- * 허브 성적표용 카운터(worker/hubstats.js, Analytics Engine hub_leads)에 넘기고, 웹훅 생존 점검도 그쪽이 한다.
+ * 허브 성적표용 카운터(worker/hubstats.js, 공용 D1 hub_leads)에 넘기고, 웹훅 생존 점검도 그쪽이 한다.
  *
  * 브라우저 쪽은 src/scripts/funnel.ts. 저장소는 D1 yupumjeongri-funnel (스키마 migrations/).
  * 번호·IP 는 저장하지 않는다. 유입 출처는 호스트만, 검색어는 리퍼러에 실려 올 때만 남긴다.

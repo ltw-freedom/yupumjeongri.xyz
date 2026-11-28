@@ -67,15 +67,15 @@ const site = {
         // 접수·실패·시험은 D1 깔때기(worker/funnel.js)와 허브 성적표 카운터(worker/hubstats.js) 두 곳에 건수만 센다
         onConsult: (page, photoCount, service) => {
           recordConsult(env, ctx, request, page, photoCount);
-          writeLead(env, { result: 'consult', service, page, photos: photoCount });
+          writeLead(env, ctx, { result: 'consult', service, page, photos: photoCount });
         },
         // Slack 으로 넘기지 못한 신청 — 횟수와 까닭만
         onConsultFail: (reason, page) => {
           recordConsultFail(env, ctx, request, reason, page);
-          writeLead(env, { result: 'fail', page, reason });
+          writeLead(env, ctx, { result: 'fail', page, reason });
         },
         // 시험 접수 — Slack 상담 채널로 보내지 않았다. D1 깔때기에는 세지 않고 카운터에만 '시험'으로
-        onTest: (page) => writeLead(env, { result: 'test', page }),
+        onTest: (page) => writeLead(env, ctx, { result: 'test', page }),
       };
       return request.method === 'POST' ? onRequestPost(context) : onRequestGet(context);
     }
@@ -116,11 +116,13 @@ export default {
   // wrangler.jsonc triggers.crons — 매일 09:00 KST. Slack 에는 아무것도 보내지 않는다(2026-11-28).
   // 어제 하루 깔때기 숫자를 허브 성적표 카운터에 넘기고, 상담 웹훅이 살아 있는지 메시지 없이 점검한다(worker/hubstats.js).
   async scheduled(event, env, ctx) {
+    // 두 작업은 서로 기다리지 않는다 — 하나가 실패해도 다른 쪽 쓰기가 끝날 때까지 실행을 붙잡고, 실패는 각각 로그에 남긴다
+    const names = ['매일 깔때기 집계', '웹훅 점검'];
     ctx.waitUntil(
-      Promise.all([
+      Promise.allSettled([
         env.FUNNEL_DB ? summarizeDay(env, kstDay(-1)).then((day) => writeFunnelDay(env, day)) : null,
         checkWebhook(env),
-      ]).catch((err) => console.error('매일 집계·웹훅 점검 실패', err)),
+      ]).then((results) => results.forEach((r, i) => r.status === 'rejected' && console.error(`${names[i]} 실패`, r.reason))),
     );
   },
 };

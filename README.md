@@ -246,8 +246,9 @@ Slack 전송이 실패하면 신청자는 `?error=send`(Secret 이 없으면 `?e
 
 - **시험 접수.** 번호가 `010-0000-0000` 이거나 문의 내용에 `[시험]` 이 있으면 Slack 에 보내지 않고 완료 화면으로 보낸다. 사진도 저장하지 않고
   깔때기(D1)에도 세지 않는다. Slack 모양을 꼭 봐야 하는 날만 Worker 변수 `ALLOW_TEST_TO_SLACK=on` 을 넣고 재배포한다(운영자 승인, 끝나면 뺀다).
-- **허브 카운터.** 접수·전송 실패·시험이 한 건마다 Workers Analytics Engine 데이터셋 `hub_leads`(바인딩 `HUB_LEADS`)에 건수 한 점으로 남는다
-  (`worker/hubstats.js`, 번호·내용 없음). 운영자 허브의 관제판 성적표가 이것을 읽는다.
+- **허브 카운터.** 접수·전송 실패·시험이 한 건마다 공용 D1 `hub_leads` 의 `points` 표(바인딩 `HUB_DB`)에 한 행으로 남는다
+  (`worker/hubstats.js`, 번호·내용 없음, 400일 뒤 지움). 같은 운영자의 다른 브랜드 Worker 도 이 DB 를 같이 쓰고, 공용 스키마는 이 저장소
+  `migrations-hub/` 가 맡는다(적용: `npx wrangler d1 migrations apply hub_leads --remote`, 운영자 요청 때만). 운영자 허브의 관제판 성적표가 이것을 읽는다.
 - **매일 09:00 KST cron**(`wrangler.jsonc` `triggers.crons` `0 0 * * *`): 어제 깔때기 숫자와 유입 출처·들어온 페이지 상위 5를 `hub_leads` 에 넘기고,
   상담 웹훅에 빈 요청(`{}`)을 보내 살아 있는지 본다. Slack 은 text 가 없는 요청에 메시지를 만들지 않고 `no_text` 로 답한다(= 살아 있음).
   `no_service` 같은 답이면 끊긴 것이고, 성적표의 '웹훅' 칸에 보인다.

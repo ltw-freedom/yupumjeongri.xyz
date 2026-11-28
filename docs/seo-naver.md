@@ -706,13 +706,18 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
 - 월요일 09:00 Slack 깔때기 요약(4-16)을 없앴다. 11/30 첫 발송 전이라 한 번도 나가지 않았다. `sendWeekly`·`weeklyText` 를 지웠다.
 - 시험 접수(번호 `010-0000-0000` 또는 문의 내용 `[시험]`)는 Slack 에 보내지 않고 완료 화면으로. 사진 저장·D1 `consult` 기록도 하지 않는다.
   예외 스위치는 Worker 변수 `ALLOW_TEST_TO_SLACK=on`.
-- 허브 카운터 `worker/hubstats.js`: Workers Analytics Engine 데이터셋 `hub_leads` 에 접수(`consult`)·전송 실패(`fail`)·시험(`test`) 한 건마다 한 점.
+- 허브 카운터 `worker/hubstats.js`: 접수(`consult`)·전송 실패(`fail`)·시험(`test`) 한 건마다 한 행(처음엔 Analytics Engine, 2026-11-29 공용 D1 로 바꿈 — 아래).
   칸은 결과, 상담 분야 이름, 신청 페이지, 실패 까닭, 사진 장 수뿐이다(번호·내용·IP·검색어 없음).
 - cron 을 월요일에서 매일 09:00 KST(`0 0 * * *`)로. 어제 깔때기 숫자(방문~접수 14칸)와 유입 출처·들어온 페이지 상위 5를 `hub_leads` 에 넘기고,
   상담 웹훅에 빈 요청 `{}` 을 보내 생존을 본다(살아 있으면 Slack 이 `no_text` 로 거절하고 메시지를 만들지 않는다. Slack 웹훅 오류 문서 기준).
   검색어는 허브로 넘기지 않는다.
 - 확인: `npm test` 48개 통과(시험 접수·카운터·웹훅 판정 새 검사 포함), `npm run check` 0 errors, `npm run build` 1,185쪽,
-  `wrangler deploy --dry-run` 에서 `HUB_LEADS` 바인딩 확인. 운영 Worker 에서의 첫 점검·첫 카운터는 푸시 다음 날 09:00 에 생긴다.
+  `wrangler deploy --dry-run` 에서 바인딩 확인.
+- 배포 경과: 11/28 `0bcb733`·11/29 `7c131e5` 는 계정에서 Analytics Engine 이 켜지지 않아 `code: 10089` 로 배포 실패(운영은 앞 판 그대로).
+  운영자 요청으로 바인딩만 뺀 `ecc4c4b` 를 먼저 배포해 월요일 요약 없애기·시험 접수 제외가 11/29 운영에 들어갔다.
+- 11/29 카운터를 공용 D1 `hub_leads`(APAC, 운영자 요청으로 허브 세션이 만듦)로 바꿨다. 표 `points` 는 `migrations-hub/0001_points.sql`,
+  바인딩 `HUB_DB`. 매일 cron 이 그날 집계 행을 지우고 다시 쓰고(재실행에도 겹치지 않음), 400일 지난 이 브랜드 행을 지운다.
+  `npm test` 53개 통과(리뷰 반영: cron 두 작업 서로 끊지 않기, 카운터가 상담 흐름에 예외를 던지지 않기, 폼 값의 번호·메일 버리기), 로컬 D1 에서 같은 SQL 확인.
 
 **운영자가 할 일** — 푸시 뒤 대시보드 Worker → Settings → Triggers 에 `0 0 * * *` 한 줄이 보이는지(월요일 줄이 사라졌는지) 한 번 본다.
 4-18 의 3번(월요일 Slack 요약 확인)은 없앴다.
