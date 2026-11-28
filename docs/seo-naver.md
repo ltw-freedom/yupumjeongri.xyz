@@ -635,6 +635,7 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
 - **주 1회 깔때기 요약.** 월요일 09:00 KST 에 지난 7일(방문·네이버·번호 칸 누름·제출·접수·전송 실패, 유입 출처·착지·검색어, 그 전 7일)을
   Slack 상담 채널로 보낸다(`worker/funnel.js` `sendWeekly`, `wrangler.jsonc` `triggers.crons` `0 0 * * MON`). 접수가 0 인 주에도 온다 —
   **월요일에 이 요약이 오지 않으면 웹훅이 끊긴 것**이라, 시험 제출 없이 웹훅 생존을 확인하는 장치를 겸한다. 매일 요약(10/08 끔)을 되살린 것이 아니다.
+  (2026-11-28 에 없앴다. 한 번도 나가지 않았다 — 4-19.)
 - **칼럼 1편.** `/column/binjip-jeongri-biyong/` '빈집 정리 비용, 평수보다 쌓인 짐의 부피로 정해지는 이유' — 금액은 전부 `pricing.ts` 공개 값(빈집 원룸 기준 50만~150만원, 단가 4줄, 부가세 별도), 사례·후기 없음.
   빈집 서비스 페이지의 '관련 칼럼'과 가평·양평·평택 시군구 페이지(`cityStats.ts` 빈집 비율 상위 3곳)에 링크가 생긴다. 사이트맵 84 → 85.
   '고독사 비용'은 9/3 칼럼(`godoksa-yupumjeongri-biyong`)이 이미 답한다. 고독사·빈집 **서비스 페이지**의 서비스별 비용 답(4-6, `[slug].astro` 주석)은 이번에 넣지 않았다 — 다음 후보.
@@ -659,7 +660,7 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
    - `https://yupumjeongri.xyz/service/binjip-jeongri/`
    - `https://yupumjeongri.xyz/column/godoksa-yupumjeongri-biyong/`
    - GSC: 사이트맵 다시 제출, URL 검사로 `/` · `/cost/` · `/column/binjip-jeongri-biyong/` 색인 생성 요청. 동 페이지는 요청하지 않는다(noindex).
-4. 첫 월요일 09:00 에 Slack 요약이 오는지 본다. 안 오면 웹훅 Secret 을 다시 넣는다(README '웹훅 URL 은 코드에 넣지 않는다').
+4. (2026-11-28 없앰 — 4-19 의 매일 웹훅 점검으로 바뀜.)
 5. 전송 실패 조회: `npx wrangler d1 execute yupumjeongri-funnel --remote --command "SELECT day, ref, path, COUNT(*) FROM events WHERE type = 'fail' GROUP BY 1, 2, 3 ORDER BY 1 DESC"`
 
 **남은 판단 (운영자)** — 방문을 바로 만드는 수단은 이번 변경에 없다. 검색 광고(예산), 실제 작업 기록 넘기기(`dongCases.ts` → 그 동만 색인 복귀), 네이버 블로그(보류 중)는 운영자가 정한다.
@@ -694,7 +695,27 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
    `/column/godoksa-yupumjeongri-biyong/` · `/column/binjip-jeongri-biyong/` · `/column/30pyeong-apateu-yupumjeongri-biyong/` · `/column/turum-yupumjeongri-biyong/`
    (앞에 `https://yupumjeongri.xyz` 를 붙인다. 동 페이지는 넣지 않는다.) 그 뒤 새 칼럼은 예약 작업의 IndexNow 가 보낸다.
 2. GSC 사이트맵 다시 제출, Bing Crawl Control 최대(README TODO 2·6). 여유가 될 때.
-3. 2026-11-30(월) 09:00 Slack 상담 채널에 주간 깔때기 요약이 오는지만 본다. 오면 cron 과 웹훅이 둘 다 산 것이다.
+3. (2026-11-28 없앰 — 주간 요약은 Slack 으로 오지 않는다. 4-19.)
+
+## 4-19. 2026-11-28 Slack 상담 채널은 실제 고객 문의만 — 주간 요약을 없애고 허브 카운터로
+
+운영자 결정(2026-11-28 "slack 상담 채널엔 실제 고객이 상담하는 문의건만 왔으면 좋겠는데? 주간 요약이 오는 건 관제판에서 해야하는 일 같아").
+허브 관제판에 브랜드별 주간 성적표를 만드는 1단계의 이 저장소 몫이다(설계는 운영자 허브 저장소 `docs/scorecard-design.md`).
+
+**바꾼 것**
+- 월요일 09:00 Slack 깔때기 요약(4-16)을 없앴다. 11/30 첫 발송 전이라 한 번도 나가지 않았다. `sendWeekly`·`weeklyText` 를 지웠다.
+- 시험 접수(번호 `010-0000-0000` 또는 문의 내용 `[시험]`)는 Slack 에 보내지 않고 완료 화면으로. 사진 저장·D1 `consult` 기록도 하지 않는다.
+  예외 스위치는 Worker 변수 `ALLOW_TEST_TO_SLACK=on`.
+- 허브 카운터 `worker/hubstats.js`: Workers Analytics Engine 데이터셋 `hub_leads` 에 접수(`consult`)·전송 실패(`fail`)·시험(`test`) 한 건마다 한 점.
+  칸은 결과, 상담 분야 이름, 신청 페이지, 실패 까닭, 사진 장 수뿐이다(번호·내용·IP·검색어 없음).
+- cron 을 월요일에서 매일 09:00 KST(`0 0 * * *`)로. 어제 깔때기 숫자(방문~접수 14칸)와 유입 출처·들어온 페이지 상위 5를 `hub_leads` 에 넘기고,
+  상담 웹훅에 빈 요청 `{}` 을 보내 생존을 본다(살아 있으면 Slack 이 `no_text` 로 거절하고 메시지를 만들지 않는다. Slack 웹훅 오류 문서 기준).
+  검색어는 허브로 넘기지 않는다.
+- 확인: `npm test` 48개 통과(시험 접수·카운터·웹훅 판정 새 검사 포함), `npm run check` 0 errors, `npm run build` 1,185쪽,
+  `wrangler deploy --dry-run` 에서 `HUB_LEADS` 바인딩 확인. 운영 Worker 에서의 첫 점검·첫 카운터는 푸시 다음 날 09:00 에 생긴다.
+
+**운영자가 할 일** — 푸시 뒤 대시보드 Worker → Settings → Triggers 에 `0 0 * * *` 한 줄이 보이는지(월요일 줄이 사라졌는지) 한 번 본다.
+4-18 의 3번(월요일 Slack 요약 확인)은 없앴다.
 
 ## 5. 측정 — 공식 도구와 사람 표본만
 

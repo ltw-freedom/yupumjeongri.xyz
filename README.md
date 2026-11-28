@@ -3,7 +3,7 @@
 **대한유품정리** 웹사이트. **Astro (SSG)** 정적 사이트를 **Cloudflare Worker** 로 서빙한다([배포](#cloudflare-workers-배포)).
 
 상담 접수는 사이트 자체 폼 하나로 받는다 — `/consult/` 등 번호 칸 → Worker `/api/consult` → Slack #대한유품정리-상담.
-깔때기 기록은 D1 `yupumjeongri-funnel`, 월요일 아침에 지난 7일 요약이 같은 Slack 채널로 온다. 다른 브랜드 시스템과는 연결하지 않는다(브랜드 격리).
+깔때기 기록은 D1 `yupumjeongri-funnel`. Slack 상담 채널에는 실제 고객 문의만 간다(2026-11-28). 숫자 요약은 운영자 허브 관제판의 성적표가 내용 없는 카운터(`worker/hubstats.js`)로 보여 준다. 다른 브랜드 사이트와 서로 링크·언급하지 않는다(브랜드 격리).
 
 ## 브랜드 · 포지셔닝
 
@@ -194,7 +194,7 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
   그래서 image 블록이 있는 메시지는 첫 전송 전에 3초 기다리고, 거절되면 5초 뒤 image 블록 그대로 한 번 더 보낸다
   (최악 8초 남짓 고객 완료 화면이 늦는다, 값은 `SLACK_IMAGE_DELAYS`). 그래도 거절되면 image 블록을 빼고 링크로 보낸다(맨 아래에 '링크로 보냈습니다' 안내) — 사진 때문에 접수가 사라지지 않는다.
   웹훅이 끊긴 응답(403·404·410)은 기다리지 않고, 네트워크 예외는 결과를 몰라 다시 보내지 않는다.
-- 깔때기: 사진을 보낸 접수는 `events` 의 `consult` 행 `ref` 에 `photo-<장 수>` 가 남고, 월요일 요약에 '사진을 함께 보낸 접수'가 붙는다.
+- 깔때기: 사진을 보낸 접수는 `events` 의 `consult` 행 `ref` 에 `photo-<장 수>` 가 남고, 매일 집계(`consult_photo`, `photos`)로 허브 성적표에 넘어간다.
 - 개인정보 고지: `/consult/` 폼 하단과 사진 칸 안내(`site.privacy.photoNote`), `/llms-full.txt`. 보관 기간을 바꾸면 `PHOTO_TTL_DAYS` 와 `site.privacy.photoDays` 를 같이.
 - 사진 하나를 바로 지우려면 `npx wrangler kv key delete <id> --binding PHOTOS --remote` (id 는 링크 끝 32자).
 
@@ -211,7 +211,7 @@ JS 없이도 동작하도록 일반 form POST 로 두고, 결과는 서버가 30
 - 문의 내용은 자르지 않는다(폼 상한 2,000자). 상담 내용은 Slack 에만 남기 때문이다. section 한도 3,000자를 넘으면 section 을 나눈다.
 - 사용자 입력은 `&` `<` `>` 를 이스케이프한다 — 입력 안의 `<!channel>` 이나 링크 꾸밈이 먹지 않는다.
 - 메시지 `text`(알림 미리보기·'메시지 복사')는 같은 항목을 `라벨: 값` 평문으로, 사진이 있으면 빈 줄 뒤 `현장 사진 N장` 과 주소를 한 줄에 하나씩.
-- 월요일 깔때기 요약(`worker/funnel.js`)은 이 형식과 따로다.
+- Slack 상담 채널로는 이 상담 알림만 간다. 깔때기 요약은 보내지 않는다(2026-11-28).
 
 ### 웹훅 URL 은 코드에 넣지 않는다
 
@@ -236,15 +236,23 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/...
 npx wrangler pages dev dist --compatibility-date=2026-08-10
 ```
 
-### 전송 실패 기록과 주간 요약 (2026-11-26)
+### 전송 실패 기록, 시험 접수, 허브 카운터 (2026-11-26, 2026-11-28)
 
 Slack 전송이 실패하면 신청자는 `?error=send`(Secret 이 없으면 `?error=config`)로 되돌아가고, 그 횟수와 까닭이 D1 `events` 에
 `type = 'fail'` 로 남는다(`worker/funnel.js` `recordConsultFail`). 번호·내용은 남기지 않는다. 전에는 실패가 어디에도 남지 않아
 웹훅이 끊겨도 알 수 없었다.
 
-월요일 09:00 KST 에 지난 7일 깔때기 요약(방문 → 번호 칸 → 제출 → 접수, 전송 실패, 유입 출처)이 Slack 상담 채널로 온다
-(`sendWeekly`, `wrangler.jsonc` 의 `triggers.crons`). 접수가 없는 주에도 오므로 **월요일에 요약이 안 오면 웹훅이 끊긴 것**이다.
-cron 을 끌 때는 `triggers` 를 지우지 말고 `crons` 를 빈 배열로 둔다. 배경과 조회 명령은 `docs/seo-naver.md` 4-16.
+2026-11-28 운영자 결정("Slack 상담 채널엔 실제 고객 문의만, 주간 요약은 관제판에서")으로 월요일 Slack 요약을 없앴다. 대신:
+
+- **시험 접수.** 번호가 `010-0000-0000` 이거나 문의 내용에 `[시험]` 이 있으면 Slack 에 보내지 않고 완료 화면으로 보낸다. 사진도 저장하지 않고
+  깔때기(D1)에도 세지 않는다. Slack 모양을 꼭 봐야 하는 날만 Worker 변수 `ALLOW_TEST_TO_SLACK=on` 을 넣고 재배포한다(운영자 승인, 끝나면 뺀다).
+- **허브 카운터.** 접수·전송 실패·시험이 한 건마다 Workers Analytics Engine 데이터셋 `hub_leads`(바인딩 `HUB_LEADS`)에 건수 한 점으로 남는다
+  (`worker/hubstats.js`, 번호·내용 없음). 운영자 허브의 관제판 성적표가 이것을 읽는다.
+- **매일 09:00 KST cron**(`wrangler.jsonc` `triggers.crons` `0 0 * * *`): 어제 깔때기 숫자와 유입 출처·들어온 페이지 상위 5를 `hub_leads` 에 넘기고,
+  상담 웹훅에 빈 요청(`{}`)을 보내 살아 있는지 본다. Slack 은 text 가 없는 요청에 메시지를 만들지 않고 `no_text` 로 답한다(= 살아 있음).
+  `no_service` 같은 답이면 끊긴 것이고, 성적표의 '웹훅' 칸에 보인다.
+
+cron 을 끌 때는 `triggers` 를 지우지 말고 `crons` 를 빈 배열로 둔다. 배경과 조회 명령은 `docs/seo-naver.md` 4-16·4-19.
 
 ### 스팸 방어
 

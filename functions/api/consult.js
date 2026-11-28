@@ -48,6 +48,9 @@ function normalizePhone(raw) {
     : `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
+/** 운영 시험 접수 표시 — 번호 010-0000-0000 이나 문의 내용의 '[시험]'. 정규화된 번호를 받는다 */
+export const isTestSubmission = (phone, message) => phone === '010-0000-0000' || String(message ?? '').includes('[시험]');
+
 /** 웹훅으로 한 번 보낸다. 실패 응답이면 본문(Slack 의 오류 이름)을 남긴다 */
 async function postSlack(webhook, payload) {
   const res = await fetch(webhook, {
@@ -64,7 +67,7 @@ async function postSlack(webhook, payload) {
 // 2열 fields 는 쓰지 않는다 — Slack 모바일에서 복사하면 줄바꿈이 사라진다.
 // 연락처는 하이픈 평문이다(모바일 앱이 번호를 알아보고 누르면 전화가 걸린다. Slack 링크는 http(s) 만 되어 tel: 을 못 쓴다).
 // 주소는 카카오맵 링크 API 로 감싼다(폰에서 카카오맵 앱으로 넘어간다. kakaomap:// 앱 스킴은 Slack 이 막는다).
-// 월요일 깔때기 요약(worker/funnel.js)은 이 모양과 따로다.
+// Slack 상담 채널에는 이 상담 알림만 간다. 깔때기 요약은 보내지 않는다(2026-11-28, 허브 성적표로 옮김 — worker/hubstats.js).
 
 const KAKAO_MAP_SEARCH_URL = 'https://map.kakao.com/link/search/';
 /** Slack image 블록이 그릴 수 있는 형식. WebP·HEIC·HEIF 는 image 블록 대신 링크 한 줄로 둔다 */
@@ -298,6 +301,14 @@ export async function onRequestPost(context) {
   }
   if (honeypot) console.warn('허니팟 값이 있으나 번호가 정상이라 접수함', phone);
 
+  // 시험 접수 — Slack 상담 채널에는 실제 고객 문의만 보낸다(2026-11-28 사업주 결정). 사진도 저장하지 않고 완료 화면으로 보낸다.
+  // 깔때기(D1)에는 세지 않고 허브 카운터에만 '시험'으로 센다. Slack 모양을 꼭 봐야 하는 날만 Worker 변수
+  // ALLOW_TEST_TO_SLACK=on 을 넣어 재배포한다(사업주 승인 작업, 끝나면 뺀다).
+  if (isTestSubmission(phone, message) && env.ALLOW_TEST_TO_SLACK !== 'on') {
+    context.onTest?.(page);
+    return redirect(donePath, origin);
+  }
+
   const photos = await storePhotos(env, files);
   const photoFailed = photos.failed + photos.dropped;
 
@@ -362,7 +373,7 @@ export async function onRequestPost(context) {
   // 깔때기 기록 (worker/funnel.js) — Worker 가 넘겨줄 때만. 덧붙이기는 새 접수가 아니다.
   // 위의 전송 실패(onConsultFail)는 덧붙이기도 센다 — 웹훅이 끊겼는지 보려는 숫자라서다. 번호·내용은 넘기지 않는다.
   // 사진을 보낸 신청은 깔때기에 장 수만 함께 센다(events.ref = 'photo-3', worker/funnel.js).
-  if (!followup) context.onConsult?.(page, photos.stored.length);
+  if (!followup) context.onConsult?.(page, photos.stored.length, type);
   // 완료 화면이 '사진 N장도 전달됨 / M장은 저장하지 못함'을 알릴 수 있게 숫자만 붙인다
   const photoQuery = files.length
     ? `photos=${photos.stored.length}${photoFailed ? `&photo_failed=${photoFailed}` : ''}`

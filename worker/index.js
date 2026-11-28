@@ -9,7 +9,8 @@
  * 배포: npx wrangler deploy  (설정은 루트 wrangler.jsonc)
  */
 import { onRequestPost, onRequestGet } from '../functions/api/consult.js';
-import { handleEvent, recordConsult, recordConsultFail, sendWeekly } from './funnel.js';
+import { handleEvent, kstDay, recordConsult, recordConsultFail, summarizeDay } from './funnel.js';
+import { checkWebhook, writeFunnelDay, writeLead } from './hubstats.js';
 import { logBot } from './botlog.js';
 import { servePhoto } from './photos.js';
 
@@ -63,9 +64,18 @@ const site = {
       const context = {
         request,
         env,
-        onConsult: (page, photoCount) => recordConsult(env, ctx, request, page, photoCount),
-        // Slack 으로 넘기지 못한 신청 — 횟수와 까닭만 D1 에 센다 (worker/funnel.js)
-        onConsultFail: (reason, page) => recordConsultFail(env, ctx, request, reason, page),
+        // 접수·실패·시험은 D1 깔때기(worker/funnel.js)와 허브 성적표 카운터(worker/hubstats.js) 두 곳에 건수만 센다
+        onConsult: (page, photoCount, service) => {
+          recordConsult(env, ctx, request, page, photoCount);
+          writeLead(env, { result: 'consult', service, page, photos: photoCount });
+        },
+        // Slack 으로 넘기지 못한 신청 — 횟수와 까닭만
+        onConsultFail: (reason, page) => {
+          recordConsultFail(env, ctx, request, reason, page);
+          writeLead(env, { result: 'fail', page, reason });
+        },
+        // 시험 접수 — Slack 상담 채널로 보내지 않았다. D1 깔때기에는 세지 않고 카운터에만 '시험'으로
+        onTest: (page) => writeLead(env, { result: 'test', page }),
       };
       return request.method === 'POST' ? onRequestPost(context) : onRequestGet(context);
     }
@@ -103,8 +113,14 @@ export default {
     logBot(request, response, env, ctx);
     return response;
   },
-  // wrangler.jsonc triggers.crons — 월요일 09:00 KST 에 지난 7일 방문·상담 깔때기 요약 (worker/funnel.js sendWeekly)
+  // wrangler.jsonc triggers.crons — 매일 09:00 KST. Slack 에는 아무것도 보내지 않는다(2026-11-28).
+  // 어제 하루 깔때기 숫자를 허브 성적표 카운터에 넘기고, 상담 웹훅이 살아 있는지 메시지 없이 점검한다(worker/hubstats.js).
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(sendWeekly(env));
+    ctx.waitUntil(
+      Promise.all([
+        env.FUNNEL_DB ? summarizeDay(env, kstDay(-1)).then((day) => writeFunnelDay(env, day)) : null,
+        checkWebhook(env),
+      ]).catch((err) => console.error('매일 집계·웹훅 점검 실패', err)),
+    );
   },
 };

@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node --test tests/photos.test.mjs tests/slack.test.mjs",
+    "test": "node --test tests/photos.test.mjs tests/slack.test.mjs tests/hubstats.test.mjs",
     "og": "node scripts/build-og.mjs",
     "icons": "node scripts/build-icons.mjs",
     "indexnow": "node scripts/indexnow.mjs",

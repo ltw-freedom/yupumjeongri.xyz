@@ -1,7 +1,8 @@
 /**
- * 방문·상담 깔때기 — 이벤트 기록(POST /api/event)과 주 1회 Slack 요약. 숫자는 D1 에 쌓인다.
- * (매일 09:00 요약은 실제 상담이 들어오기 시작해 2026-10-08 껐다. 2026-11-26 부터 월요일 09:00 KST 에
- *  지난 7일 요약 한 번만 보낸다 — 접수가 0 인 주에도 오므로, 이 요약이 오는 것 자체가 Slack 웹훅이 살아 있다는 확인이다.)
+ * 방문·상담 깔때기 — 이벤트 기록(POST /api/event)과 하루 집계. 숫자는 D1 에 쌓인다.
+ * Slack 으로는 요약을 보내지 않는다. 2026-11-28 사업주 결정("Slack 상담 채널엔 실제 고객 문의만, 주간 요약은 관제판에서")으로
+ * 월요일 주간 요약(2026-11-26~11-28, 실제로 한 번도 나가지 않음)을 없앴다. 대신 매일 09:00 KST cron 이 어제 하루 숫자를
+ * 허브 성적표용 카운터(worker/hubstats.js, Analytics Engine hub_leads)에 넘기고, 웹훅 생존 점검도 그쪽이 한다.
  *
  * 브라우저 쪽은 src/scripts/funnel.ts. 저장소는 D1 yupumjeongri-funnel (스키마 migrations/).
  * 번호·IP 는 저장하지 않는다. 유입 출처는 호스트만, 검색어는 리퍼러에 실려 올 때만 남긴다.
@@ -97,12 +98,8 @@ async function all(env, sql, ...binds) {
   return (await env.FUNNEL_DB.prepare(sql).bind(...binds).all()).results ?? [];
 }
 
-/** endDay(KST, 그날 포함)까지 7일의 깔때기 숫자와, 견줄 그 전 7일 */
-export async function summarizeWeek(env, endDay) {
-  const at = Date.parse(`${endDay}T12:00:00+09:00`);
-  const startDay = kstDay(-6, at);
-  const prevStart = kstDay(-13, at);
-  const prevEnd = kstDay(-7, at);
+/** 하루(KST) 깔때기 숫자와 유입 출처·들어온 페이지 상위 5. 검색어는 허브로 넘기지 않아 세지 않는다 */
+export async function summarizeDay(env, day) {
   const [counts] = await all(
     env,
     `SELECT
@@ -120,69 +117,18 @@ export async function summarizeWeek(env, endDay) {
        SUM(type = 'consult' AND ref LIKE 'photo-%')            AS consult_photo,
        SUM(CASE WHEN type = 'consult' AND ref LIKE 'photo-%' THEN CAST(substr(ref, 7) AS INTEGER) ELSE 0 END) AS photos,
        SUM(type = 'fail')                                      AS fail
-     FROM events WHERE day >= ? AND day <= ?`,
-    startDay,
-    endDay,
+     FROM events WHERE day = ?`,
+    day,
   );
-  const range = [startDay, endDay];
-  const fails = await all(env, `SELECT ref, COUNT(*) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'fail' GROUP BY ref ORDER BY n DESC LIMIT 5`, ...range);
   const sources = await all(
     env,
-    `SELECT ref, COUNT(DISTINCT sid) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'view' AND ref != '' GROUP BY ref ORDER BY n DESC LIMIT 5`,
-    ...range,
+    `SELECT ref, COUNT(DISTINCT sid) AS n FROM events WHERE day = ? AND type = 'view' AND ref != '' GROUP BY ref ORDER BY n DESC LIMIT 5`,
+    day,
   );
   const landings = await all(
     env,
-    `SELECT path, COUNT(DISTINCT sid) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'view' AND ref != '' GROUP BY path ORDER BY n DESC LIMIT 5`,
-    ...range,
+    `SELECT path, COUNT(DISTINCT sid) AS n FROM events WHERE day = ? AND type = 'view' AND ref != '' GROUP BY path ORDER BY n DESC LIMIT 5`,
+    day,
   );
-  const queries = await all(
-    env,
-    `SELECT query, COUNT(*) AS n FROM events WHERE day >= ? AND day <= ? AND type = 'view' AND query != '' GROUP BY query ORDER BY n DESC LIMIT 5`,
-    ...range,
-  );
-  const [prev] = await all(
-    env,
-    `SELECT COUNT(DISTINCT CASE WHEN type = 'view' THEN sid END) AS visitors,
-            COUNT(DISTINCT CASE WHEN type = 'view' AND ref LIKE '%naver.com' THEN sid END) AS naver,
-            SUM(type = 'consult') AS consult
-     FROM events WHERE day >= ? AND day <= ?`,
-    prevStart,
-    prevEnd,
-  );
-  return { startDay, endDay, counts, fails, sources, landings, queries, prev };
-}
-
-export function weeklyText({ startDay, endDay, counts: c, fails, sources, landings, queries, prev }) {
-  const n = (v) => Number(v ?? 0);
-  const md = (day) => `${Number(day.slice(5, 7))}/${Number(day.slice(8, 10))}`;
-  const list = (rows, key) => (rows.length ? rows.map((r) => `${r[key]} ${r.n}`).join(' · ') : '없음');
-  return [
-    `*대한유품정리 지난 7일(${md(startDay)}~${md(endDay)}) 방문·상담 깔때기*`,
-    `방문 *${n(c?.visitors)}명* (페이지뷰 ${n(c?.views)}) — 외부 유입 ${n(c?.external)} · 네이버 ${n(c?.naver)} · 모바일 ${n(c?.mobile)}`,
-    `계산기 사용 ${n(c?.calc)} → 상담 버튼 ${n(c?.cta)} → 번호 칸 누름 *${n(c?.focus)}* → 제출 ${n(c?.submit)} (형식 오류 ${n(c?.invalid)}) → 접수 *${n(c?.consult)}건*`,
-    ...(n(c?.consult_photo) ? [`그중 현장 사진을 함께 보낸 접수 ${n(c?.consult_photo)}건 (사진 ${n(c?.photos)}장, 30일 뒤 자동 삭제)`] : []),
-    ...(n(c?.fail)
-      ? [`:warning: *Slack 으로 넘기지 못한 신청 ${n(c?.fail)}건* (${list(fails, 'ref')}) — 신청자는 오류 화면을 봤습니다. 웹훅 Secret 을 확인하세요.`]
-      : []),
-    `유입 출처: ${list(sources, 'ref')}`,
-    `들어온 페이지: ${list(landings, 'path')}`,
-    `검색어: ${list(queries, 'query')}`,
-    `그 전 7일: 방문 ${n(prev?.visitors)}명 · 네이버 ${n(prev?.naver)} · 접수 ${n(prev?.consult)}건`,
-    '_매주 월요일 09:00 에 옵니다. 안 오면 상담 알림 웹훅이 끊긴 것입니다._',
-  ].join('\n');
-}
-
-/** cron — 어제까지 7일 요약을 상담 채널로. 접수가 0 인 주에도 보낸다(웹훅 생존 확인을 겸한다). */
-export async function sendWeekly(env) {
-  if (!env.FUNNEL_DB) return;
-  const text = weeklyText(await summarizeWeek(env, kstDay(-1)));
-  // 로컬(wrangler dev --test-scheduled)은 웹훅이 없으면 로그로만 — /__scheduled 로 확인한다
-  if (!env.SLACK_WEBHOOK_URL) return console.log(text);
-  const res = await fetch(env.SLACK_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
-  });
-  if (!res.ok) console.error('깔때기 주간 요약 전송 실패', res.status, await res.text());
+  return { day, counts, sources, landings };
 }

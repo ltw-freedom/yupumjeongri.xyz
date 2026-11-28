@@ -15,7 +15,7 @@ import {
   storePhotos,
 } from '../worker/photos.js';
 import { onRequestPost } from '../functions/api/consult.js';
-import { recordConsult, weeklyText } from '../worker/funnel.js';
+import { recordConsult } from '../worker/funnel.js';
 
 class FakeKV {
   constructor() {
@@ -215,7 +215,7 @@ test('접수: 사진 2장 저장 + 형식 밖 1장은 빼고 접수는 계속, S
   for (const id of kv.map.keys()) assert.ok(text.includes(`https://yupumjeongri.xyz/api/photo/${id}`));
   assert.ok(text.includes('30일 뒤 자동 삭제'));
   assert.ok(text.includes('사진 1장은 저장하지 못했습니다'));
-  assert.deepEqual(calls.consult, [['/consult/', 2]]);
+  assert.deepEqual(calls.consult, [['/consult/', 2, '']]);
 });
 
 test('접수: 사진 없이 보낸 신청은 전과 같다 (urlencoded, KV 쓰기 없음)', async () => {
@@ -229,7 +229,7 @@ test('접수: 사진 없이 보낸 신청은 전과 같다 (urlencoded, KV 쓰�
   assert.equal(location, 'https://yupumjeongri.xyz/consult/done/');
   assert.equal(kv.puts.length, 0);
   assert.ok(!slackText().includes('현장 사진'));
-  assert.deepEqual(calls.consult, [['', 0]]);
+  assert.deepEqual(calls.consult, [['', 0, '']]);
 });
 
 test('접수: KV 가 없어도 접수는 Slack 으로 가고 실패 장 수를 적는다', async () => {
@@ -294,6 +294,4 @@ test('깔때기: 사진 장 수만 consult 행의 ref 에 photo-N 으로', async
   assert.equal(rows[0][2], 'consult');
   assert.equal(rows[0][5], 'photo-3');
   assert.equal(rows[1][5], '');
-  const text = weeklyText({ startDay: '2026-11-23', endDay: '2026-11-29', counts: { consult: 2, consult_photo: 1, photos: 3 }, fails: [], sources: [], landings: [], queries: [], prev: {} });
-  assert.ok(text.includes('현장 사진을 함께 보낸 접수 1건 (사진 3장'));
 });

@@ -81,12 +81,13 @@ async function submit(fields, photos = [], env = {}) {
   const fd = new FormData();
   for (const [k, v] of Object.entries(fields)) fd.append(k, v);
   for (const p of photos) fd.append('photos', p);
-  const calls = { consult: [], fail: [] };
+  const calls = { consult: [], fail: [], test: [] };
   const res = await onRequestPost({
     request: new Request('https://yupumjeongri.xyz/api/consult', { method: 'POST', body: fd }),
     env: { SLACK_WEBHOOK_URL: 'https://hooks.example.test/x', ...env },
     onConsult: (...a) => calls.consult.push(a),
     onConsultFail: (...a) => calls.fail.push(a),
+    onTest: (...a) => calls.test.push(a),
     sleep: async (ms) => {
       slept.push(ms);
       order.push(`wait ${ms}`);
@@ -400,4 +401,28 @@ test('다시 보내기: image 블록이 없던 메시지(사진 없음·HEIC 만
   assert.equal(heic.location, 'https://yupumjeongri.xyz/consult/?error=send');
   assert.equal(slackCalls.length, 1);
   assert.deepEqual(slept, []);
+});
+
+// --- 시험 접수 (2026-11-28: Slack 상담 채널엔 실제 고객 문의만) -------------------
+
+test('시험 접수: 010-0000-0000 이나 [시험] 은 Slack 에 보내지 않고 완료 화면으로, 깔때기 대신 test 로만 센다', async () => {
+  const kv = new FakeKV();
+  for (const fields of [
+    { phone: '010-0000-0000', page: '/consult/' },
+    { phone: '010-1234-5678', message: '[시험] 연락 금지', page: '/consult/' },
+  ]) {
+    const { location, calls } = await submit(fields, [file(JPEG)], { PHOTOS: kv });
+    assert.equal(location, 'https://yupumjeongri.xyz/consult/done/');
+    assert.deepEqual(calls.test, [['/consult/']]);
+    assert.equal(calls.consult.length, 0);
+  }
+  assert.equal(slackCalls.length, 0);
+  assert.equal(kv.map.size, 0); // 사진도 저장하지 않는다
+});
+
+test('시험 접수: ALLOW_TEST_TO_SLACK=on 인 날만 실제처럼 Slack 에 간다', async () => {
+  const { calls } = await submit({ phone: '010-0000-0000', type: '유품정리' }, [], { ALLOW_TEST_TO_SLACK: 'on' });
+  assert.equal(slackCalls.length, 1);
+  assert.equal(calls.test.length, 0);
+  assert.equal(calls.consult[0][2], '유품정리'); // 상담 분야 이름이 카운터로 넘어간다
 });
