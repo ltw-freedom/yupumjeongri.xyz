@@ -1,7 +1,7 @@
 ---
 title: 고독사 현장, 발견 직후에 해야 할 일과 하지 말아야 할 일
 description: 고독사 현장을 발견한 직후 무엇을 먼저 해야 하는지, 그리고 상황을 악화시키는 흔한 실수를 정리했습니다.
-publishedAt: 2026-03-11
+publishedAt: 2026-08-10
 relatedAreas: ['gwanak', 'seoul']
 ---
 

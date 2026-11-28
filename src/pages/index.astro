@@ -16,6 +16,8 @@ import { photos } from '../data/cases';
 import { organization, faqSchema, webSite, webPage } from '../data/schema';
 import { contentDate } from '../data/contentDates';
 import { priceAnswerCore } from '../data/pricing';
+import { getCollection } from 'astro:content';
+import { byNewest } from '../data/columnLinks';
 
 /**
  * AEO(Answer Engine) · GEO(Generative Engine) 대응:
@@ -64,8 +66,16 @@ const faqs = [
 /** 히어로 아래 사진 띠 — 팀·장비·현장이 한눈에 보이는 컷 3장 */
 const fieldPhotos = [photos.teamLoadingTruck, photos.ppeHallway, photos.balconyHighrise];
 
-// 실제로 본문을 고친 날 — contentDates.ts 수동 지도. 사이트맵 lastmod·WebPage dateModified·FAQ 아래 '최종 수정' 줄이 같은 값을 쓴다.
-const updated = contentDate('/');
+/**
+ * 최근 칼럼 3편 — 매일 칼럼 예약 작업이 새 글을 내므로, 수집이 가장 자주 오는 홈에서 새 글로 바로 닿게 한다(2026-11-28).
+ * 순서는 /column/ 목록·RSS 와 같은 byNewest.
+ */
+const recentColumns = (await getCollection('columns', ({ data }) => !data.draft)).sort(byNewest).slice(0, 3);
+const ymd = (date: Date) => date.toISOString().slice(0, 10);
+
+// 실제로 본문을 고친 날. 홈 고유 본문은 contentDates.ts 수동 지도, 최근 칼럼 블록은 가장 새 칼럼의 발행일이 바꾼다 —
+// 둘 중 늦은 날. 사이트맵 lastmod(astro.config.mjs 의 같은 계산)·WebPage dateModified·FAQ 아래 '최종 수정' 줄이 같은 값을 쓴다.
+const updated = [contentDate('/'), ...recentColumns.slice(0, 1).map((entry) => ymd(entry.data.publishedAt))].sort().at(-1)!;
 ---
 
 <BaseLayout
@@ -229,6 +239,32 @@ const updated = contentDate('/');
       <FAQ items={faqs} />
 
       <p class="note">최종 수정 <time datetime={updated}>{updated}</time></p>
+    </div>
+  </section>
+
+  {/* 최근 칼럼 — 제목·설명은 칼럼 frontmatter 에서 그대로 가져온다 */}
+  <section class="section section--surface" aria-label="최근 칼럼">
+    <div class="container">
+      <div class="section-head">
+        <p class="overline">06 — 칼럼</p>
+        <h2>최근 칼럼</h2>
+      </div>
+      <ul class="grid">
+        {
+          recentColumns.map((entry) => (
+            <li class="card">
+              <h3>
+                <a href={`/column/${entry.id}/`}>{entry.data.title}</a>
+              </h3>
+              <p>{entry.data.description}</p>
+              <p class="note">
+                <time datetime={ymd(entry.data.publishedAt)}>{ymd(entry.data.publishedAt)}</time>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+      <p><a href="/column/">칼럼 전체 보기</a></p>
     </div>
   </section>
 

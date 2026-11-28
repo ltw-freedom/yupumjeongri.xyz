@@ -12,7 +12,7 @@ import { dongCases } from './src/data/dongCases.ts';
  * 동 페이지 사이트맵 — 2026-11-15 부터 동 페이지는 noindex, follow 다 (docs/seo-naver.md 4-15).
  *
  * 예전에는 웨이브(wave1 221쪽 → 'all')로 단계 발행했지만, 네이버(10/30 노출 −93%, 색인 112 → 50)·구글(색인 574 · 3개월 노출 45)이
- * 동 1,090쪽 지역명 치환 템플릿을 포함한 사이트 전체를 낮게 본 것으로 판단해 동 페이지를 색인에서 뺐다.
+ * 동 1,096쪽 지역명 치환 템플릿을 포함한 사이트 전체를 낮게 본 것으로 판단해 동 페이지를 색인에서 뺐다.
  * noindex 페이지를 사이트맵에 넣으면 신호가 어긋나므로, 사이트맵에는 noindex 가 아닌 동(= dongCases.ts 에 운영자가 확인한
  * 실제 작업 기록이 있는 동)만 넣는다. src/data/sitemap-wave1.json 은 이력으로만 남긴다.
  */
@@ -24,12 +24,26 @@ const indexableDongs = new Set(dongCases.map((c) => `/area/${c.region}/${c.city}
 const columnsDir = new URL('./src/content/columns/', import.meta.url);
 /** @type {Map<string, string>} 칼럼 경로 → YYYY-MM-DD */
 const columnLastmod = new Map();
+/** 공개(draft 아님) 칼럼의 발행일 — /column/ 목록과 홈 '최근 칼럼' 블록의 lastmod 계산에 쓴다 */
+const livePublishedDates = [];
 for (const file of readdirSync(columnsDir).filter((name) => name.endsWith('.md'))) {
   const text = readFileSync(new URL(file, columnsDir), 'utf-8');
   const updated = text.match(/^updatedAt:\s*(\d{4}-\d{2}-\d{2})/m)?.[1];
   const published = text.match(/^publishedAt:\s*(\d{4}-\d{2}-\d{2})/m)?.[1];
   const date = updated ?? published;
   if (date) columnLastmod.set(`/column/${file.replace(/\.md$/, '')}/`, date);
+  if (published && !/^draft:\s*true/m.test(text)) livePublishedDates.push(published);
+}
+/**
+ * 새 칼럼이 공개된 가장 늦은 날 — /column/ 목록(제목·설명 카드)과 홈 '최근 칼럼' 블록은 새 칼럼이 붙을 때 바뀐다.
+ * 칼럼 날짜에서 나온 값이라 빌드 날짜 주입이 아니다(contentDates.ts 머리 규칙). 홈은 index.astro 의 updated 와 같은 계산.
+ */
+const latestColumnPublished = livePublishedDates.sort().at(-1);
+/** @param {string} pathname */
+function listingLastmod(pathname) {
+  if (pathname === '/column/') return latestColumnPublished;
+  if (pathname === '/') return [lookupContentDate('/'), latestColumnPublished].filter(Boolean).sort().at(-1);
+  return undefined;
 }
 
 /** /area/{region}/{city}/{dong}/ 4단 경로인가 */
@@ -67,7 +81,7 @@ export default defineConfig({
       serialize: (item) => {
         const pathname = new URL(item.url).pathname;
         // 칼럼은 frontmatter, 나머지는 contentDates.ts 의 수동 지도. 둘 다 없으면(동 페이지 등) lastmod 를 붙이지 않는다.
-        const lastmod = columnLastmod.get(pathname) ?? lookupContentDate(pathname);
+        const lastmod = columnLastmod.get(pathname) ?? listingLastmod(pathname) ?? lookupContentDate(pathname);
         return lastmod ? { ...item, lastmod } : item;
       },
     }),

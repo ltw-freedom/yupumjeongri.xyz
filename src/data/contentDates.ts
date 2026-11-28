@@ -18,8 +18,9 @@
 
 /** 경로 → YYYY-MM-DD. 근거는 줄마다 커밋으로 적는다 */
 export const contentDates: Readonly<Record<string, string>> = {
-  // 2026-11-08: answer-box 가격 직답을 priceAnswerCore 로, 진행 과정 제목 정리
-  '/': '2026-11-08',
+  // 2026-11-28: 홈 하단 '최근 칼럼' 블록 추가. 이후 새 칼럼이 블록을 바꾸는 날은 여기서 올리지 않고
+  // 가장 새 칼럼의 발행일과 이 값 중 늦은 날을 쓴다(index.astro updated, astro.config.mjs listingLastmod)
+  '/': '2026-11-28',
   // 2026-11-08: 평수별 비용 표·계산 방법·견적 받는 법 절, FAQ 추가
   '/cost/': '2026-11-08',
   // 2026-11-08: faqs.ts 비용·견적 문답 각도 변경·추가

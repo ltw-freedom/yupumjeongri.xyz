@@ -337,7 +337,7 @@ Cloudflare AI 크롤 허용 확인, GSC 사이트맵·제외 사유. 4-5 의 '1~
 
 ### 4-7-1. 같은 날 공식 콘솔 (운영자 스크린샷, 방법 태그 `console`)
 
-에이전트 브라우저(Claude in Chrome·내장 브라우저)는 searchadvisor.naver.com 을 열지 못하고, Chrome 의 dlxoqkftk1 계정에는 GSC 속성이 없다.
+에이전트 브라우저(Claude in Chrome·내장 브라우저)는 searchadvisor.naver.com 을 열지 못하고, Chrome 에 로그인된 계정에는 GSC 속성이 없다.
 GSC 는 다른 구글 계정으로 소유확인돼 있다 → 콘솔 수치는 운영자 스크린샷으로 받는다.
 
 **서치어드바이저 (최근 업데이트 10/26)**
@@ -617,7 +617,7 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
 
 운영자 결정(2026-11-25 "사이트는 계속 가져간다, 상담 0건에 대책을 세운다", 2026-11-26 "할 수 있는 것부터, 네이버 블로그는 아직 보류").
 진단은 11/25 `d1`(읽기 전용 조회)·코드·자사 도메인 응답으로 했다. 운영 폼 시험 제출은 하지 않았고 네이버 검색 화면도 조회하지 않았다(5장).
-**이 절의 변경은 2026-11-26 에 작업 트리에 만들었고, `main` 푸시(= 배포) 전이다.** 푸시한 날을 이 줄에 적을 것.
+**이 절의 변경은 2026-11-26 에 만들어 같은 날 `main` 에 푸시(= 배포)했다(`533905e`).**
 
 **진단** `d1`
 - 0 이 되는 단계는 폼이 아니라 방문이다. 10/02~10/28(27일) 방문 세션 98(네이버 54), 실제 접수 6(시험 1건 제외).
@@ -628,7 +628,7 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
 - 폼 고장 가능성은 낮다(웹훅 Secret 등록됨, 10/28 시험 때 D1·Slack 도착 확인, 최신 빌드 성공).
   다만 **Slack 전송이 실패하면 D1 에도 남지 않아 웹훅이 끊겨도 알 길이 없는 구조였다.** 10/28 뒤 실제 제출이 없어 지금 살아 있는지는 검증되지 않았다.
 
-**바꾼 것 (푸시 전)**
+**바꾼 것 (2026-11-26 푸시)**
 - **전송 실패 기록.** `/api/consult` 가 Slack 으로 넘기지 못한 신청을 D1 `events` 에 `type = 'fail'` 로 센다(`functions/api/consult.js` → `worker/funnel.js` `recordConsultFail`).
   까닭은 `ref` 칸에: `config`(웹훅 Secret 없음) · `slack-404` 같은 `slack-<상태코드>` · `exception`(연결 실패). 번호·내용은 남기지 않는다(횟수·까닭·신청 페이지·기기뿐).
   표를 새로 만들지 않아 마이그레이션이 없다. 신청자가 보는 화면(`?error=send`·`?error=config`)은 그대로다.
@@ -670,6 +670,31 @@ SEO/GEO 지적 1건 'Meta Description too long or too short' — 171자. 전 사
 운영자 요청(2026-11-27 "견적 신청 때 사진을 받고 싶다", Cloudflare 무료 플랜 KV 에 줄여 올리기).
 `/consult/` 폼과 완료 화면의 덧붙이기 칸에 사진 칸을 더했다. 브라우저에서 긴 변 1600px JPEG 로 줄여 보내고, KV `yupumjeongri-xyz-photos`(바인딩 `PHOTOS`)에 30일 보관한 뒤 Slack 에 열람 링크 `/api/photo/<id>` 를 보낸다. 번호 한 칸 폼(QuickConsult·EstimateCalc)은 그대로다. 사진 칸이 생겨도 사진만으로 금액을 확정해 주겠다는 문구는 쓰지 않는다.
 콘텐츠와 색인 대상 주소는 바뀌지 않았다(`/api/` 는 robots.txt 로 막혀 있다). 커밋 `3ef8a81`, 2026-11-27 푸시(= 배포). 운영 폼 시험 제출: 2026-11-27 00:55 KST 운영자 요청으로 허브 세션이 1건 보냈다(`/consult/`, 번호 010-0000-0000, 지역 "서울 노원구 (시험 접수)", 사진 1장). 완료 화면 "현장 사진 1장도 함께 전달", KV 저장(만료 12/26)과 열람 링크 200 을 확인했다. D1 `consult` 와 월요일 요약의 접수·사진 수에 이 1건이 섞인다. 2026-11-27 01:51 KST 에 Slack 알림 형식(비워도 모양, 사진 image 블록) 확인용으로 1건을 더 보냈다(같은 시험 값, 사진 1장, Slack 이 사진을 받아 감). 이 날 시험 접수는 합계 2건이다.
+
+## 4-18. 2026-11-28 마지막 세팅 점검 — 노출이 되는 다른 사이트와 견줘 빠진 것만 보완
+
+운영자 요청("노출이 잘 되는 다른 사이트처럼 세팅돼 있는지 마지막으로 점검·보완하고, 예약 작업이 있으니 앞으로 크게 신경 쓰지 말자").
+견준 것: 같은 운영자의 다른 정적 사이트 두 곳의 head·구조화 데이터·robots·사이트맵·RSS·llms·IndexNow·내부 링크(자사 도메인 `live_curl` 과 코드). 네이버 검색 화면은 조회하지 않았다(5장). 다른 사이트의 문장·사진·가격은 가져오지 않았다.
+
+**결론** — 기술 세팅은 이미 같은 수준이거나 더 촘촘하다(robots 의 AI 봇 그룹, llms-full.txt, 가격 Offer 스키마, 칼럼 작성·수정일 표시). 노출이 안 되는 원인은 세팅이 아니라 4-15 의 사이트 단위 하향이고, 회복 판정은 그대로 2026-12-15 전후다.
+
+**바꾼 것 (2026-11-28)**
+- 홈 하단 '최근 칼럼' 블록: 가장 새 칼럼 3편(제목·설명·발행일)과 `/column/` 링크. 매일 칼럼이 홈에서 한 번에 닿는다. 홈의 '최종 수정'·`dateModified`·사이트맵 lastmod 는 `contentDates.ts` 의 '/' 와 가장 새 칼럼 발행일 중 늦은 날(빌드 날짜가 아니다).
+- 사이트맵 `/column/` 에 lastmod(가장 새 칼럼 발행일). 전에는 이 주소만 lastmod 가 없었다.
+- 색인 페이지에 `robots: index, follow, max-image-preview:large`. 동 페이지 `noindex, follow` 와 완료·404 `noindex, nofollow` 는 그대로.
+- 칼럼 3편(`yupumjeongri-junbi`, `bieoteo-jip-gyeonjeok`, `godoksa-hyeonjang-choigi-daeeung`)의 `publishedAt` 이 사이트를 처음 배포한 2026-08-10 보다 이른 날(1~3월)이었다. 세 파일 모두 8/10 초기 구축 커밋(`8896d59`)에서 처음 생겼으므로 2026-08-10 으로 바로잡았다. 본문과 `updatedAt` 은 그대로다.
+- README: 공개 저장소에 있던 로그인 계정 이메일과 접수 날짜·지역 메모를 뺐다. '칼럼 추가' 절에 매일 자동 칼럼을 적었다. 이미 배포된 항목의 '푸시 전' 표시를 고쳤다(이 문서 4-16 포함).
+- 확인: `npm run check` 0 errors, `npm run build` 1,185쪽, 사이트맵 87주소(동 0). 시군구·동 템플릿과 title·description 은 손대지 않아 `area-similarity.mjs` 는 돌리지 않았다.
+
+**하지 않은 것** — web manifest(노출 근거 없음), 블로그 sameAs·rel=me 자리(블로그 보류. 열 때 허브 `/naver-blog-setup` 이 넣는다), 작업 기록 넘기기(2026-11-27 운영자 결정으로 하지 않음).
+
+**운영자가 할 일 (한 번 하면 끝)**
+1. 서치어드바이저(수집 요청 프로그램): 사이트맵 `https://yupumjeongri.xyz/sitemap-index.xml` 다시 제출, 수집 요청 11개 —
+   `/` · `/cost/` · `/faq/` · `/process/` · `/service/yupumjeongri/` · `/service/binjip-jeongri/` · `/column/` ·
+   `/column/godoksa-yupumjeongri-biyong/` · `/column/binjip-jeongri-biyong/` · `/column/30pyeong-apateu-yupumjeongri-biyong/` · `/column/turum-yupumjeongri-biyong/`
+   (앞에 `https://yupumjeongri.xyz` 를 붙인다. 동 페이지는 넣지 않는다.) 그 뒤 새 칼럼은 예약 작업의 IndexNow 가 보낸다.
+2. GSC 사이트맵 다시 제출, Bing Crawl Control 최대(README TODO 2·6). 여유가 될 때.
+3. 2026-11-30(월) 09:00 Slack 상담 채널에 주간 깔때기 요약이 오는지만 본다. 오면 cron 과 웹훅이 둘 다 산 것이다.
 
 ## 5. 측정 — 공식 도구와 사람 표본만
 
