@@ -34,13 +34,11 @@
     }
   ],
   // 허브 관제판 성적표용 내용 없는 카운터 (worker/hubstats.js, 2026-11-28). 이름·연락처·내용은 쓰지 않는다.
-  // 데이터셋은 첫 쓰기 때 저절로 생기고 3개월 보관된다. 같은 데이터셋을 다른 브랜드 Worker 도 쓴다(index1 = 브랜드 키).
-  "analytics_engine_datasets": [
-    {
-      "binding": "HUB_LEADS",
-      "dataset": "hub_leads"
-    }
-  ],
+  // 바인딩은 아래처럼 붙인다. 3개월 보관되고, 같은 데이터셋을 다른 브랜드 Worker 도 쓴다(index1 = 브랜드 키).
+  //   "analytics_engine_datasets": [{ "binding": "HUB_LEADS", "dataset": "hub_leads" }],
+  // 2026-11-29 잠시 뺐다: 계정에서 Analytics Engine 이 아직 켜지지 않아 배포가 code 10089 로 두 번 실패했다
+  // (11/28 0bcb733, 11/29 7c131e5 — 대시보드에서 데이터셋 hub_leads 를 만든 뒤에도). 켜진 것을 확인하면 위 줄을 되살린다.
+  // 바인딩이 없는 동안 hubstats.js 는 아무것도 쓰지 않고 넘어간다(시험 접수 Slack 제외·웹훅 점검 로그는 그대로 돈다).
   // 매일 09:00 KST(00:00 UTC) — 어제 깔때기 숫자를 hub_leads 에 넘기고 상담 웹훅을 메시지 없이 점검한다(worker/index.js scheduled).
   // Slack 에는 아무것도 보내지 않는다. 2026-11-26~11-28 의 월요일 Slack 요약은 2026-11-28 사업주 결정으로 없앴다.
   // cron 을 끌 때는 triggers 를 지우지 말고 crons 를 빈 배열로 둔다
